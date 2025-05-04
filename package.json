@@ -1,0 +1,22 @@
+{
+  "name": "gladpros",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev": "yarn workspace frontend dev & yarn workspace backend dev",
+    "build": "yarn workspaces run build",
+    "test": "yarn workspaces run test",
+    "lint": "yarn workspaces run lint",
+    "start": "yarn workspace backend start"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "eslint": "^8.0.0",
+    "prettier": "^3.0.0",
+    "husky": "^9.0.0",
+    "lint-staged": "^15.0.0"
+  }
+}
