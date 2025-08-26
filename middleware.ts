@@ -1,3 +1,5 @@
+// Fonte oficial de middleware.
+// Versões antigas/experimentais estão em /archived-middleware.
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { verifyAuthJWT, AuthClaims } from "@/lib/jwt";
