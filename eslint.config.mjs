@@ -10,6 +10,7 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
+  { ignores: ["coverage/", ".next/"] },
   ...compat.extends("next/core-web-vitals", "next/typescript"),
   {
     rules: {
@@ -18,6 +19,16 @@ const eslintConfig = [
       "@typescript-eslint/ban-ts-comment": ["warn"],
     },
   },
+  // Relax rules for scripts JS files (allow require-style imports)
+  {
+    files: ["scripts/**/*.js"],
+    rules: {
+      "@typescript-eslint/no-require-imports": "off",
+      "import/no-anonymous-default-export": "off",
+      "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }]
+    },
+  },
+  // Keep a looser set for mixed test folders and scripts
   {
     files: ["src/tests/**/*.{js,ts,tsx}", "scripts/**/*.{js,ts}"],
     rules: {

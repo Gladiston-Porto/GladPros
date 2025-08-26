@@ -91,7 +91,7 @@ export class PropostaEmailService {
         options
       )
 
-      let attachments: any[] = []
+      const attachments: any[] = []
 
       // Incluir PDF se solicitado
       if (options.includePDF) {
