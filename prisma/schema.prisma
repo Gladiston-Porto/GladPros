@@ -1,0 +1,444 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model AnexoProposta {
+  id         Int      @id @default(autoincrement())
+  propostaId Int
+  filename   String   @db.VarChar(255)
+  filepath   String   @db.VarChar(500)
+  mime       String   @db.VarChar(100)
+  uploadedBy Int
+  criadoEm   DateTime @default(now())
+  descricao  String?  @db.Text
+  privado    Boolean  @default(false)
+  Proposta   Proposta @relation(fields: [propostaId], references: [id], onDelete: Cascade)
+
+  @@index([propostaId])
+}
+
+model AuditLog {
+  id         String   @id
+  userId     Int
+  entidade   String
+  entidadeId String
+  acao       String
+  diff       String?  @db.LongText
+  timestamp  DateTime @default(now())
+  Usuario    Usuario  @relation(fields: [userId], references: [id])
+
+  @@index([entidade, entidadeId])
+  @@index([timestamp])
+  @@index([userId])
+}
+
+model Auditoria {
+  id         Int            @id @default(autoincrement())
+  tabela     String         @db.VarChar(64)
+  registroId Int
+  acao       Auditoria_acao
+  usuarioId  Int?
+  ip         String?        @db.VarChar(45)
+  payload    String?        @db.LongText
+  criadoEm   DateTime       @default(now())
+  Usuario    Usuario?       @relation(fields: [usuarioId], references: [id])
+
+  @@index([tabela, registroId, criadoEm])
+  @@index([tabela, registroId])
+  @@index([usuarioId])
+}
+
+model Cliente {
+  id              Int                      @id @default(autoincrement())
+  tipo            Cliente_tipo
+  nomeCompleto    String?
+  razaoSocial     String?
+  nomeFantasia    String?
+  email           String                   @unique
+  telefone        String                   @db.VarChar(32)
+  nomeChave       String
+  endereco1       String?
+  endereco2       String?
+  cidade          String?                  @db.VarChar(96)
+  estado          String?                  @db.VarChar(32)
+  zipcode         String?                  @db.VarChar(16)
+  status          Cliente_status           @default(ATIVO)
+  tipoDocumentoPF Cliente_tipoDocumentoPF?
+  ssn             String?                  @db.VarChar(32)
+  itin            String?                  @db.VarChar(32)
+  ein             String?                  @db.VarChar(32)
+  documentoEnc    String?
+  docLast4        String?                  @db.VarChar(4)
+  docHash         String?                  @unique @db.Char(64)
+  observacoes     String?
+  ativo           Boolean                  @default(true)
+  criadoEm        DateTime                 @default(now())
+  atualizadoEm    DateTime
+  Proposta        Proposta[]
+
+  @@index([ativo])
+  @@index([cidade])
+  @@index([docLast4])
+  @@index([estado])
+  @@index([nomeChave, telefone])
+  @@index([status, tipo])
+}
+
+model CodigoMFA {
+  id        Int                @id @default(autoincrement())
+  usuarioId Int
+  codigo    String             @db.Char(64)
+  tipoAcao  CodigoMFA_tipoAcao
+  expiresAt DateTime
+  usado     Boolean            @default(false)
+  criadoEm  DateTime           @default(now())
+  ip        String?            @db.VarChar(45)
+  userAgent String?            @db.VarChar(255)
+  Usuario   Usuario            @relation(fields: [usuarioId], references: [id])
+
+  @@index([criadoEm])
+  @@index([tipoAcao])
+  @@index([usuarioId])
+}
+
+model HistoricoSenha {
+  id        Int      @id @default(autoincrement())
+  usuarioId Int
+  senhaHash String
+  criadaEm  DateTime @default(now())
+  Usuario   Usuario  @relation(fields: [usuarioId], references: [id])
+
+  @@index([usuarioId])
+}
+
+model PasswordResetToken {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  tokenHash String   @db.Char(64)
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  Usuario   Usuario  @relation(fields: [userId], references: [id])
+
+  @@index([tokenHash])
+  @@index([userId])
+}
+
+model Projeto {
+  id           Int            @id @default(autoincrement())
+  clienteId    Int
+  propostaId   Int?           @unique
+  origem       Projeto_origem @default(SEM_PROPOSTA)
+  nome         String?
+  status       String?        @default("INICIADO")
+  criadoEm     DateTime       @default(now())
+  atualizadoEm DateTime
+  Proposta     Proposta?      @relation(fields: [propostaId], references: [id])
+
+  @@index([clienteId])
+  @@index([origem])
+}
+
+model Proposta {
+  id                         Int                               @id @default(autoincrement())
+  numeroProposta             String                            @unique @db.VarChar(20)
+  clienteId                  Int
+  dataCriacao                DateTime                          @default(now())
+  tipoServico                String
+  permite                    Proposta_permite
+  quaisPermites              String?                           @db.Text
+  condicoesPagamento         String?                           @db.LongText
+  valorEstimado              Decimal?                          @db.Decimal(12, 2)
+  moeda                      String                            @default("USD") @db.VarChar(3)
+  status                     Proposta_status                   @default(RASCUNHO)
+  enviadaParaOCliente        DateTime?
+  assinaturaCliente          String?                           @db.VarChar(255)
+  assinaturaResponsavel      String?                           @db.VarChar(255)
+  assinadaEm                 DateTime?
+  tempoParaAceite            Int?
+  projetoId                  Int?                              @unique
+  historicoAlteracoes        String?                           @db.LongText
+  deletedAt                  DateTime?
+  deletedBy                  Int?
+  criadoEm                   DateTime                          @default(now())
+  atualizadoEm               DateTime
+  aprovacaoInternaFinanceira Boolean?                          @default(false)
+  aprovacaoInternaTecnica    Boolean?                          @default(false)
+  aprovadaEm                 DateTime?
+  assinaturaImagem           String?                           @db.Text
+  assinaturaIp               String?                           @db.VarChar(45)
+  assinaturaTipo             Proposta_assinaturaTipo?          @default(CANVAS)
+  assinaturaUserAgent        String?                           @db.Text
+  atualizadoPor              Int?
+  condicoesGerais            String?                           @db.Text
+  contatoEmail               String                            @default("nao-informado@temp.com") @db.VarChar(255)
+  contatoNome                String                            @default("Não informado") @db.VarChar(255)
+  contatoTelefone            String?                           @db.VarChar(50)
+  criadoPor                  Int?
+  dataConversao              DateTime?
+  descontosCondicionais      String?                           @db.Text
+  descontosOfertados         Decimal?                          @db.Decimal(5, 2)
+  descricaoEscopo            String                            @default("Escopo não detalhado") @db.Text
+  exclusoes                  String?                           @db.Text
+  formaPagamentoPreferida    Proposta_formaPagamentoPreferida?
+  garantia                   String?                           @db.Text
+  gatilhoFaturamento         Proposta_gatilhoFaturamento?      @default(NA_APROVACAO)
+  inspecoesNecessarias       String?                           @db.Text
+  instrucoesPagamento        String?                           @db.Text
+  internalEstimate           String?                           @db.LongText
+  janelaExecucaoPreferencial String?                           @db.Text
+  localExecucaoEndereco      String                            @default("Endereço não informado") @db.Text
+  marcosPagamento            String?                           @db.LongText
+  motivo_cancelamento        String?                           @db.Text
+  multaAtraso                String?                           @db.VarChar(100)
+  normasReferencias          String?                           @db.Text
+  observacoesInternas        String?                           @db.Text
+  observacoesParaCliente     String?                           @db.Text
+  opcoesAlternativas         String?                           @db.LongText
+  percentualSinal            Decimal?                          @db.Decimal(5, 2)
+  prazoExecucaoEstimadoDias  Int?
+  precoPropostaCliente       Decimal?                          @db.Decimal(12, 2)
+  responsavelConversao       Int?
+  restricoesDeAcesso         String?                           @db.Text
+  riscosIdentificados        String?                           @db.Text
+  titulo                     String                            @default("Proposta sem título") @db.VarChar(500)
+  tokenExpiresAt             DateTime?
+  tokenPublico               String?                           @unique @db.VarChar(100)
+  validadeProposta           DateTime?
+  AnexoProposta              AnexoProposta[]
+  Projeto                    Projeto?
+  Cliente                    Cliente                           @relation(fields: [clienteId], references: [id])
+  PropostaEtapa              PropostaEtapa[]
+  PropostaLog                PropostaLog[]
+  PropostaMaterial           PropostaMaterial[]
+
+  @@index([clienteId])
+  @@index([dataCriacao, id])
+  @@index([status, dataCriacao, id])
+  @@index([status])
+}
+
+model PropostaEtapa {
+  id                   Int                  @id @default(autoincrement())
+  propostaId           Int
+  servico              String
+  descricao            String               @db.Text
+  status               PropostaEtapa_status @default(PLANEJADA)
+  ordem                Int                  @default(0)
+  custoMaoObraEstimado Decimal?             @db.Decimal(12, 2)
+  dependencias         String?              @db.Text
+  duracaoEstimadaHoras Decimal?             @db.Decimal(8, 2)
+  quantidade           Decimal?             @db.Decimal(10, 2)
+  unidade              String?              @db.VarChar(20)
+  Proposta             Proposta             @relation(fields: [propostaId], references: [id], onDelete: Cascade)
+
+  @@index([propostaId])
+}
+
+model PropostaLog {
+  id            String             @id
+  propostaId    Int
+  actorId       Int?
+  action        PropostaLog_action
+  oldJson       String?            @db.LongText
+  newJson       String?            @db.LongText
+  ip            String?            @db.VarChar(45)
+  userAgent     String?            @db.Text
+  correlationId String?            @db.VarChar(100)
+  createdAt     DateTime           @default(now())
+  Proposta      Proposta           @relation(fields: [propostaId], references: [id], onDelete: Cascade)
+
+  @@index([createdAt])
+  @@index([propostaId])
+}
+
+model PropostaMaterial {
+  id                     Int                     @id @default(autoincrement())
+  propostaId             Int
+  codigo                 String?                 @db.VarChar(50)
+  nome                   String
+  quantidade             Decimal                 @default(0.000) @db.Decimal(12, 3)
+  unidade                String?                 @db.VarChar(20)
+  status                 PropostaMaterial_status @default(PLANEJADO)
+  observacao             String?                 @db.Text
+  precoUnitario          Decimal?                @db.Decimal(12, 2)
+  moeda                  String                  @default("USD") @db.VarChar(3)
+  totalItem              Decimal?                @db.Decimal(12, 2)
+  fornecedorPreferencial String?                 @db.VarChar(255)
+  Proposta               Proposta                @relation(fields: [propostaId], references: [id], onDelete: Cascade)
+
+  @@index([propostaId])
+}
+
+model SessaoAtiva {
+  id              Int      @id @default(autoincrement())
+  usuarioId       Int
+  token           String   @unique @db.VarChar(64)
+  ip              String?  @db.VarChar(45)
+  userAgent       String?  @db.VarChar(255)
+  cidade          String?  @db.VarChar(64)
+  pais            String?  @db.VarChar(32)
+  ultimaAtividade DateTime @default(now())
+  criadoEm        DateTime @default(now())
+  Usuario         Usuario  @relation(fields: [usuarioId], references: [id])
+
+  @@index([token])
+  @@index([ultimaAtividade])
+  @@index([usuarioId])
+}
+
+model TentativaLogin {
+  id        Int      @id @default(autoincrement())
+  usuarioId Int?
+  email     String
+  sucesso   Boolean
+  ip        String?  @db.VarChar(45)
+  userAgent String?  @db.VarChar(255)
+  motivo    String?  @db.VarChar(64)
+  criadaEm  DateTime @default(now())
+  Usuario   Usuario? @relation(fields: [usuarioId], references: [id])
+
+  @@index([criadaEm])
+  @@index([email])
+  @@index([sucesso])
+  @@index([usuarioId])
+}
+
+model Usuario {
+  id                 Int                  @id @default(autoincrement())
+  email              String               @unique
+  senha              String
+  nivel              String
+  endereco1          String
+  endereco2          String
+  cidade             String
+  estado             String?              @db.VarChar(32)
+  zipcode            String?              @db.VarChar(16)
+  status             Usuario_status       @default(ATIVO)
+  avatarUrl          String?
+  criadoEm           DateTime             @default(now())
+  atualizadoEm       DateTime
+  nomeCompleto       String?
+  telefone           String?              @db.VarChar(32)
+  dataNascimento     DateTime?            @db.Date
+  senhaProvisoria    Boolean              @default(false)
+  primeiroAcesso     Boolean              @default(false)
+  bloqueado          Boolean              @default(false)
+  bloqueadoEm        DateTime?
+  pinSeguranca       String?
+  perguntaSecreta    String?
+  respostaSecreta    String?
+  anotacoes          String?              @db.LongText
+  ultimoLoginEm      DateTime?
+  tokenVersion       Int                  @default(0)
+  AuditLog           AuditLog[]
+  Auditoria          Auditoria[]
+  CodigoMFA          CodigoMFA[]
+  HistoricoSenha     HistoricoSenha[]
+  PasswordResetToken PasswordResetToken[]
+  SessaoAtiva        SessaoAtiva[]
+  TentativaLogin     TentativaLogin[]
+}
+
+enum Cliente_tipo {
+  PF
+  PJ
+}
+
+enum Auditoria_acao {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+}
+
+enum Projeto_origem {
+  SEM_PROPOSTA
+  DE_PROPOSTA
+}
+
+enum CodigoMFA_tipoAcao {
+  LOGIN
+  RESET
+  PRIMEIRO_ACESSO
+  DESBLOQUEIO
+}
+
+enum PropostaLog_action {
+  CREATED
+  UPDATED
+  SENT
+  SIGNED
+  APPROVED
+  CANCELLED
+  ATTACH_ADDED
+  ATTACH_REMOVED
+}
+
+enum PropostaEtapa_status {
+  PLANEJADA
+  EM_ANDAMENTO
+  CONCLUIDA
+}
+
+enum Proposta_permite {
+  SIM
+  NAO
+}
+
+enum PropostaMaterial_status {
+  PLANEJADO
+  SUBSTITUIDO
+  REMOVIDO
+}
+
+enum Usuario_status {
+  ATIVO
+  INATIVO
+}
+
+enum Proposta_status {
+  RASCUNHO
+  ENVIADA
+  ASSINADA
+  APROVADA
+  CANCELADA
+}
+
+enum Cliente_status {
+  ATIVO
+  INATIVO
+}
+
+enum Cliente_tipoDocumentoPF {
+  SSN
+  ITIN
+}
+
+enum Proposta_assinaturaTipo {
+  CANVAS
+  CHECKBOX
+  NOME_CHECKBOX
+}
+
+enum Proposta_formaPagamentoPreferida {
+  PIX
+  CARTAO
+  BOLETO
+  TRANSFERENCIA
+  DINHEIRO
+  CHEQUE
+}
+
+enum Proposta_gatilhoFaturamento {
+  NA_APROVACAO
+  POR_MARCOS
+  NA_ENTREGA
+  CUSTOMIZADO
+}

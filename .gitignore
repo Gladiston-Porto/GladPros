@@ -1,0 +1,21 @@
+﻿# Builds e caches
+.next/
+dist/
+out/
+node_modules/
+
+# Test/coverage
+coverage/
+*.lcov
+*.log
+
+# Ambiente/local
+.env*
+!.env.example
+
+# Editor
+.vscode/
+.DS_Store
+
+# Prisma
+prisma/dev.db

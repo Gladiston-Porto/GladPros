@@ -1,0 +1,20 @@
+// File: /prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id          Int      @id @default(autoincrement())
+  email       String   @unique
+  senha       String
+  nivel       String
+  avatarUrl   String?  // Caminho da imagem do avatar
+  criadoEm    DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+}
