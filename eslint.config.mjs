@@ -36,6 +36,15 @@ const eslintConfig = [
       "import/no-anonymous-default-export": "off",
     },
   },
+  // Reduce strictness for type definition files and tests to avoid noise
+  {
+    files: ["src/types/**/*.ts", "**/*.test.{ts,tsx}", "src/**/__tests__/**/*.{ts,tsx}"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+      "@typescript-eslint/no-empty-object-type": "off"
+    },
+  },
 ];
 
 export default eslintConfig;
