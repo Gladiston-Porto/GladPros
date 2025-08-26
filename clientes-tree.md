@@ -29,12 +29,12 @@ Este arquivo lista todos os arquivos e caminhos relacionados ao módulo `cliente
 - `src/modules/clientes/.gitkeep` — Arquivo placeholder no módulo.
 
 ## Componentes reutilizáveis em `src/components/clientes`
-- `src/components/clientes/ClienteForm.tsx` — Formulário reutilizável para criação/edição de cliente.
-- `src/components/clientes/ClienteList.tsx` — Componente de mais alto nível que compõe tabela e list behaviors (usado em páginas e variações).
-- `src/components/clientes/ClienteFilters.tsx` — Controles de filtro (busca, tipo, status) reutilizáveis.
-- `src/components/clientes/ClienteDetailsModal.tsx` — Modal para exibir detalhes rápidos do cliente.
-- `src/components/clientes/ClienteCard.tsx` — Card visual para uso em dashboards ou listagens alternativas.
-- `src/components/clientes/Pagination.tsx` — Componente de paginação usado pelo módulo.
+- `@modules/clientes/ui.tsx` — Formulário reutilizável para criação/edição de cliente.
+- `@modules/clientes/ui/ClienteList.tsx` — Componente de mais alto nível que compõe tabela e list behaviors (usado em páginas e variações).
+- `@modules/clientes/ui/ClienteFilters.tsx` — Controles de filtro (busca, tipo, status) reutilizáveis.
+- `@modules/clientes/ui/ClienteDetailsModal.tsx` — Modal para exibir detalhes rápidos do cliente.
+- `@modules/clientes/ui/ClienteCard.tsx` — Card visual para uso em dashboards ou listagens alternativas.
+- `@modules/clientes/ui/Pagination.tsx` — Componente de paginação usado pelo módulo.
 
 ## Hooks e helpers
 - `src/hooks/useClienteOperations.ts` — Hook que encapsula operações CRUD/optimistic updates para clientes.

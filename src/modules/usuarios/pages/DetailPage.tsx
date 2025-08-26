@@ -2,9 +2,9 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import UserForm from "../components/UserForm";
-import { SecurityTab } from "../components/SecurityTab";
-import { getUser, updateUser } from "../services/usersApi";
+import UserForm from "../ui/UserForm";
+import { SecurityTab } from "../ui/SecurityTab";
+import { getUser, updateUser } from "../client/usersApi";
 import { getAuditoriaUsuario } from "../services/auditoriaApi";
 import type { Usuario } from "../types";
 import type { AuditoriaResponse } from "@/types/auditoria";
@@ -27,8 +27,8 @@ export default function UserDetailPage({ id }: { id: string }) {
     setLoading(true);
     setError(null);
     getUser(id)
-      .then((u) => { if (alive) setUser(u); })
-      .catch((e) => { if (alive) setError(e?.message || "Falha ao carregar usuário"); })
+      .then((u: any) => { if (alive) setUser(u); })
+      .catch((e: any) => { if (alive) setError(e?.message || "Falha ao carregar usuário"); })
       .finally(() => { if (alive) setLoading(false); });
     return () => { alive = false; };
   }, [id]);

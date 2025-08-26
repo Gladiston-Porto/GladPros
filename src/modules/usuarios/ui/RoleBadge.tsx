@@ -1,4 +1,4 @@
-// src/modules/usuarios/components/RoleBadge.tsx
+// @modules/usuarios/ui/RoleBadge.tsx
 "use client";
 import type { UserRole } from "../types";
 

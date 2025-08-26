@@ -2,8 +2,8 @@
 
 import { useEffect, useState, useCallback } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { useToast } from "../../../components/ui/Toaster"
-import { useConfirm } from "../../../components/ui/ConfirmDialog"
+import { useToast } from "@/components/ui/Toaster"
+import { useConfirm } from "@/components/ui/ConfirmDialog"
 import Link from "next/link"
 
 export default function UsuarioDetalhePage() {

@@ -2,8 +2,8 @@
 "use client";
 import { useEffect, useMemo, useState, useCallback } from "react";
 import Link from "next/link";
+import { Pagination } from "@/modules/clientes/ui/Pagination";
 import Toolbar from "../components/Toolbar";
-import { Pagination } from "@/components/clientes/Pagination";
 import ClientesTable from "../components/ClientesTable";
 import { getClientes, deleteCliente, toggleClienteStatus } from "../services/clientesApi";
 import { runBulkAction, needsExportWarning } from "../services/bulkService";

@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react'
-import { ClienteCard } from '@/components/clientes/ClienteCard'
+import { ClienteCard } from '@/modules/clientes/ui/ClienteCard'
 
 // Mock do confirm global
 global.confirm = jest.fn()

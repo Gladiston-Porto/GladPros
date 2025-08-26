@@ -2,9 +2,9 @@
 "use client";
 import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import Link from "next/link";
-import Toolbar from "../components/Toolbar";
-import UsersTable from "../components/UsersTable";
-import { getUsers, deleteUser, toggleUserStatus } from "../services/usersApi";
+import Toolbar from "../ui/Toolbar";
+import UsersTable from "../ui/UsersTable";
+import { getUsers, deleteUser, toggleUserStatus } from "../client/usersApi";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
 import type { Usuario } from "../types";
 import { Panel } from "@/components/GladPros";
@@ -99,7 +99,7 @@ export default function UsersListPage() {
     users={data.filter(u => selectedIds.includes(u.id))} 
     scope="selected"
     exporting={exporting}
-    onExportAllFiltered={async (format) => {
+  onExportAllFiltered={async (format: string) => {
       try {
         setExporting(true);
         if (format === 'csv') {
@@ -139,14 +139,14 @@ export default function UsersListPage() {
           <div className="p-6 text-sm opacity-60">Carregando…</div>
         ) : (
           <UsersTable 
-            data={data}
-            onEdit={(id) => (location.href = `/usuarios/${id}`)} 
+            data={data} 
+            onEdit={(id: number) => (location.href = `/usuarios/${id}`)} 
             onDelete={onDelete} 
             onToggleStatus={onToggleStatus} 
             onSelectedChange={setSelectedIds}
             sortKey={sortKey}
             sortDir={sortDir}
-            onSortChange={(k,d) => { setSortKey(k); setSortDir(d); }}
+            onSortChange={(k: any, d: any) => { setSortKey(k); setSortDir(d); }}
           />
         )}
       </Panel>

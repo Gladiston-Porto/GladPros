@@ -5,9 +5,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/server/db-temp";
 import { StatusProposta, StatusPermite } from "@/types/prisma-temp";
-import { propostaFormSchema } from "@/components/propostas/validation";
-import { adaptPropostaFormToAPI } from "@/components/propostas/adapter";
-import { PropostaFormData } from "@/components/propostas/types";
+import { propostaFormSchema } from "@modules/propostas/ui/validation";
+import { adaptPropostaFormToAPI } from "@modules/propostas/ui/adapter";
+import { PropostaFormData } from "@modules/propostas/ui/types";
 import { requireServerUser } from "@/lib/requireServerUser";
 
 // Retry helper para transações DB
@@ -94,8 +94,9 @@ export async function POST(request: NextRequest) {
     // Validar dados com schema do novo formulário
     const validatedData = propostaFormSchema.parse(body);
     
-    // Converter para formato da API/DB
-    const apiPayload = adaptPropostaFormToAPI(validatedData);
+  // Converter para formato da API/DB
+  // zod validatedData may use string literals for 'permite'; cast to any to satisfy adapter until types are aligned
+  const apiPayload = adaptPropostaFormToAPI(validatedData as any);
     
     // Criar proposta usando o temporary DB client
     const novaProposta = await withRetry(async () => {

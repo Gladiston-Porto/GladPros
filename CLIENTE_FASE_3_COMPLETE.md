@@ -8,7 +8,7 @@ A **Fase 3** do módulo de Clientes foi concluída com sucesso, criando uma inte
 
 ### 1. **ClienteCard.tsx** - Componente de Exibição
 ```typescript
-// src/components/clientes/ClienteCard.tsx - 147 linhas
+// @modules/clientes/ui/ClienteCard.tsx - 147 linhas
 ```
 - **Funcionalidades:**
   - Exibição em formato card com informações do cliente
@@ -19,7 +19,7 @@ A **Fase 3** do módulo de Clientes foi concluída com sucesso, criando uma inte
 
 ### 2. **ClienteFilters.tsx** - Filtros Avançados
 ```typescript
-// src/components/clientes/ClienteFilters.tsx - 177 linhas
+// @modules/clientes/ui/ClienteFilters.tsx - 177 linhas
 ```
 - **Funcionalidades:**
   - Busca por texto em tempo real
@@ -30,7 +30,7 @@ A **Fase 3** do módulo de Clientes foi concluída com sucesso, criando uma inte
 
 ### 3. **Pagination.tsx** - Paginação Completa
 ```typescript
-// src/components/clientes/Pagination.tsx - 147 linhas
+// @modules/clientes/ui/Pagination.tsx - 147 linhas
 ```
 - **Funcionalidades:**
   - Navegação por páginas com elipse (...)
@@ -41,7 +41,7 @@ A **Fase 3** do módulo de Clientes foi concluída com sucesso, criando uma inte
 
 ### 4. **ClienteList.tsx** - Lista Principal
 ```typescript
-// src/components/clientes/ClienteList.tsx - 244 linhas
+// @modules/clientes/ui/ClienteList.tsx - 244 linhas
 ```
 - **Funcionalidades:**
   - Container principal que integra todos os componentes
@@ -53,7 +53,7 @@ A **Fase 3** do módulo de Clientes foi concluída com sucesso, criando uma inte
 
 ### 5. **ClienteForm.tsx** - Formulário Completo
 ```typescript
-// src/components/clientes/ClienteForm.tsx - 367 linhas
+// @modules/clientes/ui.tsx - 367 linhas
 ```
 - **Funcionalidades:**
   - Formulário unificado para criar/editar clientes
@@ -65,7 +65,7 @@ A **Fase 3** do módulo de Clientes foi concluída com sucesso, criando uma inte
 
 ### 6. **ClienteDetailsModal.tsx** - Modal de Detalhes
 ```typescript
-// src/components/clientes/ClienteDetailsModal.tsx - 285 linhas
+// @modules/clientes/ui/ClienteDetailsModal.tsx - 285 linhas
 ```
 - **Funcionalidades:**
   - Modal responsivo com overlay

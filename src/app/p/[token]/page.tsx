@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import ClientPropostaView from '@/components/propostas/ClientPropostaView'
+import ClientPropostaView from '@modules/propostas/ui/ClientPropostaView'
 import { db } from '@/server/db-temp'
 import { PropostaWithRelations } from '@/types/propostas'
 

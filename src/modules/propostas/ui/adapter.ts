@@ -1,5 +1,5 @@
 // Adapter para converter dados do novo formulário para o formato da API/DB atual
-import { PropostaFormData } from '@/components/propostas/types'
+import { PropostaFormData } from '@modules/propostas/ui/types'
 import { StatusProposta, StatusPermite } from '@/types/prisma-temp'
 
 export interface PropostaAPIPayload {
@@ -85,7 +85,11 @@ export interface PropostaAPIPayload {
 
 export function adaptPropostaFormToAPI(formData: PropostaFormData): PropostaAPIPayload {
   // Calcular totais
-  const custoMaterial = formData.materiais.reduce((acc, m) => acc + (m.preco || 0) * m.quantidade, 0)
+  const custoMaterial = formData.materiais.reduce(
+    (acc: number, m: { preco?: number; quantidade: number }) =>
+      acc + (m.preco ?? 0) * m.quantidade,
+    0
+  )
   const custoMaoObra = formData.interno.custo_mo
   const custoTerceiros = formData.interno.custo_terceiros
   const freteLogistica = formData.interno.frete
@@ -155,27 +159,27 @@ export function adaptPropostaFormToAPI(formData: PropostaFormData): PropostaAPIP
     observacoesInternas: formData.obsInternas,
     
     // Materiais adaptados
-    materiais: formData.materiais.map(m => ({
-      codigo: m.codigo,
-      nome: m.nome,
+    materiais: formData.materiais.map((m: { id?: string; codigo?: string; nome?: string; preco?: number; quantidade: number; unidade?: string; status?: string; fornecedor?: string; obs?: string }) => ({
+      codigo: String(m.codigo ?? ''),
+      nome: String(m.nome ?? ''),
       quantidade: m.quantidade,
-      unidade: m.unidade,
+      unidade: String(m.unidade ?? ''),
       valorUnitarioEstimado: m.preco,
-      status: m.status.toUpperCase(),
-      fornecedor: m.fornecedor,
-      observacoes: m.obs
+      status: String((m.status ?? ''))?.toUpperCase(),
+      fornecedor: m.fornecedor ? String(m.fornecedor) : undefined,
+      observacoes: m.obs ? String(m.obs) : undefined
     })),
     
     // Etapas adaptadas
-    etapas: formData.etapas.map((e, index) => ({
-      servico: e.servico,
-      descricao: e.descricao,
+    etapas: formData.etapas.map((e: any, index: number) => ({
+      servico: String(e.servico ?? ''),
+      descricao: String(e.descricao ?? ''),
       ordem: index + 1,
       quantidade: e.quantidade,
-      unidade: e.unidade,
+      unidade: e.unidade ? String(e.unidade) : undefined,
       duracaoEstimadaHoras: e.duracaoHoras,
       custoMaoObraEstimado: e.custoMO,
-      status: e.status.toUpperCase()
+      status: e.status ? String(e.status).toUpperCase() : 'PLANEJADA'
     }))
   }
 }

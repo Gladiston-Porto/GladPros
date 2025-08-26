@@ -1,9 +1,9 @@
-// src/modules/usuarios/components/Toolbar.tsx
+// @modules/usuarios/ui/Toolbar.tsx
 "use client";
 import { Search, Plus, Download, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
-import { exportToCSV, exportToPDF } from "../services/exportService";
+import { exportToCSV, exportToPDF } from "../client/exportService";
 import type { Usuario } from "../types";
 import { useToast } from "@/components/ui/Toaster";
 

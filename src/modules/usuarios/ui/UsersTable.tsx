@@ -1,4 +1,4 @@
-// src/modules/usuarios/components/UsersTable.tsx
+// @modules/usuarios/ui/UsersTable.tsx
 "use client";
 
 import * as React from "react";

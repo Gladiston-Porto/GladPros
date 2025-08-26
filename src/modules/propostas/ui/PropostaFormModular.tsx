@@ -66,7 +66,7 @@ const FormHeader = ({
   </header>
 )
 
-export function PropostaFormModular() {
+export default function PropostaFormModular() {
   // Estados iniciais simplificados
   const [escopo, setEscopo] = useState<EscopoInfo>({
     titulo: '',

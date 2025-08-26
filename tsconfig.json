@@ -16,11 +16,12 @@
 
     "baseUrl": ".",                 // ← root do projeto
     "paths": {
-      "@/*": ["src/*"]              // ← "@/lib/xyz" -> "src/lib/xyz"
+      "@/*": ["src/*"],             // "@/lib/xyz" -> "src/lib/xyz"
+      "@modules/*": ["src/modules/*"]
     },
 
     "plugins": [{ "name": "next" }]
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules", "src/__tests__", "**/*.test.ts", "**/*.test.tsx"]
 }

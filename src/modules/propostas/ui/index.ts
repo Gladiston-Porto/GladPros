@@ -1,6 +1,5 @@
-// Componentes de propostas - Nova versão integrada
-export { default as PropostaFormNova } from './PropostaFormNova'
-export * from './ui-components'
-export * from './types'
-export * from './hooks'
-export * from './validation'
+export { default as PropostaForm }        from './PropostaForm'
+export { default as PropostaFormModular } from './PropostaFormModular'
+export { default as ClientPropostaView }  from './ClientPropostaView'
+export { ClientesProvider }               from './ClientesContext'
+export * from './sections'

@@ -1,4 +1,4 @@
-// File: src/modules/usuarios/services/usersApi.ts
+// File: @modules/usuarios/client/usersApi.ts
 import type { Usuario } from "../types";
 
 const API = "/api/usuarios";

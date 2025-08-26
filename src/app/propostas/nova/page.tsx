@@ -2,8 +2,8 @@
 import { ReactNode } from "react";
 import DashboardShell, { AppUser } from "@/components/GladPros";
 import { requireServerUser } from "@/lib/requireServerUser";
-import { PropostaFormNova } from "@/components/propostas";
-import { ClientesProvider } from "@/components/propostas/ClientesContext";
+import PropostaForm from "@modules/propostas/ui/PropostaForm";
+import { ClientesProvider } from "@modules/propostas/ui/ClientesContext";
 
 export default async function NovaPropostaPage() {
   const user = (await requireServerUser()) as unknown as AppUser;
@@ -11,7 +11,7 @@ export default async function NovaPropostaPage() {
   return (
     <DashboardShell user={user}>
       <ClientesProvider>
-        <PropostaFormNova />
+        <PropostaForm />
       </ClientesProvider>
     </DashboardShell>
   );

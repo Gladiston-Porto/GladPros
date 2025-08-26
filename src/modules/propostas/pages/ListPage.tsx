@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import Link from "next/link";
 import Toolbar from "../components/Toolbar";
-import { Pagination } from "@/components/clientes/Pagination";
+import { Pagination } from "@/modules/clientes/ui/Pagination";
 import PropostasTable from "../components/PropostasTable";
 import { getPropostas, deleteProposta, duplicateProposta, sendProposta } from "../services/propostasApi";
 import { runBulkAction, needsExportWarning } from "../services/bulkService";

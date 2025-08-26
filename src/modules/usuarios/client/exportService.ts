@@ -1,4 +1,4 @@
-// src/modules/usuarios/services/exportService.ts
+// @modules/usuarios/client/exportService.ts
 import { Usuario } from "../types";
 
 export const exportToCSV = (users: Usuario[], filename: string = 'usuarios') => {

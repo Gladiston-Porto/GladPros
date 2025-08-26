@@ -1,0 +1,6 @@
+export * from './ClienteCard'
+export * from './ClienteList'
+export * from './ClienteFilters'
+export * from './ClienteForm'
+export * from './ClienteDetailsModal'
+export * from './Pagination'

@@ -2,8 +2,8 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import UserForm from "../components/UserForm";
-import { createUser, type CreateUserInput } from "../services/usersApi";
+import UserForm from "../ui/UserForm";
+import { createUser, type CreateUserInput } from "../client/usersApi";
 import { useToast } from "@/components/ui/Toaster";
 
 export default function UserNewPage() {
