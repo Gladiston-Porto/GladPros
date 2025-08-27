@@ -162,44 +162,44 @@ export interface DefaultArgs {
 
 export type TransactionClient = {
   proposta: {
-    findUnique: (args: any) => Promise<Proposta | null>
-    findFirst: (args: any) => Promise<Proposta | null>
-    findMany: (args: any) => Promise<Proposta[]>
-    create: (args: any) => Promise<Proposta>
-    update: (args: any) => Promise<Proposta>
-    updateMany: (args: any) => Promise<any>
-    delete: (args: any) => Promise<Proposta>
-    count: (args?: any) => Promise<number>
+  findUnique: (args: unknown) => Promise<Proposta | null>
+  findFirst: (args: unknown) => Promise<Proposta | null>
+  findMany: (args: unknown) => Promise<Proposta[]>
+  create: (args: unknown) => Promise<Proposta>
+  update: (args: unknown) => Promise<Proposta>
+  updateMany: (args: unknown) => Promise<unknown>
+  delete: (args: unknown) => Promise<Proposta>
+  count: (args?: unknown) => Promise<number>
   }
   propostaLog: {
-    create: (args: any) => Promise<PropostaLog>
-    findMany: (args: any) => Promise<PropostaLog[]>
+  create: (args: unknown) => Promise<PropostaLog>
+  findMany: (args: unknown) => Promise<PropostaLog[]>
   }
   propostaEtapa: {
-    create: (args: any) => Promise<PropostaEtapa>
-    createMany: (args: any) => Promise<any>
-    findMany: (args: any) => Promise<PropostaEtapa[]>
+  create: (args: unknown) => Promise<PropostaEtapa>
+  createMany: (args: unknown) => Promise<unknown>
+  findMany: (args: unknown) => Promise<PropostaEtapa[]>
   }
   propostaMaterial: {
-    create: (args: any) => Promise<PropostaMaterial>
-    createMany: (args: any) => Promise<any>
-    findMany: (args: any) => Promise<PropostaMaterial[]>
+  create: (args: unknown) => Promise<PropostaMaterial>
+  createMany: (args: unknown) => Promise<unknown>
+  findMany: (args: unknown) => Promise<PropostaMaterial[]>
   }
   cliente: {
-    findUnique: (args: any) => Promise<Cliente | null>
-    findMany: (args: any) => Promise<Cliente[]>
-    create: (args: any) => Promise<Cliente>
-    update: (args: any) => Promise<Cliente>
-    delete: (args: any) => Promise<Cliente>
-    count: (args?: any) => Promise<number>
+  findUnique: (args: unknown) => Promise<Cliente | null>
+  findMany: (args: unknown) => Promise<Cliente[]>
+  create: (args: unknown) => Promise<Cliente>
+  update: (args: unknown) => Promise<Cliente>
+  delete: (args: unknown) => Promise<Cliente>
+  count: (args?: unknown) => Promise<number>
   }
   usuario: {
-    findUnique: (args: any) => Promise<Usuario | null>
-    findMany: (args: any) => Promise<Usuario[]>
-    create: (args: any) => Promise<Usuario>
-    update: (args: any) => Promise<Usuario>
-    delete: (args: any) => Promise<Usuario>
-    count: (args?: any) => Promise<number>
+  findUnique: (args: unknown) => Promise<Usuario | null>
+  findMany: (args: unknown) => Promise<Usuario[]>
+  create: (args: unknown) => Promise<Usuario>
+  update: (args: unknown) => Promise<Usuario>
+  delete: (args: unknown) => Promise<Usuario>
+  count: (args?: unknown) => Promise<number>
   }
 }
 
@@ -213,12 +213,12 @@ export class PrismaClient {
 
   constructor(options?: PrismaClientOptions) {
     // stub implementation
-    this.proposta = {} as any
-    this.propostaLog = {} as any
-    this.propostaEtapa = {} as any
-    this.propostaMaterial = {} as any
-    this.cliente = {} as any
-    this.usuario = {} as any
+  this.proposta = {} as unknown as TransactionClient['proposta']
+  this.propostaLog = {} as unknown as TransactionClient['propostaLog']
+  this.propostaEtapa = {} as unknown as TransactionClient['propostaEtapa']
+  this.propostaMaterial = {} as unknown as TransactionClient['propostaMaterial']
+  this.cliente = {} as unknown as TransactionClient['cliente']
+  this.usuario = {} as unknown as TransactionClient['usuario']
   }
 
   $connect(): Promise<void> {
@@ -230,7 +230,7 @@ export class PrismaClient {
   }
 
   $transaction<T>(fn: (tx: TransactionClient) => Promise<T>): Promise<T> {
-    return fn({} as any)
+    return fn({} as unknown as TransactionClient)
   }
 
   // Método adicional para geração de número
