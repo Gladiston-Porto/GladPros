@@ -27,17 +27,32 @@ Resumo
     $headers = @{ Authorization = "token $token"; Accept = 'application/vnd.github+json' }
 
     $url = "https://api.github.com/repos/$owner/$repo/pulls"
-    $resp = Invoke-RestMethod -Uri $url -Method Post -Headers $headers -Body $payload -ContentType 'application/json'
-
-    if ($resp.html_url) {
-        Write-Host "PR criado: $($resp.html_url)" -ForegroundColor Green
-        exit 0
-    } else {
-        Write-Host "Falha ao criar PR. Resposta:" -ForegroundColor Red
-        $resp | ConvertTo-Json | Write-Host
-        exit 2
+    try {
+        $resp = Invoke-RestMethod -Uri $url -Method Post -Headers $headers -Body $payload -ContentType 'application/json'
+        if ($resp.html_url) {
+            Write-Host "PR criado: $($resp.html_url)" -ForegroundColor Green
+            exit 0
+        } else {
+            Write-Host "Falha ao criar PR. Resposta inesperada:" -ForegroundColor Red
+            $resp | ConvertTo-Json | Write-Host
+            exit 2
+        }
+    } catch {
+        $r = $_.Exception.Response
+        if ($r -ne $null) {
+            $status = $r.StatusCode.Value__
+            $stream = $r.GetResponseStream()
+            $reader = New-Object System.IO.StreamReader($stream)
+            $text = $reader.ReadToEnd()
+            Write-Host "STATUS: $status" -ForegroundColor Yellow
+            Write-Host $text
+            exit 4
+        } else {
+            Write-Host "Erro local: $($_.Exception.Message)" -ForegroundColor Red
+            exit 3
+        }
     }
 } catch {
-    Write-Host "Erro: $($_.Exception.Message)" -ForegroundColor Red
-    exit 3
+    Write-Host "Erro inesperado: $($_.Exception.Message)" -ForegroundColor Red
+    exit 5
 }
