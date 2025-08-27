@@ -5,22 +5,17 @@ import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
 import SignaturePad from '@/components/ui/SignaturePad'
 import PDFExportButton from '@/components/ui/PDFExportButton'
 import { formatCurrency, formatDate } from '@/lib/utils'
-import { StatusProposta, PropostaWithRelations as PropostaWithDetails, Cliente } from '@/types/propostas'
+import { StatusProposta, PropostaWithRelations as PropostaWithDetails } from '@/types/propostas'
 import { 
   FileText,
-  Calendar,
   DollarSign,
   Building2,
   Mail,
-  Phone,
-  MapPin,
   CheckCircle,
   AlertCircle
 } from 'lucide-react'
