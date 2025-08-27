@@ -52,8 +52,8 @@ export default function UsersListPage() {
       await deleteUser(String(id));
       showToast({ title: 'Removido', message: 'Usuário removido com sucesso', type: 'success' });
       load();
-    } catch (error) {
-      console.error(error);
+    } catch {
+      console.error('Erro ao remover usuário');
       showToast({ title: 'Erro', message: 'Falha ao remover usuário', type: 'error' });
     }
   }
@@ -72,8 +72,8 @@ export default function UsersListPage() {
       await toggleUserStatus(String(id), !currentStatus);
   showToast({ title: 'Sucesso', message: 'Status atualizado', type: 'success' });
   load(); // Recarregar lista
-    } catch (error) {
-  console.error(error);
+    } catch {
+  console.error('Erro ao alterar status do usuário');
   showToast({ title: 'Erro', message: 'Erro ao alterar status do usuário', type: 'error' });
     }
   }
@@ -146,7 +146,7 @@ export default function UsersListPage() {
             onSelectedChange={setSelectedIds}
             sortKey={sortKey}
             sortDir={sortDir}
-            onSortChange={(k: any, d: any) => { setSortKey(k); setSortDir(d); }}
+            onSortChange={(k: 'nome' | 'email' | 'role' | 'ativo' | 'criadoEm', d: 'asc' | 'desc') => { setSortKey(k); setSortDir(d); }}
           />
         )}
       </Panel>

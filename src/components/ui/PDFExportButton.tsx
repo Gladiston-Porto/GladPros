@@ -4,7 +4,7 @@ import { useState } from 'react'
 import jsPDF from 'jspdf'
 import html2canvas from 'html2canvas'
 import { Button } from '@/components/ui/button'
-import { Download, FileText } from 'lucide-react'
+import { Download } from 'lucide-react'
 
 interface PDFExportButtonProps {
   elementId: string

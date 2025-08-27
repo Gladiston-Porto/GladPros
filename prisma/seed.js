@@ -1,5 +1,5 @@
-const { PrismaClient } = require('@prisma/client')
-const bcrypt = require('bcryptjs')
+import { PrismaClient } from '@prisma/client'
+import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
@@ -13,7 +13,7 @@ async function main() {
     update: { role: 'ADMIN', status: 'ATIVO' },
     create: {
       email,
-  senha: senhaHash,
+      senha: senhaHash,
       nome: 'Administrador',
       role: 'ADMIN',
       status: 'ATIVO',

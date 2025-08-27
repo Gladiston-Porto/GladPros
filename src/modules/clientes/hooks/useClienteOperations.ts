@@ -29,10 +29,10 @@ export function useClienteOperations({ onSuccess, onError }: UseClienteOperation
 
       onSuccess?.('Cliente criado com sucesso!')
       return result
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Erro inesperado'
+    } catch {
+      const message = 'Erro inesperado'
       onError?.(message)
-      throw error
+      throw new Error(message)
     } finally {
       setLoading(false)
     }
@@ -58,10 +58,10 @@ export function useClienteOperations({ onSuccess, onError }: UseClienteOperation
 
       onSuccess?.('Cliente atualizado com sucesso!')
       return result
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Erro inesperado'
+    } catch {
+      const message = 'Erro inesperado'
       onError?.(message)
-      throw error
+      throw new Error(message)
     } finally {
       setLoading(false)
     }
@@ -83,10 +83,10 @@ export function useClienteOperations({ onSuccess, onError }: UseClienteOperation
 
       onSuccess?.('Cliente inativado com sucesso!')
       return result
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Erro inesperado'
+    } catch {
+      const message = 'Erro inesperado'
       onError?.(message)
-      throw error
+      throw new Error(message)
     } finally {
       setLoading(false)
     }

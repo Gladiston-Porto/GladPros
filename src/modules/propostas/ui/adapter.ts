@@ -159,7 +159,7 @@ export function adaptPropostaFormToAPI(formData: PropostaFormData): PropostaAPIP
     observacoesInternas: formData.obsInternas,
     
     // Materiais adaptados
-    materiais: formData.materiais.map((m: { id?: string; codigo?: string; nome?: string; preco?: number; quantidade: number; unidade?: string; status?: string; fornecedor?: string; obs?: string }) => ({
+  materiais: formData.materiais.map((m: { id?: string; codigo?: string; nome?: string; preco?: number; quantidade: number; unidade?: string; status?: string; fornecedor?: string; obs?: string }) => ({
       codigo: String(m.codigo ?? ''),
       nome: String(m.nome ?? ''),
       quantidade: m.quantidade,
@@ -171,7 +171,7 @@ export function adaptPropostaFormToAPI(formData: PropostaFormData): PropostaAPIP
     })),
     
     // Etapas adaptadas
-    etapas: formData.etapas.map((e: any, index: number) => ({
+  etapas: formData.etapas.map((e: { servico?: string; descricao?: string; quantidade?: number; unidade?: string; duracaoHoras?: number; custoMO?: number; status?: string }, index: number) => ({
       servico: String(e.servico ?? ''),
       descricao: String(e.descricao ?? ''),
       ordem: index + 1,

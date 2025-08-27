@@ -1,6 +1,8 @@
 // Script para corrigir usuários existentes no banco
-const { PrismaClient } = require('@prisma/client');
-require('dotenv').config({ path: './.env' });
+import { PrismaClient } from '@prisma/client';
+import dotenv from 'dotenv';
+
+dotenv.config({ path: './.env' });
 
 const prisma = new PrismaClient();
 

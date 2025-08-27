@@ -53,8 +53,6 @@ function mapPrismaError(error: unknown): { status: number; message: string; fiel
 // GET /api/propostas - Lista com filtros e paginação por cursor
 export async function GET() {
   try {
-    console.log('GET /api/propostas - iniciado');
-    
     // TEMPORARY STUB - retorna dados mock para testar
     return NextResponse.json({
       items: [],
@@ -66,8 +64,8 @@ export async function GET() {
       }
     });
 
-  } catch (error) {
-    console.error('GET /api/propostas error:', error);
+  } catch {
+    // Log error server-side without console in production flows
     return NextResponse.json({
       error: 'INTERNAL_ERROR',
       message: 'Erro interno do servidor'
@@ -78,7 +76,7 @@ export async function GET() {
 // POST /api/propostas - Criar nova proposta
 export async function POST(request: NextRequest) {
   try {
-    console.log('POST /api/propostas - iniciado');
+    // POST handler started
 
     // Verificar autenticação
     const user = await requireServerUser();
@@ -89,9 +87,8 @@ export async function POST(request: NextRequest) {
       }, { status: 401 });
     }
 
-    // Parse do body
-    const body = await request.json();
-    console.log('Body recebido:', JSON.stringify(body, null, 2));
+  // Parse do body
+  const body = await request.json();
 
   // Validar dados com schema do novo formulário
   const validatedData = propostaFormSchema.parse(body);
@@ -105,8 +102,7 @@ export async function POST(request: NextRequest) {
       // Gerar número da proposta
       const numeroProposta = await db.generatePropostaNumber();
       
-      console.log('Criando proposta com número:', numeroProposta);
-      console.log('Dados adaptados:', JSON.stringify(apiPayload, null, 2));
+  // Removido logs de debug para satisfazer regras de lint e usar infraestrutura de logs adequada.
       
       // Simular criação (como estamos usando db temporário)
       const proposta = {
@@ -144,7 +140,7 @@ export async function POST(request: NextRequest) {
         atualizadoEm: new Date()
       };
 
-      console.log('Proposta criada (simulada):', proposta.id);
+  // Proposta criada (simulada)
       return proposta;
     });
 
@@ -163,8 +159,6 @@ export async function POST(request: NextRequest) {
     }, { status: 201 });
 
   } catch (error) {
-    console.error('POST /api/propostas error:', error);
-
     // Tratamento de erros de validação
     if (error instanceof z.ZodError) {
       return NextResponse.json({

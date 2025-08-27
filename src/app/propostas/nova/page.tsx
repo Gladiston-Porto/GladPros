@@ -1,5 +1,5 @@
 // src/app/propostas/nova/page.tsx
-import { ReactNode } from "react";
+// ReactNode not used here
 import DashboardShell, { AppUser } from "@/components/GladPros";
 import { requireServerUser } from "@/lib/requireServerUser";
 import PropostaForm from "@modules/propostas/ui/PropostaForm";

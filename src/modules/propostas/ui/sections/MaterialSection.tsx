@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { Label, Input, Textarea } from '../ui-components'
+import { Label, Input } from '../ui-components'
 import { Material } from '../types'
 
 interface MaterialSectionProps {

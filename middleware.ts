@@ -74,10 +74,11 @@ async function verifyToken(token: string): Promise<AuthClaims | null> {
       }
     }
     return decoded;
-  } catch (error) {
+  } catch {
     return null;
   }
 }
+
 
 export async function middleware(req: NextRequest) {
   const { pathname, origin } = req.nextUrl;

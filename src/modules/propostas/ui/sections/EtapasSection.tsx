@@ -87,10 +87,10 @@ export function EtapasSection({ etapas, onEtapasChange }: EtapasSectionProps) {
             <div className="flex items-center gap-2">
               <Label>Status</Label>
               <Select 
-                value={etapa.status} 
-                onChange={(e) => updateEtapa(etapa.id, { status: e.target.value as any })} 
-                className="w-auto"
-              >
+                  value={etapa.status} 
+                  onChange={(e) => updateEtapa(etapa.id, { status: e.target.value as 'planejada' | 'opcional' | 'removida' })} 
+                  className="w-auto"
+                >
                 <option value="planejada">Planejada</option>
                 <option value="opcional">Opcional</option>
                 <option value="removida">Removida</option>

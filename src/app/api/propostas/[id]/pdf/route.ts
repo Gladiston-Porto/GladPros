@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/server/db-temp'
-import { PropostaPDFService, type PDFGenerationOptions, type RBACContext } from '@/lib/services/proposta-pdf'
+import { PropostaPDFService, type PDFGenerationOptions, type RBACContext, type PropostaWithRelations as PropostaPDFType } from '@/lib/services/proposta-pdf'
 
 export async function GET(
   request: NextRequest,
@@ -14,7 +14,7 @@ export async function GET(
     const includeMateriais = searchParams.get('includeMateriais') !== 'false'
 
     // Buscar proposta com relacionamentos
-    const proposta = await db.proposta.findUnique({
+  const proposta = await db.proposta.findUnique({
       where: { id: parseInt(params.id) },
       include: {
         etapas: true,
@@ -31,7 +31,8 @@ export async function GET(
     }
 
     // Validar se a proposta pode gerar PDF
-    const validation = PropostaPDFService.validateForPDF(proposta as any)
+  // Cast via unknown to the PDF service's PropostaWithRelations type so the shapes line up
+  const validation = PropostaPDFService.validateForPDF(proposta as unknown as PropostaPDFType)
     if (!validation.valid) {
       return NextResponse.json(
         { 
@@ -66,7 +67,7 @@ export async function GET(
 
     // Gerar PDF
     const { buffer, filename, contentType } = await PropostaPDFService.generatePDF(
-      proposta as any,
+      proposta as unknown as PropostaPDFType,
       rbacContext,
       pdfOptions
     )
@@ -77,7 +78,7 @@ export async function GET(
     headers.set('Content-Disposition', `attachment; filename="${filename}"`)
     headers.set('Cache-Control', 'no-cache')
 
-    return new NextResponse(buffer as any, {
+  return new NextResponse(buffer as unknown as ArrayBuffer, {
       status: 200,
       headers
     })

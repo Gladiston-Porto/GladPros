@@ -12,8 +12,8 @@ export async function GET(
   ctx: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Verificar permissão de leitura (ADMIN e GERENTE para auditoria)
-    const user = await requireClientePermission(request, 'canUpdate')
+  // Verificar permissão de leitura (ADMIN e GERENTE para auditoria)
+  await requireClientePermission(request, 'canUpdate')
     
     // Validar parâmetros
   const { id } = clienteParamsSchema.parse(await ctx.params)
@@ -26,17 +26,23 @@ export async function GET(
     const history = await AuditService.getEntityHistory('Cliente', id, limit)
     
     // Formatar resposta
-    const data = history.map((entry: any) => ({
-      id: entry.id,
-      acao: entry.acao,
-      diff: entry.diff ? JSON.parse(entry.diff) : null,
-      timestamp: entry.timestamp.toISOString(),
-      usuario: {
-        id: entry.usuario.id,
-        nome: entry.usuario.nomeCompleto,
-        email: entry.usuario.email
+    const data = history.map((entry) => {
+      const e = entry as Record<string, unknown>
+      let parsedDiff: Record<string, unknown> | null = null
+      try {
+        parsedDiff = e.diff ? JSON.parse(String(e.diff)) : null
+      } catch {
+        parsedDiff = null
       }
-    }))
+      const usuario = e.usuario as Record<string, unknown> | undefined
+      return {
+        id: (e.id as number) ?? null,
+        acao: (e.acao as string) ?? null,
+        diff: parsedDiff,
+        timestamp: e.timestamp instanceof Date ? e.timestamp.toISOString() : String(e.timestamp),
+        usuario: usuario ? { id: (usuario.id as number) ?? null, nome: (usuario.nomeCompleto as string) ?? null, email: (usuario.email as string) ?? null } : null
+      }
+    })
     
     return NextResponse.json({ data })
     

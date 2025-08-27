@@ -80,7 +80,13 @@ export default function PropostaForm() {
   const router = useRouter()
   const { showToast } = useToast()
 
-  const toast = (options: any) => {
+  interface ToastOptions {
+    title?: string
+    description?: string
+    variant?: 'destructive' | 'default'
+  }
+
+  const toast = (options: ToastOptions) => {
     showToast({
       title: options.title || '',
       message: options.description || '',
@@ -94,11 +100,14 @@ export default function PropostaForm() {
       const response = await fetch('/api/clientes?limit=1000')
       if (response.ok) {
         const data = await response.json()
-        const clientesList = (data.clientes || []).map((cliente: any) => ({
-          id: cliente.id,
-          nome: cliente.nomeCompleto || cliente.razaoSocial || cliente.nomeFantasia || 'Cliente',
-          email: cliente.email
-        }))
+        const clientesList = (Array.isArray(data.clientes) ? data.clientes : []).map((cliente: unknown) => {
+          const c = cliente as { id?: string; nomeCompleto?: string; razaoSocial?: string; nomeFantasia?: string; email?: string }
+          return {
+            id: c.id || '',
+            nome: c.nomeCompleto || c.razaoSocial || c.nomeFantasia || 'Cliente',
+            email: c.email || ''
+          }
+        })
         setClientes(clientesList)
       }
     } catch (error) {
@@ -194,11 +203,11 @@ export default function PropostaForm() {
   }
 
   // Update etapa
-  const updateEtapa = (index: number, field: keyof EtapaForm, value: any) => {
+  const updateEtapa = (index: number, field: keyof EtapaForm, value: unknown) => {
     setFormData(prev => ({
       ...prev,
       etapas: prev.etapas.map((etapa, i) => 
-        i === index ? { ...etapa, [field]: value } : etapa
+        i === index ? { ...etapa, [field]: value as EtapaForm[typeof field] } : etapa
       )
     }))
   }
@@ -228,11 +237,11 @@ export default function PropostaForm() {
   }
 
   // Update material
-  const updateMaterial = (index: number, field: keyof MaterialForm, value: any) => {
+  const updateMaterial = (index: number, field: keyof MaterialForm, value: unknown) => {
     setFormData(prev => ({
       ...prev,
       materiais: prev.materiais.map((material, i) => 
-        i === index ? { ...material, [field]: value } : material
+        i === index ? { ...material, [field]: value as MaterialForm[typeof field] } : material
       )
     }))
   }
@@ -369,8 +378,8 @@ export default function PropostaForm() {
           </CardHeader>
           <CardContent className="space-y-4">
             {formData.etapas.length === 0 ? (
-              <p className="text-center py-8 text-muted-foreground">
-                Nenhuma etapa adicionada. Clique em "Adicionar Etapa" para começar.
+                <p className="text-center py-8 text-muted-foreground">
+                Nenhuma etapa adicionada. Clique em &quot;Adicionar Etapa&quot; para começar.
               </p>
             ) : (
               formData.etapas.map((etapa, index) => (
@@ -440,8 +449,8 @@ export default function PropostaForm() {
           </CardHeader>
           <CardContent className="space-y-4">
             {formData.materiais.length === 0 ? (
-              <p className="text-center py-8 text-muted-foreground">
-                Nenhum material adicionado. Clique em "Adicionar Material" para começar.
+                <p className="text-center py-8 text-muted-foreground">
+                Nenhum material adicionado. Clique em &quot;Adicionar Material&quot; para começar.
               </p>
             ) : (
               formData.materiais.map((material, index) => (

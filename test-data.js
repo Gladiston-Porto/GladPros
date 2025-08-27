@@ -1,5 +1,5 @@
 // test-data.js - Script para criar dados de teste
-const { PrismaClient } = require('@prisma/client');
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 

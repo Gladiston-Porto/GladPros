@@ -16,12 +16,11 @@ export async function POST(
     
     // Validate request body
     const { 
-      assinaturaTipo, 
-      assinaturaCliente, 
-      assinaturaImagem, 
-      aceiteTermos, 
-      ip, 
-      userAgent 
+      assinaturaTipo,
+      assinaturaCliente,
+      assinaturaImagem,
+      ip,
+      userAgent
     } = assinaturaClienteSchema.parse(body)
 
     // Validate token and find proposal
@@ -102,9 +101,9 @@ export async function POST(
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { 
+        {
           error: 'Dados inválidos',
-          details: error.issues.map((e: any) => e.message)
+          details: error.issues.map((issue) => String(issue.message))
         },
         { status: 400 }
       )

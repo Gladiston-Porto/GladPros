@@ -1,5 +1,5 @@
 // src/modules/propostas/services/propostasApi.ts
-import type { PropostaWithRelations, StatusProposta } from '@/types/propostas'
+import type { StatusProposta } from '@/types/propostas'
 
 export interface PropostaDTO {
   id: string
@@ -65,28 +65,52 @@ export async function getPropostas(
   const body = await response.json()
 
   // Map server shape { items, pagination } -> PropostasResponse
-  const items = body.items || []
+  const items: unknown[] = body.items || []
+  // Minimal server-side shape for safe mapping (avoid using `any`)
+  interface ServerProposta {
+    id?: string
+    numeroProposta?: string
+    titulo?: string
+    status?: StatusProposta
+    precoPropostaCliente?: number
+    valorEstimado?: number
+    criadoEm?: string
+    validadeProposta?: string
+    assinadoEm?: string
+    cliente?: {
+      id?: string
+      nomeCompleto?: string
+      razaoSocial?: string
+      email?: string
+    }
+    contatoNome?: string
+    contatoEmail?: string
+    localExecucaoEndereco?: string
+  }
   const pagination = body.pagination || {}
 
-  const data = items.map((p: any) => ({
-    id: p.id,
-    numeroProposta: p.numeroProposta,
-    titulo: p.titulo,
-    status: p.status,
-    precoPropostaCliente: p.precoPropostaCliente,
-    valorEstimado: p.valorEstimado || 0,
-    criadoEm: p.criadoEm,
-    validadeProposta: p.validadeProposta,
-    assinadoEm: p.assinadoEm,
-    cliente: {
-      id: p.cliente?.id || '',
-      nome: p.cliente?.nomeCompleto || p.cliente?.razaoSocial || '',
-      email: p.cliente?.email || ''
-    },
-    contatoNome: p.contatoNome,
-    contatoEmail: p.contatoEmail,
-    localExecucaoEndereco: p.localExecucaoEndereco
-  }))
+  const data = items.map((p) => {
+    const sp = p as ServerProposta
+    return {
+      id: sp.id || '',
+      numeroProposta: sp.numeroProposta || '',
+      titulo: sp.titulo || '',
+      status: sp.status as StatusProposta,
+      precoPropostaCliente: sp.precoPropostaCliente,
+      valorEstimado: sp.valorEstimado || 0,
+      criadoEm: sp.criadoEm || '',
+      validadeProposta: sp.validadeProposta,
+      assinadoEm: sp.assinadoEm,
+      cliente: {
+        id: sp.cliente?.id || '',
+        nome: sp.cliente?.nomeCompleto || sp.cliente?.razaoSocial || '',
+        email: sp.cliente?.email || ''
+      },
+      contatoNome: sp.contatoNome,
+      contatoEmail: sp.contatoEmail,
+      localExecucaoEndereco: sp.localExecucaoEndereco
+    }
+  })
 
   const total = typeof pagination.total === 'number' ? pagination.total : 0
   const page = filters.page || 1

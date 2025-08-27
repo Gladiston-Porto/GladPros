@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/server/db-temp'
+import type { TransactionClient } from '@/types/prisma-temp'
 import { AcaoPropostaLog, StatusProposta } from '@/types/propostas'
 
 interface RouteParams {
@@ -36,15 +37,15 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     // TODO: Get user from session
     const userId = 'temp-user-id'
 
-    const updatedProposta = await db.$transaction(async (tx: any) => {
+  const updatedProposta = await db.$transaction(async (tx: TransactionClient) => {
       // Update status to CANCELADA
       const proposta = await tx.proposta.update({
         where: { id },
         data: {
           status: StatusProposta.CANCELADA,
-          canceladoEm: new Date(),
-          canceladoMotivo: motivo || 'Cancelado pelo usuário',
-          updatedAt: new Date()
+      assinadaEm: null,
+      motivo_cancelamento: motivo || 'Cancelado pelo usuário',
+      atualizadoEm: new Date()
         }
       })
 
@@ -54,7 +55,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
           propostaId: id,
           usuarioId: userId,
           acao: AcaoPropostaLog.CANCELLED,
-          detalhes: `Proposta ${proposta.numero} cancelada. Motivo: ${motivo || 'Não informado'}`,
+          detalhes: `Proposta ${proposta.numeroProposta} cancelada. Motivo: ${motivo || 'Não informado'}`,
           ip: request.headers.get('x-forwarded-for') || 'unknown',
           userAgent: request.headers.get('user-agent') || 'unknown'
         }

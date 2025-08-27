@@ -11,6 +11,13 @@ import SignaturePad from '@/components/ui/SignaturePad'
 import PDFExportButton from '@/components/ui/PDFExportButton'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { StatusProposta, PropostaWithRelations as PropostaWithDetails } from '@/types/propostas'
+
+// Local narrow type used to avoid `as any` in the UI while keeping optional runtime-safe props
+type PropostaLike = PropostaWithDetails & {
+  numeroProposta?: string | null
+  assinadaEm?: Date | string | null
+  assinaturaResponsavel?: string | null
+}
 import { 
   FileText,
   DollarSign,
@@ -120,7 +127,7 @@ export default function ClientPropostaView({ proposta, token }: ClientPropostaVi
                   Proposta Comercial
                 </h1>
                 <p className="text-gray-600">
-                  {(proposta as any).numeroProposta} • {formatDate(proposta.createdAt)}
+                  {(proposta as PropostaLike).numeroProposta}  {formatDate(proposta.createdAt)}
                 </p>
               </div>
             </div>
@@ -133,7 +140,7 @@ export default function ClientPropostaView({ proposta, token }: ClientPropostaVi
           <div className="flex gap-2">
             <PDFExportButton
               elementId="proposta-content"
-              filename={`proposta-${(proposta as any).numeroProposta}.pdf`}
+              filename={`proposta-${(proposta as PropostaLike).numeroProposta}.pdf`}
               className="hidden print:hidden"
             >
               <FileText className="h-4 w-4 mr-2" />
@@ -347,7 +354,7 @@ export default function ClientPropostaView({ proposta, token }: ClientPropostaVi
         )}
 
         {/* Already Signed */}
-        {proposta.status === StatusProposta.ASSINADA && (proposta as any).assinadaEm && (
+  {proposta.status === StatusProposta.ASSINADA && (proposta as PropostaLike).assinadaEm && (
           <Card className="mb-6">
             <CardContent className="pt-6">
               <div className="text-center">
@@ -356,11 +363,11 @@ export default function ClientPropostaView({ proposta, token }: ClientPropostaVi
                   Proposta Assinada
                 </h3>
                 <p className="text-gray-600">
-                  Esta proposta foi assinada em {formatDate((proposta as any).assinadaEm)}
+                  Esta proposta foi assinada em {formatDate((proposta as PropostaLike).assinadaEm as Date)}
                 </p>
-                {(proposta as any).assinaturaResponsavel && (
++                {(proposta as PropostaLike).assinaturaResponsavel && (
                   <p className="text-sm text-gray-500 mt-2">
-                    Assinado por: {(proposta as any).assinaturaResponsavel}
+                    Assinado por: {(proposta as PropostaLike).assinaturaResponsavel}
                   </p>
                 )}
               </div>

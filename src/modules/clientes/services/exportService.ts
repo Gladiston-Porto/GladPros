@@ -42,7 +42,7 @@ export const exportToCSV = (clientes: ClienteDTO[], filename: string = 'clientes
   URL.revokeObjectURL(url);
 };
 
-export const exportToCSVServer = async (opts: { filename?: string; filters?: any; clientes?: ClienteDTO[] }) => {
+export const exportToCSVServer = async (opts: { filename?: string; filters?: unknown; clientes?: ClienteDTO[] }) => {
   const res = await fetch('/api/clientes/export/csv', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

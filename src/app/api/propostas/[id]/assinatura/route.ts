@@ -22,10 +22,10 @@ export async function POST(
   try {
     const propostaId = params.id
     const body = await request.json()
-    
+
     // Validar dados
     const validatedData = signatureSchema.parse(body)
-    
+
     if (!validatedData.consentimento) {
       return NextResponse.json(
         { error: 'Consentimento é obrigatório' },
@@ -70,7 +70,7 @@ export async function POST(
     const updatedProposta = await db.proposta.update({
       where: { id: propostaId },
       data: {
-        assinaturaTipo: validatedData.assinaturaTipo as any, // TipoAssinatura enum
+  assinaturaTipo: validatedData.assinaturaTipo as unknown as string, // TipoAssinatura enum
         assinaturaNome: validatedData.assinaturaNome,
         assinaturaImagem: validatedData.assinaturaImagem,
         assinaturaIp: clientIp,
@@ -89,15 +89,6 @@ export async function POST(
       }
     })
 
-    // Log da assinatura para auditoria
-    console.log(`[ASSINATURA] Proposta ${proposta.numeroProposta} assinada:`, {
-      tipo: validatedData.assinaturaTipo,
-      nome: validatedData.assinaturaNome,
-      ip: clientIp,
-      userAgent: userAgent,
-      timestamp: new Date().toISOString()
-    })
-
     // Resposta de sucesso
     return NextResponse.json({
       success: true,
@@ -112,14 +103,12 @@ export async function POST(
       }
     })
 
-  } catch (error) {
-    console.error('[ASSINATURA] Erro:', error)
-    
-    if (error instanceof z.ZodError) {
+  } catch (err) {
+    if (err instanceof z.ZodError) {
       return NextResponse.json(
-        { 
+        {
           error: 'Dados inválidos',
-          details: error.issues
+          details: err.issues
         },
         { status: 400 }
       )

@@ -2,11 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/server/db'
 import { requireClientePermission, ClientePermissions } from '@/lib/rbac'
 import { clienteUpdateSchema, clienteParamsSchema } from '@/lib/validations/cliente'
-import { 
-  sanitizeClienteInput, 
-  encryptClienteData, 
-  checkDocumentoExists, 
-  checkEmailExists,
+import {
+  sanitizeClienteInput,
+  encryptClienteData,
+  checkDocumentoExists,
   logClienteAudit,
   calculateClienteDiff,
   formatTelefone,
@@ -16,9 +15,6 @@ import {
 import { decryptDoc } from '@/lib/crypto'
 import { ZodError } from 'zod'
 
-/**
- * GET /api/clientes/[id] - Obter detalhes de um cliente
- */
 export async function GET(
   request: NextRequest,
   ctx: { params: Promise<{ id: string }> }
@@ -64,7 +60,7 @@ export async function GET(
     }
     
     // Preparar resposta base
-    const response: any = {
+  const response: Record<string, unknown> = {
       id: cliente.id,
       tipo: cliente.tipo,
       nomeCompleto: cliente.nomeCompleto,
@@ -148,9 +144,27 @@ export async function PUT(
     // Validar dados
     const validData = clienteUpdateSchema.parse(body)
     
-    // Sanitizar entrada
-    const sanitizedData = sanitizeClienteInput(validData)
+    // Sanitizar entrada (narrow local type)
+    type SanitizedClienteUpdate = {
+      tipo?: 'PF' | 'PJ'
+      ssn?: string
+      itin?: string
+      ein?: string
+      documento?: string
+      email?: string
+      nomeCompleto?: string | null
+      razaoSocial?: string | null
+      nomeFantasia?: string | null
+      telefone?: string
+      endereco1?: string | null
+      endereco2?: string | null
+      cidade?: string | null
+      estado?: string | null
+      zipcode?: string | null
+      observacoes?: string | null
+    }
     
+    const sanitizedData = sanitizeClienteInput(validData) as SanitizedClienteUpdate
     // Buscar cliente atual
     const clienteAtual = await prisma.cliente.findUnique({
       where: { id },
@@ -181,7 +195,7 @@ export async function PUT(
     }
     
     // Preparar dados para atualização
-    const updateData: any = {}
+  const updateData: Record<string, unknown> = {}
     
     // Campos simples
     const simpleFields = [
@@ -190,8 +204,8 @@ export async function PUT(
     ]
     
     for (const field of simpleFields) {
-      if (field in sanitizedData && sanitizedData[field] !== undefined) {
-        updateData[field] = sanitizedData[field]
+      if (field in (sanitizedData as Record<string, unknown>) && (sanitizedData as Record<string, unknown>)[field] !== undefined) {
+        updateData[field] = (sanitizedData as Record<string, unknown>)[field]
       }
     }
     
@@ -219,12 +233,14 @@ export async function PUT(
       if (conflicting) {
         if (conflicting.status === 'INATIVO') {
           // Liberar o email renomeando o registro inativo com um sufixo único
-          const [local, domain] = sanitizedData.email.split('@')
-          const archivedEmail = `${local}+inativo-${conflicting.id}@${domain}`
-          await prisma.cliente.update({
-            where: { id: conflicting.id },
-            data: { email: archivedEmail }
-          })
+          if (typeof sanitizedData.email === 'string') {
+            const [local, domain] = sanitizedData.email.split('@')
+            const archivedEmail = `${local}+inativo-${conflicting.id}@${domain}`
+            await prisma.cliente.update({
+              where: { id: conflicting.id },
+              data: { email: archivedEmail }
+            })
+          }
         } else {
           return NextResponse.json(
             { error: 'E-mail já cadastrado no sistema' },
@@ -327,21 +343,25 @@ export async function PUT(
     console.error('[API] PUT /api/clientes/[id] error:', error)
 
     // Tratar violações de unicidade (P2002) com mensagens amigáveis
-    const anyErr: any = error as any
-    if (anyErr && typeof anyErr.code === 'string' && anyErr.code === 'P2002') {
-      const target = anyErr.meta?.target
-      let message = 'Dados duplicados'
-      if (Array.isArray(target)) {
-        if (target.includes('email')) message = 'E-mail já cadastrado no sistema'
-        else if (target.includes('docHash')) message = 'Documento já cadastrado no sistema'
-        else if (target.includes('nomeChave') && target.includes('telefone')) message = 'Já existe cliente com o mesmo nome e telefone'
-      } else if (typeof target === 'string') {
-        if (target.includes('email')) message = 'E-mail já cadastrado no sistema'
-        else if (target.includes('docHash')) message = 'Documento já cadastrado no sistema'
-        else if (target.includes('nomeChave') && target.includes('telefone')) message = 'Já existe cliente com o mesmo nome e telefone'
+      const anyErr = error as unknown
+      if (anyErr && typeof anyErr === 'object') {
+        const ae = anyErr as Record<string, unknown>
+        const code = ae.code as string | undefined
+        if (code === 'P2002') {
+          const target = (ae.meta as Record<string, unknown> | undefined)?.target
+          let message = 'Dados duplicados'
+          if (Array.isArray(target)) {
+            if ((target as string[]).includes('email')) message = 'E-mail já cadastrado no sistema'
+            else if ((target as string[]).includes('docHash')) message = 'Documento já cadastrado no sistema'
+            else if ((target as string[]).includes('nomeChave') && (target as string[]).includes('telefone')) message = 'Já existe cliente com o mesmo nome e telefone'
+          } else if (typeof target === 'string') {
+            if (target.includes('email')) message = 'E-mail já cadastrado no sistema'
+            else if (target.includes('docHash')) message = 'Documento já cadastrado no sistema'
+            else if (target.includes('nomeChave') && target.includes('telefone')) message = 'Já existe cliente com o mesmo nome e telefone'
+          }
+          return NextResponse.json({ error: message }, { status: 400 })
+        }
       }
-      return NextResponse.json({ error: message }, { status: 400 })
-    }
     
   if (error instanceof ZodError) {
       return NextResponse.json(

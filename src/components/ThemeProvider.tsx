@@ -11,8 +11,7 @@ type ThemeContextValue = {
 
 const ThemeContext = createContext<ThemeContextValue>({
   theme: "dark",
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  setTheme: (t: Theme) => {},
+  setTheme: (t: Theme) => { void t; },
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
@@ -24,7 +23,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       const initial = saved === "light" || saved === "dark" ? (saved as Theme) : "dark";
       setTheme(initial);
       document.documentElement.classList.toggle("dark", initial === "dark");
-    } catch (e) {
+    } catch {
       // defensive
     }
   }, []);
@@ -33,7 +32,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     try {
       if (typeof window !== "undefined") localStorage.setItem("gp-theme", theme);
       document.documentElement.classList.toggle("dark", theme === "dark");
-    } catch (e) {}
+  } catch {}
   }, [theme]);
 
   return <ThemeContext.Provider value={{ theme, setTheme }}>{children}</ThemeContext.Provider>;

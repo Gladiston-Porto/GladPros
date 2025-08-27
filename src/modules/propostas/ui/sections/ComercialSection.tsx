@@ -117,7 +117,7 @@ export function ComercialSection({
         {comercial.condicoes_pagamento.length === 0 ? (
           <div className="rounded-xl border border-dashed border-slate-300 p-6 text-center">
             <p className="text-sm text-slate-500">
-              Nenhuma condição de pagamento definida. Clique em "Adicionar condição" para começar.
+              Nenhuma condição de pagamento definida. Clique em &quot;Adicionar condição&quot; para começar.
             </p>
           </div>
         ) : (

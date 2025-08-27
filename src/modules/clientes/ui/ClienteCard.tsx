@@ -1,5 +1,5 @@
 import React from 'react'
-import { Cliente, TipoCliente } from '@/types/cliente'
+import { TipoCliente } from '@/types/cliente'
 
 interface ClienteCardProps {
   cliente: {

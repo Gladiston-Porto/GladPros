@@ -103,14 +103,19 @@ export async function POST(req: NextRequest) {
     }
     if (fullUserRows.length === 0) {
       const alt = await prisma.$queryRaw<Array<{
-        id: number; email: string; nomeCompleto: string | null; primeiroAcesso: boolean; senhaProvisoria: boolean; tipo: string | null;
+        id: number;
+        email: string;
+        nomeCompleto: string | null;
+        primeiroAcesso: boolean;
+        senhaProvisoria: boolean;
+        tipo: string | null;
       }>>`
         SELECT id, email, nomeCompleto, primeiroAcesso, senhaProvisoria, nivel as tipo
         FROM Usuario
         WHERE id = ${userId}
         LIMIT 1
       `;
-      fullUserRows = (alt as any).map((r: any) => ({ ...r, tokenVersion: 0 }));
+      fullUserRows = alt.map((r) => ({ ...r, tokenVersion: 0 }));
     }
 
     const user = fullUserRows[0];

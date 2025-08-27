@@ -98,14 +98,14 @@ export class SecurityService {
     // Limpar sessões expiradas (tolerante a tabela ausente)
     try {
       await this.cleanExpiredSessions();
-    } catch (e) {
+    } catch {
       // Evitar quebra do login se a tabela SessaoAtiva ainda não existir
     }
 
     // Política de sessão única: revogar todas as sessões anteriores do usuário
     try {
       await this.revokeAllUserSessions(usuarioId);
-    } catch (e) {
+    } catch {
       // continuar mesmo se falhar
     }
 

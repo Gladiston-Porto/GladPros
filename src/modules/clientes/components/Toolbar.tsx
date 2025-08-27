@@ -1,7 +1,6 @@
 // src/modules/clientes/components/Toolbar.tsx
 "use client";
 import { Search, Download, ChevronDown } from "lucide-react";
-import { Plus } from "lucide-react";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
@@ -98,8 +97,8 @@ export default function Toolbar({
         }
         showToast({ title: 'Exportado', message: 'PDF gerado com sucesso', type: 'success' });
       }
-    } catch (error) {
-      console.error('Erro na exportação:', error);
+    } catch {
+      console.error('Erro na exportação');
       showToast({ title: 'Erro', message: `Erro ao exportar ${format.toUpperCase()}`, type: 'error' });
     } finally {
       setExporting(false);

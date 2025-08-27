@@ -9,10 +9,10 @@ export class AuditService {
     entidade: string,
     entidadeId: number | string,
     acao: string,
-    diff?: Record<string, any>
+    diff?: Record<string, unknown>
   ) {
     try {
-      const auditModel = (prisma as any)?.auditLog
+      const auditModel = (prisma as unknown as { auditLog?: { create?: (args: { data: Record<string, unknown> }) => Promise<Record<string, unknown>>; findMany?: (args: { where: Record<string, unknown> }) => Promise<Record<string, unknown>[]> } })?.auditLog
       if (!auditModel || typeof auditModel.create !== 'function') {
         // Tabela/modelo de auditoria não disponível: não falhar
         return null
@@ -28,8 +28,8 @@ export class AuditService {
         }
       })
       return auditLog
-    } catch (error) {
-      console.error('Erro ao registrar audit log:', error)
+    } catch {
+      console.error('Erro ao registrar audit log:')
       // Não falha a operação principal se o log der erro
       return null
     }
@@ -41,7 +41,7 @@ export class AuditService {
     limit: number = 50
   ) {
     try {
-      const auditModel = (prisma as any)?.auditLog
+      const auditModel = (prisma as unknown as { auditLog?: { findMany?: (args: { where: Record<string, unknown>; include?: Record<string, unknown>; orderBy?: Record<string, unknown>; take?: number }) => Promise<Record<string, unknown>[]> } })?.auditLog
       if (!auditModel || typeof auditModel.findMany !== 'function') {
         return []
       }
@@ -65,8 +65,8 @@ export class AuditService {
         take: limit
       })
       return history
-    } catch (error) {
-      console.error('Erro ao buscar histórico:', error)
+    } catch {
+      console.error('Erro ao buscar histórico:')
       return []
     }
   }

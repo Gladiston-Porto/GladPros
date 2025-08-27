@@ -13,11 +13,13 @@ const bulkSchema = z.object({
   filters: clienteFiltersSchema.partial().optional()
 })
 
-function buildWhereFromFilters(filters: any) {
-  const where: any = {}
-  if (filters?.q && String(filters.q).trim()) {
-    const q = String(filters.q).trim()
-    where.OR = [
+function buildWhereFromFilters(filters: unknown): Record<string, unknown> {
+  const where: Record<string, unknown> = {}
+  const f = (filters as Record<string, unknown> | undefined) ?? {}
+  if (f.q && String(f.q).trim()) {
+    const q = String(f.q).trim()
+    // Build a prisma-like OR clause using an index assignment to avoid `any`
+    ;(where as Record<string, unknown>)['OR'] = [
       { nomeCompleto: { contains: q, mode: 'insensitive' } },
       { razaoSocial: { contains: q, mode: 'insensitive' } },
       { nomeFantasia: { contains: q, mode: 'insensitive' } },
@@ -25,11 +27,11 @@ function buildWhereFromFilters(filters: any) {
       { docLast4: { contains: q } }
     ]
   }
-  if (filters?.tipo && filters.tipo !== 'all') {
-    where.tipo = filters.tipo
+  if (f.tipo && (f.tipo as string) !== 'all') {
+    (where as Record<string, unknown>)['tipo'] = f.tipo
   }
-  if (filters?.ativo !== undefined && filters.ativo !== 'all') {
-    where.status = filters.ativo ? 'ATIVO' : 'INATIVO'
+  if (f.ativo !== undefined && (f.ativo as string) !== 'all') {
+    (where as Record<string, unknown>)['status'] = (f.ativo as boolean) ? 'ATIVO' : 'INATIVO'
   }
   return where
 }
@@ -46,12 +48,12 @@ export async function POST(request: NextRequest) {
       await requireClientePermission(request, 'canUpdate')
     }
 
-    let where: any = {}
+  let where: Record<string, unknown> = {}
     if (scope === 'selected') {
       if (!ids || ids.length === 0) {
         return NextResponse.json({ error: 'Nenhum ID informado' }, { status: 400 })
       }
-      where.id = { in: ids }
+  (where as Record<string, unknown>)['id'] = { in: ids }
     } else {
       where = buildWhereFromFilters(filters || {})
     }

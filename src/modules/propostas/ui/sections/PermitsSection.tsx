@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { Section, Label, Input, Textarea, Select } from '../ui-components'
+import { Section, Label, Textarea, Select } from '../ui-components'
 import { StatusPermite } from '@/types/prisma-temp'
 
 interface PermiteInfo {

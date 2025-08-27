@@ -51,7 +51,6 @@ function hashDoc(doc) {
 async function main() {
   const dry = process.argv.includes('--dry-run');
   const { primary, fallbacks } = getKeys();
-  const keys = [primary, ...fallbacks];
 
   let scanned = 0, rekeyed = 0, skipped = 0, failed = 0, alreadyPrimary = 0;
   const batchSize = 200;

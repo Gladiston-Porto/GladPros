@@ -33,7 +33,7 @@ export default function NewPage() {
           fieldErrors.email = msg;
         }
         if (/Documento.*cadastrado/i.test(msg)) {
-          const d: any = data;
+          const d = data as Record<string, unknown>
           if (d?.tipo === 'PJ' && d?.ein) fieldErrors.ein = msg;
           if (d?.tipo === 'PF') {
             if (d?.tipoDocumentoPF === 'SSN' && d?.ssn) fieldErrors.ssn = msg;
@@ -46,10 +46,11 @@ export default function NewPage() {
 
       showToast({ title: 'Sucesso', message: 'Cliente criado com sucesso', type: 'success' });
       router.push('/clientes');
-    } catch (error: any) {
-      console.error('Erro ao criar cliente:', error);
-      if (error?.details) throw error;
-      showToast({ title: 'Erro', message: error.message || 'Erro ao criar cliente', type: 'error' });
+    } catch (unknownError) {
+      console.error('Erro ao criar cliente:', unknownError);
+      const err = unknownError as { message?: string; details?: unknown }
+      if (err?.details) throw unknownError;
+      showToast({ title: 'Erro', message: err.message || 'Erro ao criar cliente', type: 'error' });
     } finally {
       setLoading(false);
     }

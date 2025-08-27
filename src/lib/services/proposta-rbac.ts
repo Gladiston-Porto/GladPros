@@ -1,6 +1,6 @@
 // src/lib/services/proposta-rbac.ts
-// Temporarily allow `any` in this helper while migrating to stricter types.
-/* eslint-disable @typescript-eslint/no-explicit-any */
+// RBAC masking helpers with explicit typed shapes
+import type { PropostaWithRelations, PropostaEtapa, PropostaMaterial } from './proposta-pdf'
 
 export interface UserPermissions {
   canViewInternalValues: boolean;
@@ -39,11 +39,12 @@ export function getUserPermissions(userId?: number, isAdmin: boolean = false): U
  * Determina contexto da visualização da proposta
  */
 export function getPropostaContext(
-  proposta: any,
+  proposta: PropostaWithRelations | unknown,
   isClientView: boolean,
   userPermissions: UserPermissions
 ): PropostaContext {
-  const isAfterSignature = (proposta as any)?.status === 'ASSINADA' || (proposta as any)?.status === 'APROVADA';
+  const p = proposta as PropostaWithRelations | undefined
+  const isAfterSignature = p?.status === 'ASSINADA' || p?.status === 'APROVADA'
   
   return {
     isClientView,
@@ -94,79 +95,80 @@ function maskNumericValue(value: number | null | undefined): string | number | n
 /**
  * Mascara uma etapa conforme contexto
  */
-function maskEtapa(etapa: any, context: PropostaContext): any {
+function maskEtapa(etapa: PropostaEtapa, context: PropostaContext): Record<string, unknown> {
   const shouldMask = shouldMaskValue(context);
-  
+
   return {
     ...etapa,
-    custoMaoObraEstimado: shouldMask 
-      ? maskNumericValue(etapa.custoMaoObraEstimado as any)
+    custoMaoObraEstimado: shouldMask
+      ? maskNumericValue(etapa.custoMaoObraEstimado)
       : etapa.custoMaoObraEstimado
   };
 }
 
-/**
- * Mascara um material conforme contexto
- */
-function maskMaterial(material: any, context: PropostaContext): any {
+function maskMaterial(material: PropostaMaterial, context: PropostaContext): Record<string, unknown> {
   const shouldMask = shouldMaskValue(context);
-  
+
+  const total = (material.valorUnitario ?? 0) * (material.quantidade ?? 0)
+
   return {
     ...material,
-    precoUnitario: shouldMask 
-      ? maskNumericValue(material.precoUnitario as any)
-      : material.precoUnitario,
-    totalItem: shouldMask 
-      ? maskNumericValue(material.totalItem as any)
-      : material.totalItem
+    valorUnitario: shouldMask
+      ? maskNumericValue(material.valorUnitario)
+      : material.valorUnitario,
+    totalItem: shouldMask
+      ? maskNumericValue(total)
+      : total
   };
 }
 
 /**
  * Aplica mascaramento RBAC a uma proposta completa
  */
-export function applyRBACMasking(proposta: any, context: PropostaContext): any {
+export function applyRBACMasking(proposta: unknown, context: PropostaContext): Record<string, unknown> {
   const shouldMask = shouldMaskValue(context);
   const includeInternal = shouldIncludeInternalValues(context);
-  
-  const masked = {
-    ...proposta,
-    
+
+  const p = proposta as Partial<PropostaWithRelations> | undefined
+
+  const masked: Record<string, unknown> = {
+    ...(p as Record<string, unknown>),
+
     // Valores principais
-    valorEstimado: shouldMask 
-      ? maskNumericValue(proposta.valorEstimado)
-      : proposta.valorEstimado,
-    precoPropostaCliente: shouldMask 
-      ? maskNumericValue(proposta.precoPropostaCliente)
-      : proposta.precoPropostaCliente,
-    
+    valorEstimado: shouldMask
+      ? maskNumericValue(p?.valorEstimado as number | null | undefined)
+      : (p?.valorEstimado as number | null | undefined),
+    precoPropostaCliente: shouldMask
+      ? maskNumericValue(p?.precoPropostaCliente as number | null | undefined)
+      : (p?.precoPropostaCliente as number | null | undefined),
+
     // Estimativas internas - remover completamente se não tiver permissão
-    internalEstimate: includeInternal ? proposta.internalEstimate : undefined,
-    
-    // Observações internas
-    observacoesInternas: includeInternal ? proposta.observacoesInternas : undefined,
-    
-    // Campos de auditoria interna
-    criadoPor: includeInternal ? proposta.criadoPor : undefined,
-    atualizadoPor: includeInternal ? proposta.atualizadoPor : undefined,
-    
-    // Etapas com mascaramento
-    etapas: proposta.etapas?.map((etapa: any) => maskEtapa(etapa, context)),
-    
-    // Materiais com mascaramento  
-    materiais: proposta.materiais?.map((material: any) => maskMaterial(material, context)),
-    
+  internalEstimate: includeInternal ? (p?.internalEstimate as Record<string, unknown> | undefined) : undefined,
+
+  // Observações internas
+  observacoesInternas: includeInternal ? (p?.observacoesInternas as string | undefined) : undefined,
+
+  // Campos de auditoria interna
+  criadoPor: includeInternal ? (p?.criadoPor as number | undefined) : undefined,
+  atualizadoPor: includeInternal ? (p?.atualizadoPor as number | undefined) : undefined,
+
+  // Etapas com mascaramento
+  etapas: p?.etapas?.map((etapa) => maskEtapa(etapa as PropostaEtapa, context)),
+
+  // Materiais com mascaramento
+  materiais: p?.materiais?.map((material) => maskMaterial(material as PropostaMaterial, context)),
+
     // Anexos - filtrar privados para cliente
-    anexos: context.isClientView 
-      ? proposta.anexos?.filter((anexo: any) => !anexo.privado)
-      : proposta.anexos,
-    
+    anexos: context.isClientView
+        ? p?.anexos?.filter((anexo) => !((anexo as { privado?: boolean }).privado))
+        : p?.anexos,
+
     // Metadados de permissão para a UI
     canViewInternalValues: context.userPermissions.canViewInternalValues,
     canEdit: context.userPermissions.canEdit,
     canApprove: context.userPermissions.canApprove,
-  };
-  
+  }
+
   return masked;
 }
 
@@ -174,9 +176,9 @@ export function applyRBACMasking(proposta: any, context: PropostaContext): any {
  * Filtra lista de propostas por permissões do usuário
  */
 export function filterPropostasByPermissions(
-  propostas: any[],
+  propostas: PropostaWithRelations[],
   userPermissions: UserPermissions
-): any[] {
+): PropostaWithRelations[] {
   if (userPermissions.canViewAllPropostas) {
     return propostas;
   }
@@ -190,7 +192,7 @@ export function filterPropostasByPermissions(
  * Valida se usuário pode acessar uma proposta específica
  */
 export function canAccessProposta(
-  proposta: any,
+  proposta: PropostaWithRelations,
   userPermissions: UserPermissions
 ): boolean {
   if (userPermissions.canViewAllPropostas) {
@@ -209,7 +211,7 @@ export function canAccessProposta(
  * Valida se usuário pode editar uma proposta
  */
 export function canEditProposta(
-  proposta: any,
+  proposta: PropostaWithRelations,
   userPermissions: UserPermissions
 ): boolean {
   if (!userPermissions.canEdit) {
@@ -228,7 +230,7 @@ export function canEditProposta(
  * Valida se usuário pode aprovar uma proposta
  */
 export function canApproveProposta(
-  proposta: any,
+  proposta: PropostaWithRelations,
   userPermissions: UserPermissions
 ): boolean {
   if (!userPermissions.canApprove) {

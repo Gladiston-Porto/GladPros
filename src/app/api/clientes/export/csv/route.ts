@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/server/db'
 import { clienteFiltersSchema } from '@/lib/validations/cliente'
 
-function buildWhere(filters: any) {
-  const where: any = {}
+function buildWhere(filters: Record<string, unknown>) {
+  const where: Record<string, unknown> = {}
   if (filters?.q && String(filters.q).trim()) {
     const q = String(filters.q).trim()
     where.OR = [
@@ -23,12 +23,39 @@ export async function POST(request: NextRequest) {
   try {
     const raw = await request.json().catch(() => ({}))
     const filename = typeof raw?.filename === 'string' && raw.filename.trim() ? raw.filename : 'clientes'
-    let rows: any[] = Array.isArray(raw?.clientes) ? raw.clientes : []
+    type ClienteRow = {
+      id: number | string
+      nomeCompletoOuRazao?: string
+      tipo?: string
+      email?: string
+      telefone?: string
+      cidade?: string
+      estado?: string
+      ativo?: boolean
+      criadoEm?: string
+    }
+
+    // Raw shape returned by the prisma select above
+    type RawCliente = {
+      id: number
+      tipo: string
+      nomeCompleto: string | null
+      razaoSocial: string | null
+      nomeFantasia: string | null
+      email: string
+      telefone: string
+      cidade: string | null
+      estado: string | null
+      status: string
+      criadoEm: Date
+    }
+
+    let rows: ClienteRow[] = Array.isArray(raw?.clientes) ? raw.clientes as ClienteRow[] : []
 
     if (!rows.length && raw?.filters) {
       const parsed = clienteFiltersSchema.partial().parse(raw.filters)
       const where = buildWhere(parsed)
-      rows = await prisma.cliente.findMany({
+      const dbRows = await prisma.cliente.findMany({
         where,
         select: {
           id: true,
@@ -44,15 +71,16 @@ export async function POST(request: NextRequest) {
           criadoEm: true,
         },
         orderBy: [{ status: 'desc' }, { atualizadoEm: 'desc' }],
-      })
-      rows = rows.map((c) => ({
+      }) as RawCliente[]
+
+      rows = dbRows.map((c) => ({
         id: c.id,
         nomeCompletoOuRazao: c.tipo === 'PF' ? (c.nomeCompleto || '') : (c.nomeFantasia || c.razaoSocial || ''),
         tipo: c.tipo,
         email: c.email,
         telefone: c.telefone,
-        cidade: c.cidade,
-        estado: c.estado,
+        cidade: c.cidade ?? undefined,
+        estado: c.estado ?? undefined,
         ativo: c.status === 'ATIVO',
         criadoEm: c.criadoEm.toISOString(),
       }))
@@ -65,7 +93,7 @@ export async function POST(request: NextRequest) {
     const headers = ['ID', 'Nome/Empresa', 'Tipo', 'E-mail', 'Telefone', 'Cidade', 'Estado', 'Status', 'Criado Em']
     const lines = [
       headers.join(','),
-      ...rows.map((c) => [
+      ...rows.map((c) => ([
         c.id,
         c.nomeCompletoOuRazao || '',
         c.tipo || '',
@@ -75,7 +103,7 @@ export async function POST(request: NextRequest) {
         c.estado || '',
         c.ativo ? 'Ativo' : 'Inativo',
         c.criadoEm ? new Date(c.criadoEm).toLocaleDateString('pt-BR') : '',
-      ].map((f: any) => `"${String(f).replace(/"/g, '""')}"`).join(','))
+      ].map((f) => `"${String(f ?? '').replace(/"/g, '""')}"`).join(',')))
     ]
     const csv = lines.join('\n')
 

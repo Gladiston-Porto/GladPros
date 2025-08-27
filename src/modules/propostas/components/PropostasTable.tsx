@@ -1,6 +1,6 @@
 // src/modules/propostas/components/PropostasTable.tsx
 "use client";
-import { useState } from "react";
+// removed unused useState
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,14 +11,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
+// UI table components not used in this file
 import { 
   Eye, 
   Edit, 
@@ -109,7 +102,7 @@ export default function PropostasTable({
   };
 
   const formatCurrency = (value?: number) => {
-    if (!value) return 'N/A';
+    if (value == null) return 'N/A';
     return `USD ${value.toFixed(2)}`;
   };
 

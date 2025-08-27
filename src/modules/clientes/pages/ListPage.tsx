@@ -6,7 +6,7 @@ import { Pagination } from "@/modules/clientes/ui/Pagination";
 import Toolbar from "../components/Toolbar";
 import ClientesTable from "../components/ClientesTable";
 import { getClientes, deleteCliente, toggleClienteStatus } from "../services/clientesApi";
-import { runBulkAction, needsExportWarning } from "../services/bulkService";
+import { runBulkAction } from "../services/bulkService";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
 import type { ClienteDTO } from "@/types/cliente";
 import { Panel } from "@/components/GladPros";
@@ -40,7 +40,7 @@ export default function ClientesListPage() {
     try {
       const res = await getClientes({ 
         q, 
-        tipo: tipo as any, 
+        tipo: (tipo as unknown) as 'PF' | 'PJ' | 'all', 
         ativo: status === 'ATIVO' ? true : status === 'INATIVO' ? false : 'all',
         page, 
         pageSize,
@@ -49,10 +49,8 @@ export default function ClientesListPage() {
       }, signal);
       setData(res.data);
       setTotal(res.total);
-    } catch (e: any) {
-      if (e?.name !== 'AbortError') {
-        console.error(e);
-      }
+    } catch (e) {
+      console.error('Erro ao carregar clientes:', e);
     } finally {
       setLoading(false);
     }
@@ -159,13 +157,13 @@ export default function ClientesListPage() {
                   const ok = await confirm({ title: 'Ativar selecionados', message: `Ativar ${selectedIds.length} cliente(s)?`, confirmText: 'Ativar' });
                   if (!ok) return;
                   try {
-                    await runBulkAction({ action: 'activate', scope: 'selected', ids: selectedIds });
-                    showToast({ title: 'Sucesso', message: 'Clientes ativados', type: 'success' });
-                    setSelectedIds([]);
-                    load();
-                  } catch (e) {
-                    showToast({ title: 'Erro', message: 'Falha ao ativar selecionados', type: 'error' });
-                  }
+                      await runBulkAction({ action: 'activate', scope: 'selected', ids: selectedIds });
+                      showToast({ title: 'Sucesso', message: 'Clientes ativados', type: 'success' });
+                      setSelectedIds([]);
+                      load();
+                    } catch {
+                      showToast({ title: 'Erro', message: 'Falha ao ativar selecionados', type: 'error' });
+                    }
                 }}
                 className="rounded-lg border px-3 py-1"
               >Ativar Selecionados</button>
@@ -178,7 +176,7 @@ export default function ClientesListPage() {
                     showToast({ title: 'Sucesso', message: 'Clientes desativados', type: 'success' });
                     setSelectedIds([]);
                     load();
-                  } catch (e) {
+                  } catch {
                     showToast({ title: 'Erro', message: 'Falha ao desativar selecionados', type: 'error' });
                   }
                 }}
@@ -193,7 +191,7 @@ export default function ClientesListPage() {
                     showToast({ title: 'Sucesso', message: 'Clientes excluídos', type: 'success' });
                     setSelectedIds([]);
                     load();
-                  } catch (e) {
+                  } catch {
                     showToast({ title: 'Erro', message: 'Falha ao excluir selecionados', type: 'error' });
                   }
                 }}

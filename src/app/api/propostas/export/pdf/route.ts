@@ -10,8 +10,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { filename = 'propostas', filters = {} } = body
 
-    // Build where clause based on filters
-    const where: any = {}
+  // Build where clause based on filters
+  const where: Record<string, unknown> = {}
     
     if (filters.q) {
       where.OR = [
@@ -30,7 +30,18 @@ export async function POST(request: NextRequest) {
     }
 
     // Fetch data
-    const propostas = await (prisma as any).proposta.findMany({
+    type MinimalProposta = {
+      numeroProposta: string
+      titulo?: string
+      cliente: { nome: string }
+      status?: string
+      precoPropostaCliente?: number | null
+      criadoEm: Date
+      validadeProposta?: Date | null
+    }
+
+    const p = prisma as unknown as { proposta: { findMany: (opts: unknown) => Promise<MinimalProposta[]> } }
+    const propostas = await p.proposta.findMany({
       where,
       include: {
         cliente: {
@@ -127,7 +138,7 @@ export async function POST(request: NextRequest) {
               </tr>
             </thead>
             <tbody>
-              ${propostas.map((proposta: any) => `
+              ${propostas.map((proposta) => `
                 <tr>
                   <td><strong>${proposta.numeroProposta}</strong></td>
                   <td class="truncate">${proposta.titulo}</td>

@@ -211,7 +211,7 @@ export class PrismaClient {
   cliente: TransactionClient['cliente']
   usuario: TransactionClient['usuario']
 
-  constructor(options?: PrismaClientOptions) {
+  constructor(_options?: PrismaClientOptions) {
     // stub implementation
   this.proposta = {} as unknown as TransactionClient['proposta']
   this.propostaLog = {} as unknown as TransactionClient['propostaLog']

@@ -39,8 +39,8 @@ export function SecurityTab({ userId }: SecurityTabProps) {
         const data = await response.json()
         setSessoes(data.sessions || [])
       }
-    } catch (error) {
-      console.error("Erro ao carregar sessões:", error)
+    } catch {
+      console.error("Erro ao carregar sessões")
     } finally {
       setLoadingSessoes(false)
     }
@@ -54,8 +54,8 @@ export function SecurityTab({ userId }: SecurityTabProps) {
         const data = await response.json()
         setTentativas(data.results || [])
       }
-    } catch (error) {
-      console.error("Erro ao carregar tentativas:", error)
+    } catch {
+      console.error("Erro ao carregar tentativas")
     } finally {
       setLoadingTentativas(false)
     }
@@ -68,8 +68,8 @@ export function SecurityTab({ userId }: SecurityTabProps) {
         const data = await res.json()
         setStatus({ blocked: Boolean(data.blocked), lastSuccessfulLoginAt: data.lastSuccessfulLoginAt || null })
       }
-    } catch (e) {
-      console.error('Erro ao carregar status de segurança:', e)
+    } catch {
+      console.error('Erro ao carregar status de segurança:')
     }
   }, [userId])
 

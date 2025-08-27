@@ -6,11 +6,11 @@ import { verifyAuthJWT } from "@/lib/jwt"
 import { hasTokenVersionColumn } from "@/lib/db-metadata"
 
 export async function POST(request: Request) {
-  const payload: Record<string, any> = { message: 'Logout realizado com sucesso' };
+  const payload: Record<string, unknown> = { message: 'Logout realizado com sucesso' };
 
   try {
     // Extrair cookies (Next.js Web API Request)
-    const cookieHeader = (request.headers as any).get?.("cookie") as string | undefined;
+    const cookieHeader = (request.headers as Headers).get('cookie') ?? undefined;
     const sessionToken = cookieHeader
       ?.split(';')
       .map((p) => p.trim())
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
       ?.split('=')[1];
 
     // Accept Authorization: Bearer <token> as alternative
-    const authHeader = (request.headers as any).get?.('authorization') as string | undefined;
+    const authHeader = (request.headers as Headers).get('authorization') ?? undefined;
     const headerToken = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : undefined;
     const authToken = cookieAuthToken ?? headerToken;
 
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
       try {
         const { SecurityService } = await import('@/lib/security');
         await SecurityService.revokeSessionByToken(sessionToken);
-      } catch (e) {
+      } catch (e: unknown) {
         console.warn('[Logout] Falha ao revogar sessão por token:', e);
       }
     }
@@ -49,11 +49,11 @@ export async function POST(request: Request) {
             // Falha transitória: ignore
           }
         }
-      } catch (e: any) {
+      } catch {
         // token inválido, ignore
       }
     }
-  } catch (e) {
+  } catch (e: unknown) {
     console.warn('[Logout] Falha ao processar cookies:', e);
   }
 

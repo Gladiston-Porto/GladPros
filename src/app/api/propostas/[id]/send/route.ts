@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/server/db-temp'
+import type { TransactionClient } from '@/types/prisma-temp'
 import { AcaoPropostaLog, StatusProposta } from '@/types/propostas'
 
 interface RouteParams {
@@ -32,13 +33,13 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     // TODO: Get user from session
     const userId = 'temp-user-id'
 
-    const updatedProposta = await db.$transaction(async (tx: any) => {
+  const updatedProposta = await db.$transaction(async (tx: TransactionClient) => {
       // Update status to ENVIADA
       const proposta = await tx.proposta.update({
         where: { id },
         data: {
           status: StatusProposta.ENVIADA,
-          updatedAt: new Date()
+          atualizadoEm: new Date()
         }
       })
 
@@ -48,7 +49,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
           propostaId: id,
           usuarioId: userId,
           acao: AcaoPropostaLog.SENT,
-          detalhes: `Proposta ${proposta.numero} enviada para o cliente`,
+          detalhes: `Proposta ${proposta.numeroProposta} enviada para o cliente`,
           ip: request.headers.get('x-forwarded-for') || 'unknown',
           userAgent: request.headers.get('user-agent') || 'unknown'
         }
@@ -65,7 +66,9 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     })
 
   } catch (error) {
-    console.error('Error sending proposta:', error)
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error sending proposta:', error)
+    }
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }

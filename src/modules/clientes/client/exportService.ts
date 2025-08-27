@@ -41,7 +41,7 @@ export const exportToCSV = (clientes: ClienteDTO[], filename: string = 'clientes
   URL.revokeObjectURL(url);
 };
 
-export const exportToCSVServer = async (opts: { filename?: string; filters?: any; clientes?: ClienteDTO[] }) => {
+export const exportToCSVServer = async (opts: { filename?: string; filters?: unknown; clientes?: ClienteDTO[] }) => {
   const res = await fetch('/api/clientes/export/csv', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -80,7 +80,7 @@ export const exportToPDF = async (clientes: ClienteDTO[], filename: string = 'cl
     link.click();
     link.remove();
     window.URL.revokeObjectURL(url);
-  } catch (e) {
-    throw e;
+  } catch {
+    throw new Error('Falha ao gerar PDF');
   }
 };

@@ -3,6 +3,9 @@ import ClientPropostaView from '@modules/propostas/ui/ClientPropostaView'
 import { db } from '@/server/db-temp'
 import { PropostaWithRelations } from '@/types/propostas'
 
+// Local narrow shape used only for safely reading numeroProposta in metadata
+type PropostaMeta = { numeroProposta?: string | null }
+
 interface Props {
   params: {
     token: string
@@ -48,7 +51,7 @@ async function getPropostaByToken(token: string): Promise<PropostaWithRelations 
       }
     })
 
-    return proposta as any
+  return proposta as PropostaWithRelations | null
   } catch (error) {
     console.error('Error fetching proposal:', error)
     return null
@@ -77,8 +80,9 @@ export async function generateMetadata({ params }: Props) {
     }
   }
 
+  const numero = (proposta as unknown as PropostaMeta).numeroProposta ?? ''
   return {
-    title: `Proposta ${(proposta as any).numeroProposta} - GladPros`,
-    description: `Visualização da proposta comercial ${(proposta as any).numeroProposta}`,
+    title: `Proposta ${numero} - GladPros`,
+    description: `Visualização da proposta comercial ${numero}`,
   }
 }

@@ -66,47 +66,8 @@ async function testLogin(email) {
   return { needsProvisionalPassword: true };
 }
 
-async function simulateMFAFlow(userId, code = '123456') {
-  console.log('\n🔹 3. Simulando verificação MFA...');
-  
-  const response = await fetch(`${BASE_URL}/api/auth/mfa/verify`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      userId: userId,
-      code: code,
-      tipoAcao: 'PRIMEIRO_ACESSO'
-    })
-  });
 
-  const result = await response.json();
-  console.log(`  → Status MFA: ${response.status}`);
-  console.log(`  → Resposta:`, result);
-  
-  return { status: response.status, data: result };
-}
-
-async function testFirstAccess(userId) {
-  console.log('\n🔹 4. Testando primeiro acesso...');
-  
-  const response = await fetch(`${BASE_URL}/api/auth/first-access/setup`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      userId: userId,
-      newPassword: 'MinhaNovaSenh@123',
-      pin: '1234',
-      securityQuestion: 'Qual é o nome do seu primeiro animal de estimação?',
-      securityAnswer: 'Rex'
-    })
-  });
-
-  const result = await response.json();
-  console.log(`  → Status primeiro acesso: ${response.status}`);
-  console.log(`  → Resposta:`, result);
-  
-  return { status: response.status, data: result };
-}
+// Helper functions for MFA/first-access were removed to avoid unused-vars warnings in CI scripts.
 
 async function cleanup(userId) {
   console.log('\n🔹 5. Limpando dados de teste...');

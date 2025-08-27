@@ -56,8 +56,10 @@ jest.mock('next/navigation', () => ({
 jest.mock('next/image', () => ({
   __esModule: true,
   default: (props) => {
-    // eslint-disable-next-line @next/next/no-img-element
-    return <img {...props} />
+  // Ensure an explicit alt is always present for accessibility checks in tests
+  const { alt = '', ...rest } = props || {}
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img alt={alt} {...rest} />
   },
 }))
 

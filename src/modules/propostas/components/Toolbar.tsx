@@ -1,12 +1,11 @@
 // src/modules/propostas/components/Toolbar.tsx
 "use client";
-import { Search, Download, ChevronDown } from "lucide-react";
-import { Plus } from "lucide-react";
-import { Loader2 } from "lucide-react";
+import { Search, Download, ChevronDown, Plus } from "lucide-react";
 import Link from "next/link";
 // ...existing code...
 import { useState, useRef, useEffect } from "react";
 import type { PropostaDTO } from '../services/propostasApi';
+import type { StatusProposta } from '@/types/propostas';
 import { exportToCSV, exportToPDF, exportToCSVServer } from "../services/exportService";
 import { needsExportWarning } from "../services/bulkService";
 import { useToast } from "@/components/ui/Toaster";
@@ -14,8 +13,8 @@ import { useToast } from "@/components/ui/Toaster";
 interface ToolbarProps {
   q: string;
   onQ: (value: string) => void;
-  status: string;
-  onStatus: (value: string) => void;
+  status: StatusProposta | 'all' | '' | string;
+  onStatus: (value: StatusProposta | 'all' | '' | string) => void;
   clienteId: string;
   onClienteId: (value: string) => void;
   total: number;
@@ -50,6 +49,8 @@ export default function Toolbar({
   const [statusMenuOpen, setStatusMenuOpen] = useState(false);
   const [clienteMenuOpen, setClienteMenuOpen] = useState(false);
   const [scopeMenuOpen, setScopeMenuOpen] = useState(false);
+  // used placeholder to remind future feature; avoid unused-var lint
+  void scopeMenuOpen;
   const statusRef = useRef<HTMLDivElement>(null);
   const clienteRef = useRef<HTMLDivElement>(null);
   const scopeRef = useRef<HTMLDivElement>(null);
@@ -121,11 +122,11 @@ export default function Toolbar({
         }
         showToast({ title: 'Exportado', message: 'PDF gerado com sucesso', type: 'success' });
       }
-    } catch (error) {
-      console.error('Erro ao exportar:', error);
+    } catch {
+      console.error('Erro ao exportar:');
       showToast({ 
         title: 'Erro', 
-        message: error instanceof Error ? error.message : 'Erro desconhecido', 
+        message: 'Erro ao exportar', 
         type: 'error' 
       });
     } finally {

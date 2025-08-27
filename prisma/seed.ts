@@ -8,7 +8,7 @@ async function main() {
   const senha = process.env.SEED_ADMIN_PASS ?? "Admin@12345"
   const senhaHash = await hash(senha, 10)
 
-  await (prisma.usuario as any).upsert({
+  await prisma.usuario.upsert({
     where: { email },
     update: { nivel: "ADMIN", status: "ATIVO" },
     create: {
@@ -18,7 +18,8 @@ async function main() {
       status: "ATIVO",
       endereco1: "Endereço Admin",
       endereco2: "",
-      cidade: "São Paulo"
+  cidade: "São Paulo",
+  atualizadoEm: new Date()
     },
   })
   console.log(`Admin criado/atualizado: ${email}`)

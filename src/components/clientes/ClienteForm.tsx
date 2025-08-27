@@ -86,7 +86,7 @@ export function ClienteForm({ cliente, onSubmit, onCancel, loading = false }: Cl
       return
     }
 
-    const payload: any = { ...formData }
+  const payload: Partial<FormData> = { ...formData }
     // Normalize document masks to match server regex patterns
     if (payload.tipo === 'PF') {
       if (payload.tipoDocumentoPF === 'SSN' && payload.ssn) {
@@ -112,28 +112,26 @@ export function ClienteForm({ cliente, onSubmit, onCancel, loading = false }: Cl
 
     try {
       await onSubmit(payload)
-    } catch (err: any) {
-      // Mapear erros de validação do servidor (Zod) para campos do formulário
+    } catch (err) {
       const fieldErrors: Record<string, string> = {}
-      // Suporte a erro.fieldErrors direto
-      if (err && typeof err === 'object' && err.fieldErrors && typeof err.fieldErrors === 'object') {
-        Object.assign(fieldErrors, err.fieldErrors)
-      }
-      // Suporte a err.details como issues do Zod
-      const issues = err?.details || err?.issues
-      if (Array.isArray(issues)) {
-        issues.forEach((issue: any) => {
-          const path = Array.isArray(issue.path) ? issue.path.join('.') : issue.path
-          if (typeof path === 'string' && path) {
-            fieldErrors[path] = issue.message || 'Valor inválido'
-          }
-        })
+      if (err && typeof err === 'object') {
+        const e = err as Record<string, unknown>
+        if (e.fieldErrors && typeof e.fieldErrors === 'object') {
+          Object.assign(fieldErrors, e.fieldErrors as Record<string, string>)
+        }
+        const issues = e.details || e.issues
+        if (Array.isArray(issues)) {
+          issues.forEach((issue) => {
+            const iss = issue as Record<string, unknown>
+            const path = Array.isArray(iss.path) ? (iss.path as string[]).join('.') : String(iss.path ?? '')
+            if (path) fieldErrors[path] = String(iss.message ?? 'Valor inválido')
+          })
+        }
       }
       if (Object.keys(fieldErrors).length) {
         setErrors(fieldErrors)
         return
       }
-      // Se não for erro de campo, apenas relançar para tratamento externo
       throw err
     }
   }
@@ -270,22 +268,18 @@ export function ClienteForm({ cliente, onSubmit, onCancel, loading = false }: Cl
       {/* Ações */}
       <div className="flex justify-end gap-2 pt-2">
         <button
-          type="submit"
-          disabled={loading}
-          className="inline-flex items-center gap-2 rounded-2xl bg-[#0098DA] px-4 py-2 text-sm text-white hover:brightness-110 disabled:opacity-70"
-        >
-          {loading && (
-            <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/60 border-t-white" aria-hidden />
-          )}
-          <span>{loading ? 'Salvando…' : 'Salvar'}</span>
-        </button>
-        <button
           type="button"
           onClick={onCancel}
-          disabled={loading}
-          className="rounded-2xl border border-[#0098DA] px-4 py-2 text-sm text-[#0098DA] hover:bg-[#0098DA] hover:text-white"
+          className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
         >
           Cancelar
+        </button>
+        <button
+          type="submit"
+          disabled={loading}
+          className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium disabled:opacity-50"
+        >
+          Salvar
         </button>
       </div>
     </form>

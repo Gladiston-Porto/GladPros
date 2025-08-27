@@ -1,7 +1,6 @@
 // src/lib/services/proposta-token.ts
 import { randomBytes } from 'crypto';
 import { db } from "@/server/db-temp";
-import type { Proposta } from "@/types/prisma-temp";
 
 export interface TokenPublico {
   token: string;
@@ -132,8 +131,10 @@ export async function cleanExpiredTokens(): Promise<number> {
       tokenExpiresAt: null
     }
   });
-
-  return result.count;
+  // `updateMany` returns an object that should contain a numeric `count`.
+  // Narrow the unknown result to an object with optional count to avoid `any`.
+  const typed = result as { count?: number } | undefined;
+  return typeof typed?.count === 'number' ? typed.count : 0;
 }
 
 /**

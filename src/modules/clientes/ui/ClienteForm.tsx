@@ -86,7 +86,7 @@ export function ClienteForm({ cliente, onSubmit, onCancel, loading = false }: Cl
       return
     }
 
-    const payload: any = { ...formData }
+  const payload: Partial<FormData> = { ...formData }
     // Normalize document masks to match server regex patterns
     if (payload.tipo === 'PF') {
       if (payload.tipoDocumentoPF === 'SSN' && payload.ssn) {
@@ -111,29 +111,27 @@ export function ClienteForm({ cliente, onSubmit, onCancel, loading = false }: Cl
     }
 
     try {
-      await onSubmit(payload)
-    } catch (err: any) {
-      // Mapear erros de validação do servidor (Zod) para campos do formulário
+    await onSubmit(payload)
+    } catch (err) {
       const fieldErrors: Record<string, string> = {}
-      // Suporte a erro.fieldErrors direto
-      if (err && typeof err === 'object' && err.fieldErrors && typeof err.fieldErrors === 'object') {
-        Object.assign(fieldErrors, err.fieldErrors)
-      }
-      // Suporte a err.details como issues do Zod
-      const issues = err?.details || err?.issues
-      if (Array.isArray(issues)) {
-        issues.forEach((issue: any) => {
-          const path = Array.isArray(issue.path) ? issue.path.join('.') : issue.path
-          if (typeof path === 'string' && path) {
-            fieldErrors[path] = issue.message || 'Valor inválido'
-          }
-        })
+      if (err && typeof err === 'object') {
+        const e = err as Record<string, unknown>
+        if (e.fieldErrors && typeof e.fieldErrors === 'object') {
+          Object.assign(fieldErrors, e.fieldErrors as Record<string, string>)
+        }
+        const issues = e.details || e.issues
+        if (Array.isArray(issues)) {
+          issues.forEach((issue) => {
+            const iss = issue as Record<string, unknown>
+            const path = Array.isArray(iss.path) ? (iss.path as string[]).join('.') : String(iss.path ?? '')
+            if (path) fieldErrors[path] = String(iss.message ?? 'Valor inválido')
+          })
+        }
       }
       if (Object.keys(fieldErrors).length) {
         setErrors(fieldErrors)
         return
       }
-      // Se não for erro de campo, apenas relançar para tratamento externo
       throw err
     }
   }

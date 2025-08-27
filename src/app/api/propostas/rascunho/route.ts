@@ -7,7 +7,7 @@ import { requireServerUser } from "@/lib/requireServerUser";
 // POST /api/propostas/rascunho - Salvar rascunho
 export async function POST(request: NextRequest) {
   try {
-    console.log('POST /api/propostas/rascunho - iniciado');
+  // Recebimento de rascunho iniciado (sem logs em consola)
 
     // Verificar autenticação
     const user = await requireServerUser();
@@ -18,13 +18,11 @@ export async function POST(request: NextRequest) {
       }, { status: 401 });
     }
 
-    // Parse do body
-    const body = await request.json();
-    
-    // Para rascunhos, vamos apenas salvar no localStorage do lado do cliente
-    // ou em cache temporário. Por enquanto, apenas confirmar recebimento
-    console.log('Rascunho recebido para usuário:', user.id);
-    console.log('Tamanho dos dados:', JSON.stringify(body).length, 'chars');
+  // Parse do body (armazenado para compatibilidade/inspeção futura)
+  const body = await request.json();
+  void body;
+  // Para rascunhos, vamos apenas salvar no localStorage do lado do cliente
+  // ou em cache temporário. Por enquanto, apenas confirmar recebimento
 
     // Simular salvamento bem-sucedido
     return NextResponse.json({
@@ -33,8 +31,8 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString()
     });
 
-  } catch (error) {
-    console.error('POST /api/propostas/rascunho error:', error);
+  } catch {
+    // Retornar erro sem logar diretamente no console; registro centralizado é recomendado.
     return NextResponse.json({
       error: 'INTERNAL_ERROR',
       message: 'Erro ao salvar rascunho'

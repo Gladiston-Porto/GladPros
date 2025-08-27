@@ -6,9 +6,8 @@ export function useAutoSave(formData: PropostaFormData, enabled: boolean = true)
   const lastSaveRef = useRef<string>('')
 
   const saveRascunho = useCallback(async (data: PropostaFormData) => {
-    try {
-      console.log('Salvando rascunho automaticamente...')
-      
+      try {
+        // Salvando rascunho automaticamente (sem logs para evitar poluição de console em produção)
       // Criar um payload simplificado para rascunho
       const rascunhoData = {
         ...data,
@@ -21,15 +20,14 @@ export function useAutoSave(formData: PropostaFormData, enabled: boolean = true)
         body: JSON.stringify(rascunhoData)
       })
 
-      if (response.ok) {
-        console.log('Rascunho salvo automaticamente')
-        // Opcionalmente mostrar feedback visual discreto
-      } else {
-        console.warn('Erro ao salvar rascunho:', response.statusText)
-      }
-    } catch (error) {
-      console.warn('Erro no salvamento automático:', error)
-    }
+        if (response.ok) {
+          // Rascunho salvo com sucesso
+        } else {
+          // Falha no salvamento automático (verificar servidor)
+        }
+  } catch {
+  // Erro no salvamento automático - ignorar silenciosamente para não interromper UX
+  }
   }, [])
 
   const debouncedSave = useCallback((data: PropostaFormData) => {

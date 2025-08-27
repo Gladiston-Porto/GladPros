@@ -7,14 +7,15 @@ import { Panel } from "@/components/GladPros";
 import { useToast } from "@/components/ui/Toaster";
 
 interface EditClientePageProps {
-  params: { id: string } | Promise<{ id: string }>;
+  params: { id: string };
 }
 
 export default function DetailPage({ params }: EditClientePageProps) {
-  const { id } = (params && typeof params === 'object' && 'id' in (params as any)) ? (params as any).id : React.use(params as any);
+  const id = params?.id || ''
+ 
   const router = useRouter();
   const { showToast } = useToast();
-  const [cliente, setCliente] = useState<any>(null);
+  const [cliente, setCliente] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(true);
   const [operationLoading, setOperationLoading] = useState(false);
 
@@ -26,12 +27,13 @@ export default function DetailPage({ params }: EditClientePageProps) {
         if (!response.ok) {
           throw new Error('Cliente não encontrado');
         }
-        const data = await response.json();
+  const data = await response.json() as Record<string, unknown>;
         if (!cancelled) setCliente(data);
-      } catch (error: any) {
+      } catch (unknownError) {
         if (cancelled) return;
-        console.error('Erro ao carregar cliente:', error);
-        showToast({ title: 'Erro', message: error.message || 'Erro ao carregar cliente', type: 'error' });
+        console.error('Erro ao carregar cliente:', unknownError);
+        const e = unknownError as Error
+        showToast({ title: 'Erro', message: e.message || 'Erro ao carregar cliente', type: 'error' });
         router.push('/clientes');
       } finally {
         if (!cancelled) setLoading(false);
@@ -40,7 +42,7 @@ export default function DetailPage({ params }: EditClientePageProps) {
 
     fetchCliente();
     return () => { cancelled = true };
-  }, [id]);
+  }, [id, router, showToast]);
 
   const handleSubmit = async (data: ClienteCreateInput | ClienteUpdateInput) => {
     setOperationLoading(true);
@@ -48,19 +50,19 @@ export default function DetailPage({ params }: EditClientePageProps) {
       const response = await fetch(`/api/clientes/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify(data as Record<string, unknown>),
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        if (error?.details) {
-          throw { message: error.error || error.message || 'Dados inválidos', details: error.details };
+        const errBody = await response.json() as Record<string, unknown>;
+        if (errBody?.details) {
+          throw { message: String(errBody.error || errBody.message || 'Dados inválidos'), details: errBody.details };
         }
-        const msg: string = error?.error || error?.message || '';
+        const msg: string = (errBody?.error as string) || (errBody?.message as string) || '';
         const fieldErrors: Record<string, string> = {};
         if (/e-mail.*cadastrado|E-mail.*cadastrado/i.test(msg)) fieldErrors.email = msg;
         if (/Documento.*cadastrado/i.test(msg)) {
-          const d: any = data;
+    const d = data as Record<string, unknown>;
           if (d?.tipo === 'PJ' && d?.ein) fieldErrors.ein = msg;
           if (d?.tipo === 'PF') {
             if (d?.tipoDocumentoPF === 'SSN' && d?.ssn) fieldErrors.ssn = msg;
@@ -73,7 +75,8 @@ export default function DetailPage({ params }: EditClientePageProps) {
 
       showToast({ title: 'Sucesso', message: 'Cliente atualizado com sucesso', type: 'success' });
       router.push('/clientes');
-    } catch (error: any) {
+    } catch (err) {
+      const error = err as { message?: string; details?: unknown };
       if (error?.details) throw error;
       showToast({ title: 'Erro', message: error.message || 'Erro ao atualizar cliente', type: 'error' });
     } finally {

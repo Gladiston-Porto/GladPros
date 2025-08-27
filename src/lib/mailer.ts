@@ -62,19 +62,17 @@ export async function sendMail(to: string, subject: string, html: string) {
       const info = await transporter.sendMail(payload);
       // guardar último envio para debug em dev
       globalForMail.__lastMail = { ...payload, info };
-      if (process.env.NODE_ENV === "development") {
-        console.log("[SMTP MAILER SENT]", { to, subject, messageId: info?.messageId });
-      }
+    // Em ambientes de desenvolvimento, o armazenamento em memória é suficiente para inspeção.
       return info;
     } catch (err) {
-      console.error("[SMTP MAILER ERROR]", err);
+    // Erro propagado para o chamador; registro centralizado de logs é recomendado.
       throw err;
     }
   }
 
   // Fallback: modo dev sem SMTP → apenas registra
   globalForMail.__lastMail = payload;
-  console.log("[DEV MAILER] (no SMTP configured)", payload);
+  // Fallback: modo dev sem SMTP  armazenar em memória para inspeção por testes locais
   return payload;
 }
 

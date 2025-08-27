@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { 
   Card, 
   CardContent, 
@@ -92,8 +92,8 @@ export default function PropostasList({ userRole }: PropostasListProps) {
   
   const { toast } = useToast()
 
-  // Load propostas
-  const loadPropostas = async (reset = false) => {
+  // Load propostas (memoized so effect deps remain stable)
+  const loadPropostas = useCallback(async (reset = false) => {
     try {
       setLoading(true)
       const params = new URLSearchParams()
@@ -122,7 +122,7 @@ export default function PropostasList({ userRole }: PropostasListProps) {
       setCursor(data.nextCursor)
       setHasMore(data.hasMore)
       
-    } catch (error) {
+    } catch {
       toast({
         title: 'Erro',
         description: 'Não foi possível carregar as propostas',
@@ -131,7 +131,7 @@ export default function PropostasList({ userRole }: PropostasListProps) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [cursor, filters, toast])
 
   // Load clients for filter
   const loadClientes = async () => {
@@ -141,7 +141,7 @@ export default function PropostasList({ userRole }: PropostasListProps) {
         const data = await response.json()
         setClientes(data.clientes || [])
       }
-    } catch (error) {
+    } catch {
       // Silent fail for filter options
     }
   }
@@ -162,7 +162,7 @@ export default function PropostasList({ userRole }: PropostasListProps) {
         title: 'Sucesso',
         description: 'Proposta excluída com sucesso'
       })
-    } catch (error) {
+    } catch {
       toast({
         title: 'Erro',
         description: 'Não foi possível excluir a proposta',
@@ -200,7 +200,7 @@ export default function PropostasList({ userRole }: PropostasListProps) {
   useEffect(() => {
     loadPropostas(true)
     loadClientes()
-  }, [])
+  }, [loadPropostas])
 
   return (
     <div className="space-y-6">

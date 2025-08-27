@@ -51,12 +51,11 @@ export class EmailService {
     // Verificar conexão uma única vez
     try {
       await this.transporter.verify();
-      console.log('[Email] Transporter singleton configurado com sucesso');
+      // Transporter verificado com sucesso; favorecer logs centralizados em produção.
       this.isInitialized = true;
-    } catch (error) {
-      console.error('[Email] Erro na configuração:', error);
+    } catch {
+      // Em desenvolvimento, permitir fallback local e não lançar erro para dev flow
       if (process.env.NODE_ENV === 'development') {
-        console.log('[Email] Usando modo de desenvolvimento (logs)');
         this.isInitialized = true; // Permitir uso em dev mesmo com falha SMTP
       }
     }
@@ -94,9 +93,8 @@ export class EmailService {
         html: template.html,
         text: template.text
       });
-    } catch (error) {
-      console.error('[Email] Erro ao enviar MFA:', error);
-      return { success: false, error: (error as Error).message };
+    } catch {
+      return { success: false, error: 'Erro desconhecido' };
     }
   }
 
@@ -111,7 +109,10 @@ export class EmailService {
     resetLink: string;
     expiresInHours?: number;
   }): Promise<{ success: boolean; messageId?: string; error?: string }> {
-    console.log('[EmailService] sendPasswordReset chamado para:', to)
+    if (process.env.NODE_ENV === 'development') {
+      // Em dev, log útil para diagnóstico local
+      console.log('[EmailService] sendPasswordReset chamado para:', to)
+    }
     try {
       const template = this.getPasswordResetTemplate({
         userName,
@@ -119,17 +120,20 @@ export class EmailService {
         expiresInHours
       });
 
-      console.log('[EmailService] Template gerado, chamando sendEmail...')
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[EmailService] Template gerado, chamando sendEmail...')
+      }
       const result = await this.sendEmail({
         to,
         subject: template.subject,
         html: template.html,
         text: template.text
       });
-      console.log('[EmailService] sendEmail result:', result)
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[EmailService] sendEmail result:', result)
+      }
       return result
     } catch (error) {
-      console.error('[Email] Erro ao enviar reset:', error);
       return { success: false, error: (error as Error).message };
     }
   }
@@ -158,9 +162,8 @@ export class EmailService {
         html: template.html,
         text: template.text
       });
-    } catch (error) {
-      console.error('[Email] Erro ao enviar senha provisória:', error);
-      return { success: false, error: (error as Error).message };
+    } catch {
+      return { success: false, error: 'Erro ao enviar senha provisória' };
     }
   }
 
@@ -178,11 +181,11 @@ export class EmailService {
     try {
       if (process.env.NODE_ENV === 'development' && !process.env.SMTP_USER) {
         // Modo desenvolvimento - log no console
-        console.log('\n📧 [EMAIL DEV MODE]');
-        console.log('Para:', to);
-        console.log('Assunto:', subject);
-        console.log('Conteúdo:', text || html.replace(/<[^>]*>/g, ''));
-        console.log('📧 [/EMAIL DEV MODE]\n');
+  console.log('\n📧 [EMAIL DEV MODE]');
+  console.log('Para:', to);
+  console.log('Assunto:', subject);
+  console.log('Conteúdo:', text || html.replace(/<[^>]*>/g, ''));
+  console.log('📧 [/EMAIL DEV MODE]\n');
         return { success: true, messageId: 'dev-mode' };
       }
 
@@ -204,10 +207,9 @@ export class EmailService {
       };
 
     } catch (error) {
-      console.error('[Email] Erro ao enviar:', error);
-      return { 
-        success: false, 
-        error: (error as Error).message 
+      return {
+        success: false,
+        error: (error as Error).message
       };
     }
   }

@@ -1,6 +1,5 @@
 // Real-time notification system using WebSockets
 import { Server as SocketIOServer } from 'socket.io'
-import { NextApiRequest, NextApiResponse } from 'next'
 
 export interface NotificationPayload {
   type: 'proposal_signed' | 'proposal_sent' | 'proposal_approved' | 'proposal_cancelled'
@@ -17,7 +16,7 @@ export interface NotificationPayload {
 class NotificationService {
   private io: SocketIOServer | null = null
 
-  initialize(server: any) {
+  initialize(server: import('http').Server) {
     if (!this.io) {
       this.io = new SocketIOServer(server, {
         cors: {
@@ -27,16 +26,16 @@ class NotificationService {
       })
 
       this.io.on('connection', (socket) => {
-        console.log('Cliente conectado:', socket.id)
+        // Conexão estabelecida - eventos de socket registrados.
 
         // Join room for user notifications
-        socket.on('join_user_room', (userId: string) => {
+  socket.on('join_user_room', (userId: string) => {
           socket.join(`user_${userId}`)
-          console.log(`Usuario ${userId} joined room`)
+          // Room join registered for userId
         })
 
         socket.on('disconnect', () => {
-          console.log('Cliente desconectado:', socket.id)
+          // Cliente desconectado - limpeza automática realizada pelo socket.io
         })
       })
     }
@@ -44,7 +43,7 @@ class NotificationService {
 
   sendNotification(payload: NotificationPayload, userId?: string) {
     if (!this.io) {
-      console.warn('Socket.IO not initialized')
+      // Socket.IO não inicializado; silencioso em runtime.
       return
     }
 

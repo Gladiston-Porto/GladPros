@@ -1,24 +1,25 @@
 // src/modules/propostas/pages/ListPage.tsx
 "use client";
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import Toolbar from "../components/Toolbar";
 import { Pagination } from "@/modules/clientes/ui/Pagination";
 import PropostasTable from "../components/PropostasTable";
 import { getPropostas, deleteProposta, duplicateProposta, sendProposta } from "../services/propostasApi";
-import { runBulkAction, needsExportWarning } from "../services/bulkService";
+import { /* runBulkAction, */ /* needsExportWarning */ } from "../services/bulkService";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
 import type { PropostaDTO } from "../services/propostasApi";
+import type { StatusProposta } from '@/types/propostas';
 import { Panel } from "@/components/GladPros";
 import { useToast } from "@/components/ui/Toaster";
 
 export default function PropostasListPage() {
-  const { confirm, Dialog } = useConfirm();
+  const { Dialog } = useConfirm();
   const { showToast } = useToast();
   
   // Filters and pagination
   const [q, setQ] = useState("");
-  const [status, setStatus] = useState(""); // Show all by default
+  const [status, setStatus] = useState<StatusProposta | 'all' | ''>(''); // Show all by default
   const [clienteId, setClienteId] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -45,7 +46,7 @@ export default function PropostasListPage() {
     try {
       const res = await getPropostas({ 
         q, 
-        status: status as any, 
+    status: status || undefined, 
         clienteId: clienteId || undefined,
         page, 
         pageSize,
@@ -55,22 +56,22 @@ export default function PropostasListPage() {
       
       setData(res.data);
       setTotal(res.total);
-    } catch (error: any) {
-      if (error.name !== 'AbortError') {
-        console.error('Erro ao carregar propostas:', error);
-        // Remover showToast das dependências para evitar loop infinito
+    } catch (e) {
+      const err = e as { name?: string; message?: string };
+      if (err.name !== 'AbortError') {
+        showToast({ title: 'Erro', message: err.message || 'Erro ao carregar propostas', type: 'error' });
       }
     } finally {
       setLoading(false);
     }
-  }, [q, status, clienteId, page, pageSize, sortKey, sortDir]); // Remover showToast
+  }, [q, status, clienteId, page, pageSize, sortKey, sortDir, showToast]);
 
   const loadClientes = useCallback(async () => {
     try {
       const response = await fetch('/api/clientes?pageSize=1000');
       if (response.ok) {
         const { data } = await response.json();
-        setClientes(data.map((c: any) => ({ id: c.id, nome: c.nome })));
+        setClientes(data.map((c: { id: string; nome: string }) => ({ id: c.id, nome: c.nome })));
       }
     } catch (error) {
       console.error('Erro ao carregar clientes:', error);
@@ -108,10 +109,11 @@ export default function PropostasListPage() {
       // Usar controlador para evitar requests desnecessários
       const controller = new AbortController();
       load(controller.signal);
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as { message?: string };
       showToast({ 
         title: 'Erro', 
-        message: error.message || 'Erro ao deletar proposta', 
+        message: err.message || 'Erro ao deletar proposta', 
         type: 'error' 
       });
     }
@@ -128,10 +130,11 @@ export default function PropostasListPage() {
       // Usar controlador para evitar requests desnecessários
       const controller = new AbortController();
       load(controller.signal);
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as { message?: string };
       showToast({ 
         title: 'Erro', 
-        message: error.message || 'Erro ao duplicar proposta', 
+        message: err.message || 'Erro ao duplicar proposta', 
         type: 'error' 
       });
     }
@@ -148,10 +151,11 @@ export default function PropostasListPage() {
       // Usar controlador para evitar requests desnecessários
       const controller = new AbortController();
       load(controller.signal);
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as { message?: string };
       showToast({ 
         title: 'Erro', 
-        message: error.message || 'Erro ao enviar proposta', 
+        message: err.message || 'Erro ao enviar proposta', 
         type: 'error' 
       });
     }
@@ -175,7 +179,7 @@ export default function PropostasListPage() {
         q={searchTerm}
         onQ={setSearchTerm}
         status={status}
-        onStatus={setStatus}
+        onStatus={(v: string) => setStatus(v as StatusProposta | 'all' | '')}
         clienteId={clienteId}
         onClienteId={setClienteId}
         total={total}

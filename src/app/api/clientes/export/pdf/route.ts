@@ -15,8 +15,8 @@ type ClientePayload = {
   criadoEm?: string;
 };
 
-function buildWhere(filters: any) {
-  const where: any = {};
+function buildWhere(filters: Record<string, unknown>) {
+  const where: Record<string, unknown> = {};
   if (filters?.q && String(filters.q).trim()) {
     const searchTerm = String(filters.q).trim();
     where.OR = [
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
     doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`, 20, 30);
     doc.text(`Total de clientes: ${clientes.length}`, 20, 35);
 
-    let y = 50;
+  let y = 50;
     const lineHeight = 6;
     doc.setFontSize(8);
     doc.setFont('helvetica', 'bold');
@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
     y += 3;
 
     doc.setFont('helvetica', 'normal');
-    clientes.forEach((c) => {
+  clientes.forEach((c: ClientePayload) => {
       if (y > 270) {
         doc.addPage();
         y = 20;
@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
       const nome = (c.nomeCompletoOuRazao || '').substring(0, 40);
       const tipo = c.tipo || '';
       const email = (c.email || '').substring(0, 30);
-      const tel = (c.telefone || '')?.substring(0, 18);
+  const tel = (c.telefone || '')?.substring(0, 18);
       const status = c.ativo ? 'Ativo' : 'Inativo';
       doc.text(nome, 20, y);
       doc.text(tipo, 80, y);

@@ -1,5 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as nodemailer from 'nodemailer'
+
+// Derive transporter and sendMail option types from nodemailer at compile time
+type TransporterType = ReturnType<typeof nodemailer.createTransport>
+type SendMailOptionsType = TransporterType extends { sendMail: (opts: infer O) => unknown } ? O : unknown
 import { generateTokenPublico } from './proposta-token'
 import { PropostaPDFService, type PropostaWithRelations, type RBACContext } from './proposta-pdf'
 
@@ -28,21 +31,22 @@ interface PropostaEmailOptions {
   /**
    * Dados adicionais para o template
    */
-  templateData?: Record<string, any>
+  templateData?: Record<string, unknown>
 }
 
 /**
  * Serviço para envio de emails relacionados a propostas
  */
 export class PropostaEmailService {
-  private static transporter: any | null = null
+  private static transporter: TransporterType | null = null
 
   /**
    * Configura o transporter de email
    */
-  private static getTransporter(): any {
+  private static getTransporter(): TransporterType {
     if (!this.transporter) {
-      this.transporter = nodemailer.createTransporter({
+  // use createTransport which is the standard API
+  this.transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST || 'localhost',
         port: parseInt(process.env.SMTP_PORT || '587'),
         secure: process.env.SMTP_SECURE === 'true',
@@ -52,7 +56,7 @@ export class PropostaEmailService {
         }
       })
     }
-    
+
     return this.transporter
   }
 
@@ -92,7 +96,7 @@ export class PropostaEmailService {
         options
       )
 
-      const attachments: any[] = []
+  const attachments: { filename: string; content: Buffer | string; contentType?: string }[] = []
 
       // Incluir PDF se solicitado
       if (options.includePDF) {
@@ -114,13 +118,14 @@ export class PropostaEmailService {
       }
 
       // Configurar email
-      const mailOptions: any = {
+      const mailOptions: SendMailOptionsType = {
         from: process.env.SMTP_FROM || 'GladPros <noreply@gladpros.com>',
         to: proposta.contatoEmail,
         subject: emailTemplate.subject,
         html: emailTemplate.html,
         text: emailTemplate.text,
-        attachments
+  // nodemailer's runtime accepts our attachments shape; narrow to the attachments type when available
+  attachments: attachments as unknown as SendMailOptionsType extends { attachments?: infer A } ? A : unknown
       }
 
       // Enviar email
@@ -165,7 +170,7 @@ export class PropostaEmailService {
         }
       )
 
-      const mailOptions: any = {
+      const mailOptions: SendMailOptionsType = {
         from: process.env.SMTP_FROM || 'GladPros <noreply@gladpros.com>',
         to: process.env.NOTIFICATION_EMAIL || 'admin@gladpros.com',
         cc: process.env.SALES_EMAIL ? [process.env.SALES_EMAIL] : undefined,
@@ -210,7 +215,7 @@ export class PropostaEmailService {
         }
       )
 
-      const mailOptions: any = {
+      const mailOptions: SendMailOptionsType = {
         from: process.env.SMTP_FROM || 'GladPros <noreply@gladpros.com>',
         to: proposta.contatoEmail,
         subject: emailTemplate.subject,
@@ -254,7 +259,13 @@ export class PropostaEmailService {
         }
 
       case 'reminder':
-        const daysOverdue = options.templateData?.daysOverdue || 0
+          // normalize daysOverdue from templateData which is unknown-shaped
+          const daysOverdue = (() => {
+            const v = options.templateData && (options.templateData as Record<string, unknown>)['daysOverdue']
+            if (typeof v === 'number') return v
+            if (typeof v === 'string') return parseInt(v, 10) || 0
+            return 0
+          })()
         return {
           subject: `Lembrete: Proposta ${proposta.numeroProposta} aguarda sua análise`,
           html: this.generateReminderHTML(proposta, proposalUrl, daysOverdue),
@@ -471,7 +482,7 @@ Email: contato@gladpros.com
    */
   private static generateSignedHTML(
     proposta: PropostaWithRelations,
-    signatureData: any
+    signatureData: { clientName?: string; signedAt?: string | Date; ip?: string }
   ): string {
     return `
     <!DOCTYPE html>
@@ -499,7 +510,7 @@ Email: contato@gladpros.com
           <h4 style="margin-top: 0;">Dados da Assinatura:</h4>
           <ul style="margin: 0; padding-left: 20px;">
             <li><strong>Assinado por:</strong> ${signatureData.clientName}</li>
-            <li><strong>Data/Hora:</strong> ${new Date(signatureData.signedAt).toLocaleString('pt-BR')}</li>
+            <li><strong>Data/Hora:</strong> ${signatureData.signedAt ? new Date(signatureData.signedAt).toLocaleString('pt-BR') : ''}</li>
             ${signatureData.ip ? `<li><strong>IP:</strong> ${signatureData.ip}</li>` : ''}
           </ul>
         </div>
@@ -523,7 +534,7 @@ Email: contato@gladpros.com
    */
   private static generateSignedText(
     proposta: PropostaWithRelations,
-    signatureData: any
+    signatureData: { clientName?: string; signedAt?: string | Date; ip?: string }
   ): string {
     return `
 Proposta Assinada!
@@ -535,7 +546,7 @@ Cliente: ${proposta.contatoNome} (${proposta.contatoEmail})
 
 Dados da Assinatura:
 - Assinado por: ${signatureData.clientName}
-- Data/Hora: ${new Date(signatureData.signedAt).toLocaleString('pt-BR')}
+- Data/Hora: ${signatureData.signedAt ? new Date(signatureData.signedAt).toLocaleString('pt-BR') : ''}
 ${signatureData.ip ? `- IP: ${signatureData.ip}` : ''}
 
 Próximos passos:

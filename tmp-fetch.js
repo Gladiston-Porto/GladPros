@@ -4,7 +4,7 @@
     console.log('status', res.status);
     const txt = await res.text();
     console.log(txt.slice(0,1000));
-  } catch (e) {
-    console.error('fetch error', e);
+  } catch {
+    console.error('fetch error');
   }
 })()

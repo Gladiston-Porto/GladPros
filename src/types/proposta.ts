@@ -8,10 +8,6 @@ import type {
   Cliente,
   Usuario,
   Projeto,
-  StatusProposta,
-  StatusPermite,
-  StatusEtapaProposta,
-  StatusMaterialProposta
 } from "./prisma-temp";
 
 export type PropostaWithDetails = Proposta & {
@@ -77,7 +73,8 @@ export type PropostaLogEntry = {
   action: string;
   actor: string;
   timestamp: Date;
-  changes?: Record<string, { from: any; to: any }>;
+  // Use `unknown` for change payloads; callers should narrow before use
+  changes?: Record<string, { from: unknown; to: unknown }>;
   ip?: string;
   userAgent?: string;
 };

@@ -57,7 +57,7 @@ async function makeToken(sub, tokenVersion) {
         const j = await r.json();
         if (j?.token) jwt = j.token;
       }
-    } catch (e) {
+    } catch {
       // ignore — fallback to local signing
     }
     if (!jwt) {

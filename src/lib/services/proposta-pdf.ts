@@ -10,7 +10,7 @@ export interface RBACContext {
 }
 
 // Função placeholder para mascaramento RBAC
-const applyRBACMasking = async (proposta: any, context: RBACContext) => {
+const applyRBACMasking = async (proposta: unknown) => {
   // TODO: Implementar lógica real de mascaramento
   return proposta
 }
@@ -54,23 +54,23 @@ export interface PropostaWithRelations {
   inspecoesNecessarias?: string | null
   
   // Condições comerciais
-  condicoesPagamento?: any
+    condicoesPagamento?: Record<string, unknown> | null
   garantia?: string | null
   exclusoes?: string | null
   condicoesGerais?: string | null
   descontosOfertados?: number | null
-  opcoesAlternativas?: any
+    opcoesAlternativas?: Array<Record<string, unknown>> | null
   
   // Estimativas internas
   valorEstimado?: number | null
-  internalEstimate?: any
+    internalEstimate?: Record<string, unknown> | null
   precoPropostaCliente?: number | null
   moeda: string
   
   // Condições de faturamento
   gatilhoFaturamento?: GatilhoFaturamento | null
   percentualSinal?: number | null
-  marcosPagamento?: any
+    marcosPagamento?: Array<Record<string, unknown>> | null
   formaPagamentoPreferida?: FormaPagamento | null
   instrucoesPagamento?: string | null
   multaAtraso?: string | null
@@ -109,7 +109,7 @@ export interface PropostaWithRelations {
   // Auditoria
   criadoPor?: number | null
   atualizadoPor?: number | null
-  historicoAlteracoes?: any
+    historicoAlteracoes?: Array<Record<string, unknown>> | null
   deletedAt?: Date | null
   deletedBy?: number | null
   criadoEm: Date
@@ -228,8 +228,8 @@ export class PropostaPDFService {
     filename: string
     contentType: string
   }> {
-    // Aplicar mascaramento RBAC nos dados
-    const maskedProposta = await applyRBACMasking(proposta, rbacContext)
+  // Aplicar mascaramento RBAC nos dados (placeholder)
+  const maskedProposta = await applyRBACMasking(proposta)
     
     const defaultOptions: Required<PDFGenerationOptions> = {
       includeValues: true,
@@ -246,8 +246,10 @@ export class PropostaPDFService {
     
     const finalOptions = { ...defaultOptions, ...options }
     
-    // Gerar o PDF usando a biblioteca de sua escolha (puppeteer, jsPDF, etc.)
-    const pdfBuffer = await this.renderPDF(maskedProposta, finalOptions)
+  // Gerar o PDF usando a biblioteca de sua escolha (puppeteer, jsPDF, etc.)
+  // maskedProposta vem de um placeholder RBAC e é unknown; caster para o tipo esperado
+  const masked = maskedProposta as PropostaWithRelations
+  const pdfBuffer = await this.renderPDF(masked, finalOptions)
     
     const filename = this.generateFilename(proposta, finalOptions.template)
     

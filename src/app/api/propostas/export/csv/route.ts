@@ -10,8 +10,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { filename = 'propostas', filters = {} } = body
 
-    // Build where clause based on filters
-    const where: any = {}
+  // Build where clause based on filters
+  const where: Record<string, unknown> = {}
     
     if (filters.q) {
       where.OR = [
@@ -30,7 +30,24 @@ export async function POST(request: NextRequest) {
     }
 
     // Fetch data
-    const propostas = await (prisma as any).proposta.findMany({
+    // Minimal shape used by this export - avoids using `any`
+    type MinimalProposta = {
+      numeroProposta: string
+      titulo?: string
+      cliente: { nome: string }
+      status?: string
+      precoPropostaCliente?: number | null
+      valorEstimado?: number | null
+      criadoEm: Date
+      validadeProposta?: Date | null
+      assinadoEm?: Date | null
+      contatoNome?: string | null
+      contatoEmail?: string | null
+      localExecucaoEndereco?: string | null
+    }
+
+    const p = prisma as unknown as { proposta: { findMany: (opts: unknown) => Promise<MinimalProposta[]> } }
+    const propostas = await p.proposta.findMany({
       where,
       include: {
         cliente: {
@@ -61,13 +78,13 @@ export async function POST(request: NextRequest) {
       'Endereço Execução'
     ]
 
-    const rows = propostas.map((proposta: any) => [
+    const rows = (propostas as MinimalProposta[]).map((proposta) => [
       proposta.numeroProposta,
       proposta.titulo,
       proposta.cliente.nome,
       proposta.status,
       proposta.precoPropostaCliente?.toFixed(2) || '',
-      proposta.valorEstimado.toFixed(2),
+      (proposta.valorEstimado ?? 0).toFixed(2),
       proposta.criadoEm.toLocaleDateString('pt-BR'),
       proposta.validadeProposta ? proposta.validadeProposta.toLocaleDateString('pt-BR') : '',
       proposta.assinadoEm ? proposta.assinadoEm.toLocaleDateString('pt-BR') : '',
@@ -77,7 +94,7 @@ export async function POST(request: NextRequest) {
     ])
 
     const csvContent = [headers, ...rows]
-      .map((row: any) => row.map((field: any) => `"${field}"`).join(','))
+      .map((row: Array<string | number | undefined>) => row.map((field) => `"${String(field ?? '')}"`).join(','))
       .join('\n')
 
     return new NextResponse(csvContent, {

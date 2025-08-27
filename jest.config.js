@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
+// Use CommonJS require to keep jest config compatible with Node's test runner
 const nextJest = require('next/jest')
 
 /** @type {import('jest').Config} */
