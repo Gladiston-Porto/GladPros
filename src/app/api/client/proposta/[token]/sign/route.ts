@@ -19,6 +19,7 @@ export async function POST(
       assinaturaTipo,
       assinaturaCliente,
       assinaturaImagem,
+      aceiteTermos: _aceiteTermos, // eslint-disable-line @typescript-eslint/no-unused-vars
       ip,
       userAgent
     } = assinaturaClienteSchema.parse(body)

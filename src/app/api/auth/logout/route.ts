@@ -53,8 +53,8 @@ export async function POST(request: Request) {
         // token inválido, ignore
       }
     }
-  } catch (e: unknown) {
-    console.warn('[Logout] Falha ao processar cookies:', e);
+  } catch (_e: unknown) {
+    console.warn('[Logout] Falha ao processar cookies:', _e);
   }
 
   // Limpar cookies de autenticação e sessão

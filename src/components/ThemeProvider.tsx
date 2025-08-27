@@ -32,7 +32,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     try {
       if (typeof window !== "undefined") localStorage.setItem("gp-theme", theme);
       document.documentElement.classList.toggle("dark", theme === "dark");
-  } catch {}
+  } catch {
+    // ignore localStorage errors
+  }
   }, [theme]);
 
   return <ThemeContext.Provider value={{ theme, setTheme }}>{children}</ThemeContext.Provider>;
