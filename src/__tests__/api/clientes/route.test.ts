@@ -41,6 +41,23 @@ jest.mock('@/lib/crypto', () => ({
   })
 }))
 
+// Mock cliente helpers
+jest.mock('@/lib/helpers/cliente', () => ({
+  sanitizeClienteInput: jest.fn((data) => data),
+  encryptClienteData: jest.fn().mockResolvedValue({
+    documentoEnc: 'encrypted-doc',
+    docLast4: '1234',
+    docHash: 'doc-hash'
+  }),
+  checkDocumentoExists: jest.fn().mockResolvedValue(false),
+  checkEmailExists: jest.fn().mockResolvedValue(false),
+  logClienteAudit: jest.fn().mockResolvedValue(undefined),
+  getClienteDisplayName: jest.fn((cliente) => cliente.nomeCompleto || cliente.razaoSocial || 'Cliente'),
+  maskDocumento: jest.fn((doc, tipo) => `***${doc}`),
+  formatTelefone: jest.fn((tel) => tel),
+  formatZipcode: jest.fn((zip) => zip)
+}))
+
 // Import the mocked prisma for use in tests
 import { prisma } from '@/server/db'
 const mockPrisma = prisma as jest.Mocked<typeof prisma>
