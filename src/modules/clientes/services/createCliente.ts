@@ -76,6 +76,7 @@ export async function createCliente(data: Input, usuarioId?: number | null, ip?:
           docLast4,
           observacoes: (observacoes ?? "").trim() || null,
           status,
+          atualizadoEm: new Date(),
         },
             }) as import("@prisma/client").Cliente
       await tx.auditoria.create({
@@ -85,7 +86,7 @@ export async function createCliente(data: Input, usuarioId?: number | null, ip?:
           acao: "CREATE",
           usuarioId: usuarioId ?? null,
           ip: ip ?? null,
-          payload: { tipo, email: emailNorm, telefone: telNorm },
+          payload: JSON.stringify({ tipo, email: emailNorm, telefone: telNorm }),
         },
       })
       return cli

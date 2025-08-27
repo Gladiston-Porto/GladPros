@@ -415,7 +415,8 @@ export async function POST(request: NextRequest) {
         estado: sanitizedData.estado,
         zipcode: sanitizedData.zipcode,
         observacoes: sanitizedData.observacoes,
-        status: 'ATIVO'
+        status: 'ATIVO',
+        atualizadoEm: new Date()
       },
       select: {
         id: true,

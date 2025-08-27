@@ -1,4 +1,5 @@
-import { Cliente, TipoCliente } from '@prisma/client'
+import { Cliente } from '@prisma/client'
+import { TipoCliente } from '@/types/cliente'
 import { encryptDoc, docHashHex, last4 } from '@/lib/crypto'
 import { prisma } from '@/server/db'
 import { AuditService } from '@/services/auditService'
