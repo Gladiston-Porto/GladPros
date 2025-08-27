@@ -6,11 +6,11 @@ import { verifyAuthJWT } from "@/lib/jwt"
 import { hasTokenVersionColumn } from "@/lib/db-metadata"
 
 export async function POST(request: Request) {
-  const payload: Record<string, unknown> = { message: 'Logout realizado com sucesso' };
+  const payload: { message: string } = { message: 'Logout realizado com sucesso' };
 
   try {
     // Extrair cookies (Next.js Web API Request)
-    const cookieHeader = (request.headers as Headers).get('cookie') ?? undefined;
+    const cookieHeader = request.headers.get('cookie') ?? undefined;
     const sessionToken = cookieHeader
       ?.split(';')
       .map((p) => p.trim())
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
       ?.split('=')[1];
 
     // Accept Authorization: Bearer <token> as alternative
-    const authHeader = (request.headers as Headers).get('authorization') ?? undefined;
+    const authHeader = request.headers.get('authorization') ?? undefined;
     const headerToken = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : undefined;
     const authToken = cookieAuthToken ?? headerToken;
 
@@ -31,8 +31,8 @@ export async function POST(request: Request) {
       try {
         const { SecurityService } = await import('@/lib/security');
         await SecurityService.revokeSessionByToken(sessionToken);
-      } catch (e: unknown) {
-        console.warn('[Logout] Falha ao revogar sessão por token:', e);
+      } catch (_e: unknown) {
+        console.warn('[Logout] Falha ao revogar sessão por token:', _e);
       }
     }
 

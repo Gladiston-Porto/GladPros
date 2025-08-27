@@ -1,7 +1,6 @@
 // src/modules/clientes/components/Toolbar.tsx
 "use client";
-import { Search, Download, ChevronDown } from "lucide-react";
-import { Loader2 } from "lucide-react";
+import { Search, Download, ChevronDown, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import { ClienteDTO } from '@/types/cliente';

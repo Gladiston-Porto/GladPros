@@ -139,6 +139,7 @@ export async function POST(request: NextRequest) {
             </thead>
             <tbody>
               ${propostas.map((proposta) => `
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 <tr>
                   <td><strong>${proposta.numeroProposta}</strong></td>
                   <td class="truncate">${proposta.titulo}</td>

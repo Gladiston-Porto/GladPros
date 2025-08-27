@@ -140,7 +140,7 @@ export default function PropostaForm() {
     if (formData.permite === StatusPermite.SIM && !formData.quaisPermites.trim()) {
       toast({
         title: 'Erro',
-        description: 'Campo "Quais permites" é obrigatório quando permite = SIM',
+        description: 'Campo &quot;Quais permites&quot; é obrigatório quando permite = SIM',
         variant: 'destructive'
       })
       return

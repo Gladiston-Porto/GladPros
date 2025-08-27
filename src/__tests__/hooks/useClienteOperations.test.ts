@@ -81,9 +81,9 @@ describe('useClienteOperations', () => {
     })
 
     it('sets loading state during create', async () => {
-  let resolveCreate: (value: unknown) => void
+      let _resolveCreate: (value: unknown) => void
       const createPromise = new Promise(resolve => {
-        resolveCreate = resolve
+        _resolveCreate = resolve
       })
 
       mockFetch.mockImplementationOnce(() => createPromise as Promise<Response>)
@@ -102,7 +102,7 @@ describe('useClienteOperations', () => {
 
       // Resolve the promise
       await act(async () => {
-        resolveCreate!({
+        _resolveCreate!({
           ok: true,
           json: async () => ({ id: 1, ...mockCreateInput }),
         } as unknown as Response)
