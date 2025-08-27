@@ -30,10 +30,13 @@ async function withRetry<T>(fn: () => Promise<T>, retries = 2, delayMs = 300): P
 
 // Helper para mapear erros do Prisma
 function mapPrismaError(error: unknown): { status: number; message: string; fields?: Record<string, string> } {
-  const e = error as { code?: string; meta?: any };
+  const e = error as { code?: string; meta?: unknown };
   
+  // Narrow meta to expected shape when present to avoid `any` usage
+  const meta = e.meta as { target?: string[] } | undefined;
+
   if (e.code === 'P2002') {
-    const target = e.meta?.target?.[0];
+    const target = meta?.target?.[0];
     if (target === 'numeroProposta') {
       return { status: 409, message: 'Número da proposta já existe' };
     }
@@ -48,7 +51,7 @@ function mapPrismaError(error: unknown): { status: number; message: string; fiel
 }
 
 // GET /api/propostas - Lista com filtros e paginação por cursor
-export async function GET(_request: NextRequest) {
+export async function GET() {
   try {
     console.log('GET /api/propostas - iniciado');
     
