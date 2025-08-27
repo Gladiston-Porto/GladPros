@@ -118,8 +118,15 @@ describe('ClienteCard', () => {
   })
 
   it('formats creation date correctly', () => {
+    // Mock toLocaleDateString to ensure consistent date formatting across environments
+    const originalToLocaleDateString = Date.prototype.toLocaleDateString
+    Date.prototype.toLocaleDateString = jest.fn().mockReturnValue('14/01/2024')
+
     render(<ClienteCard cliente={mockCliente} {...mockHandlers} />)
 
     expect(screen.getByText(/14\/01\/2024/)).toBeInTheDocument()
+
+    // Restore original function
+    Date.prototype.toLocaleDateString = originalToLocaleDateString
   })
 })
