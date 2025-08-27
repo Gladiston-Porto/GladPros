@@ -25,3 +25,7 @@ jobs:
         run: npm test --silent
       - name: Build
         run: npm run build --if-present
+        env:
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          CLIENT_DOC_ENCRYPTION_KEY_BASE64: ${{ secrets.CLIENT_DOC_ENCRYPTION_KEY_BASE64 }}
+          CLIENT_DOC_ENCRYPTION_KEY_FALLBACKS: ${{ secrets.CLIENT_DOC_ENCRYPTION_KEY_FALLBACKS }}

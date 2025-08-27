@@ -14,8 +14,8 @@ const mockCliente = {
   cidade: 'São Paulo',
   estado: 'SP',
   ativo: true,
-  criadoEm: '2024-01-15T00:00:00.000Z',
-  atualizadoEm: '2024-01-15T00:00:00.000Z',
+  criadoEm: '2024-01-14T12:00:00.000Z',
+  atualizadoEm: '2024-01-14T12:00:00.000Z',
 }
 
 const mockHandlers = {
@@ -118,8 +118,15 @@ describe('ClienteCard', () => {
   })
 
   it('formats creation date correctly', () => {
+    // Mock toLocaleDateString to ensure consistent date formatting across environments
+    const originalToLocaleDateString = Date.prototype.toLocaleDateString
+    Date.prototype.toLocaleDateString = jest.fn().mockReturnValue('14/01/2024')
+
     render(<ClienteCard cliente={mockCliente} {...mockHandlers} />)
 
     expect(screen.getByText(/14\/01\/2024/)).toBeInTheDocument()
+
+    // Restore original function
+    Date.prototype.toLocaleDateString = originalToLocaleDateString
   })
 })
