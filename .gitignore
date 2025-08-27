@@ -1,15 +1,15 @@
-﻿# Builds e caches
+﻿# Builds and caches
 .next/
 dist/
 out/
 node_modules/
 
-# Test/coverage
+# Test / coverage
 coverage/
 *.lcov
 *.log
 
-# Ambiente/local
+# Local environment
 .env*
 !.env.example
 
@@ -17,5 +17,13 @@ coverage/
 .vscode/
 .DS_Store
 
-# Prisma
+# Prisma / DB dumps
 prisma/dev.db
+dump.rdb
+*.sql
+
+# TypeScript incremental info
+tsconfig.tsbuildinfo
+
+# Next.js build output
+.next/
