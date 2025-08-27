@@ -7,3 +7,5 @@ dump.rdb
 coverage
 .vscode
 *.sql
+# Next.js build output
+.next/
