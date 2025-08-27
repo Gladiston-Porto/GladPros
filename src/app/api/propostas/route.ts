@@ -4,10 +4,9 @@ export const runtime = "nodejs";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/server/db-temp";
-import { StatusProposta, StatusPermite } from "@/types/prisma-temp";
+// trimmed unused imports for lint
 import { propostaFormSchema } from "@modules/propostas/ui/validation";
 import { adaptPropostaFormToAPI } from "@modules/propostas/ui/adapter";
-import { PropostaFormData } from "@modules/propostas/ui/types";
 import { requireServerUser } from "@/lib/requireServerUser";
 
 // Retry helper para transações DB

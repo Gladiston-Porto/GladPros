@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { StatusProposta } from '@/types/propostas'
+// imports trimmed: prisma and StatusProposta are not used in this route
 import { validateTokenPublico } from '@/lib/services/proposta-token'
 import { applyRBACMasking, getUserPermissions, getPropostaContext } from '@/lib/services/proposta-rbac'
 
