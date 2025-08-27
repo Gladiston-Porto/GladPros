@@ -7,6 +7,7 @@ import { db } from "@/server/db-temp";
 // trimmed unused imports for lint
 import { propostaFormSchema } from "@modules/propostas/ui/validation";
 import { adaptPropostaFormToAPI } from "@modules/propostas/ui/adapter";
+import type { PropostaFormData } from '@modules/propostas/ui/types';
 import { requireServerUser } from "@/lib/requireServerUser";
 
 // Retry helper para transações DB
@@ -16,9 +17,11 @@ async function withRetry<T>(fn: () => Promise<T>, retries = 2, delayMs = 300): P
     try {
       return await fn();
     } catch (err: unknown) {
-      const e = err as { code?: string; errorCode?: string; name?: string };
-      const code = e?.code || e?.errorCode;
-      const name = e?.name;
+  // Normalize unknown error into a safe shape without using `any` casts
+  const maybeObj = typeof err === 'object' && err !== null ? err as Record<string, unknown> : {};
+  const getStr = (key: string) => (typeof maybeObj[key] === 'string' ? (maybeObj[key] as string) : undefined);
+  const code = getStr('code') ?? getStr('errorCode');
+  const name = getStr('name');
       const isInit = name === "PrismaClientInitializationError" || code === "P1001";
       if (!isInit || i === retries) throw err;
       lastErr = err;
@@ -29,26 +32,26 @@ async function withRetry<T>(fn: () => Promise<T>, retries = 2, delayMs = 300): P
 }
 
 // Helper para mapear erros do Prisma
-function mapPrismaError(error: any): { status: number; message: string; fields?: Record<string, string> } {
-  const e = error as { code?: string; meta?: any };
-  
+function mapPrismaError(error: unknown): { status: number; message: string; fields?: Record<string, string> } {
+  const e = error as { code?: string; meta?: { target?: Array<string> } | null };
+
   if (e.code === 'P2002') {
-    const target = e.meta?.target?.[0];
+    const target = Array.isArray(e.meta?.target) ? e.meta?.target[0] : undefined;
     if (target === 'numeroProposta') {
       return { status: 409, message: 'Número da proposta já existe' };
     }
     return { status: 409, message: 'Violação de restrição única' };
   }
-  
+
   if (e.code === 'P2025') {
     return { status: 404, message: 'Registro não encontrado' };
   }
-  
+
   return { status: 500, message: 'Erro interno do servidor' };
 }
 
 // GET /api/propostas - Lista com filtros e paginação por cursor
-export async function GET(request: NextRequest) {
+export async function GET(/* request: NextRequest */) {
   try {
     console.log('GET /api/propostas - iniciado');
     
@@ -94,8 +97,8 @@ export async function POST(request: NextRequest) {
     const validatedData = propostaFormSchema.parse(body);
     
   // Converter para formato da API/DB
-  // zod validatedData may use string literals for 'permite'; cast to any to satisfy adapter until types are aligned
-  const apiPayload = adaptPropostaFormToAPI(validatedData as any);
+  // validatedData is a Zod-validated object; cast via unknown to the adapter input type
+  const apiPayload = adaptPropostaFormToAPI(validatedData as unknown as PropostaFormData);
     
     // Criar proposta usando o temporary DB client
     const novaProposta = await withRetry(async () => {
