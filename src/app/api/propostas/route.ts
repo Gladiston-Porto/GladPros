@@ -4,7 +4,6 @@ export const runtime = "nodejs";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/server/db-temp";
-import { StatusProposta, StatusPermite } from "@/types/prisma-temp";
 import { propostaFormSchema } from "@modules/propostas/ui/validation";
 import { adaptPropostaFormToAPI } from "@modules/propostas/ui/adapter";
 import { PropostaFormData } from "@modules/propostas/ui/types";
@@ -30,7 +29,7 @@ async function withRetry<T>(fn: () => Promise<T>, retries = 2, delayMs = 300): P
 }
 
 // Helper para mapear erros do Prisma
-function mapPrismaError(error: any): { status: number; message: string; fields?: Record<string, string> } {
+function mapPrismaError(error: unknown): { status: number; message: string; fields?: Record<string, string> } {
   const e = error as { code?: string; meta?: any };
   
   if (e.code === 'P2002') {
@@ -49,7 +48,7 @@ function mapPrismaError(error: any): { status: number; message: string; fields?:
 }
 
 // GET /api/propostas - Lista com filtros e paginação por cursor
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     console.log('GET /api/propostas - iniciado');
     
@@ -91,12 +90,12 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     console.log('Body recebido:', JSON.stringify(body, null, 2));
 
-    // Validar dados com schema do novo formulário
-    const validatedData = propostaFormSchema.parse(body);
-    
+  // Validar dados com schema do novo formulário
+  const validatedData = propostaFormSchema.parse(body);
+
   // Converter para formato da API/DB
-  // zod validatedData may use string literals for 'permite'; cast to any to satisfy adapter until types are aligned
-  const apiPayload = adaptPropostaFormToAPI(validatedData as any);
+  // zod validatedData may use string literals for 'permite'; use an unknown-first cast to avoid `any` lint rule
+  const apiPayload = adaptPropostaFormToAPI(validatedData as unknown as PropostaFormData);
     
     // Criar proposta usando o temporary DB client
     const novaProposta = await withRetry(async () => {
