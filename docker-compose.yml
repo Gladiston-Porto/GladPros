@@ -1,56 +1,16 @@
-version: '3.8'
-
 services:
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    ports:
-      - '3000:3000'
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    environment:
-      - NODE_ENV=development
-
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    ports:
-      - '5000:5000'
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
-    environment:
-      - NODE_ENV=development
-      - DB_HOST=mariadb
-      - REDIS_HOST=redis
-    depends_on:
-      - mariadb
-      - redis
-
-  mariadb:
+  db:
     image: mariadb:10.5
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: gladpros
-      MYSQL_USER: gladpros_user
-      MYSQL_PASSWORD: gladpros_pass
+      MYSQL_USER: dev
+      MYSQL_PASSWORD: dev123
     ports:
-      - '3307:3306' # Alterado para evitar conflito com a porta local 3306
+      - '3306:3306'
     volumes:
-      - mariadb_data:/var/lib/mysql
-
-  redis:
-    image: redis:6.2
-    restart: always
-    ports:
-      - '6379:6379'
-    volumes:
-      - redis_data:/data
+      - db_data:/var/lib/mysql
 
 volumes:
-  mariadb_data:
-  redis_data:
+  db_data:

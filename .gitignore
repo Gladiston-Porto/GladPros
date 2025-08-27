@@ -1,9 +1,29 @@
-node_modules
-.env
-dist
-build
+﻿# Builds and caches
+.next/
+dist/
+out/
+node_modules/
+
+# Test / coverage
+coverage/
+*.lcov
 *.log
+
+# Local environment
+.env*
+!.env.example
+
+# Editor
+.vscode/
+.DS_Store
+
+# Prisma / DB dumps
+prisma/dev.db
 dump.rdb
-coverage
-.vscode
 *.sql
+
+# TypeScript incremental info
+tsconfig.tsbuildinfo
+
+# Next.js build output
+.next/
