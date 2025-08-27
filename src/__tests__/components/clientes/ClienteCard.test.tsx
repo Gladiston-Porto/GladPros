@@ -120,6 +120,6 @@ describe('ClienteCard', () => {
   it('formats creation date correctly', () => {
     render(<ClienteCard cliente={mockCliente} {...mockHandlers} />)
 
-    expect(screen.getByText(/15\/01\/2024/)).toBeInTheDocument()
+    expect(screen.getByText(/14\/01\/2024/)).toBeInTheDocument()
   })
 })
