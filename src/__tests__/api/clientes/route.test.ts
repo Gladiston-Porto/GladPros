@@ -53,7 +53,7 @@ jest.mock('@/lib/helpers/cliente', () => ({
   checkEmailExists: jest.fn().mockResolvedValue(false),
   logClienteAudit: jest.fn().mockResolvedValue(undefined),
   getClienteDisplayName: jest.fn((cliente) => cliente.nomeCompleto || cliente.razaoSocial || 'Cliente'),
-  maskDocumento: jest.fn((doc, tipo) => `***${doc}`),
+  maskDocumento: jest.fn((doc, _tipo) => `***${doc}`),
   formatTelefone: jest.fn((tel) => tel),
   formatZipcode: jest.fn((zip) => zip)
 }))
