@@ -22,9 +22,13 @@ Resumo
 - Adiciona `scripts/smoke-test.sh` e `PULL_REQUEST_TEMPLATE.md`.
 '@
 
-    $payload = @{ title = $title; head = $head; base = $base; body = $body } | ConvertTo-Json -Depth 6
+    $payloadObj = @{ title = $title; head = $head; base = $base; body = $body }
+    $payload = $payloadObj | ConvertTo-Json -Depth 6
+    Write-Host "Payload:" -ForegroundColor Cyan
+    Write-Host $payload
 
-    $headers = @{ Authorization = "token $token"; Accept = 'application/vnd.github+json' }
+    # Use token auth for classic PAT and include a User-Agent — GitHub API expects a user-agent header
+    $headers = @{ Authorization = "token $token"; Accept = 'application/vnd.github+json'; 'User-Agent' = 'GladPros-Script' }
 
     $url = "https://api.github.com/repos/$owner/$repo/pulls"
     try {
@@ -38,14 +42,29 @@ Resumo
             exit 2
         }
     } catch {
+        # Try to extract response details from the exception first
         $r = $_.Exception.Response
         if ($r -ne $null) {
-            $status = $r.StatusCode.Value__
-            $stream = $r.GetResponseStream()
-            $reader = New-Object System.IO.StreamReader($stream)
-            $text = $reader.ReadToEnd()
+            try {
+                $status = $r.StatusCode.Value__
+            } catch { $status = 'unknown' }
+            try {
+                $stream = $r.GetResponseStream()
+                $reader = New-Object System.IO.StreamReader($stream)
+                $text = $reader.ReadToEnd()
+            } catch { $text = $null }
             Write-Host "STATUS: $status" -ForegroundColor Yellow
-            Write-Host $text
+            if ($text) { Write-Host $text } else { Write-Host "(no response body)" }
+            # Also attempt a fallback using Invoke-WebRequest which often exposes headers/content cleanly
+            try {
+                $resp2 = Invoke-WebRequest -Uri $url -Method Post -Headers $headers -Body $payload -ContentType 'application/json' -ErrorAction Stop
+                Write-Host "--- Invoke-WebRequest fallback ---" -ForegroundColor Cyan
+                Write-Host "StatusCode: $($resp2.StatusCode)"
+                Write-Host "Headers:"; $resp2.Headers | ConvertTo-Json -Depth 3 | Write-Host
+                Write-Host "Content:"; if ($resp2.Content) { $resp2.Content } else { Write-Host "(empty)" }
+            } catch {
+                Write-Host "Invoke-WebRequest fallback failed: $($_.Exception.Message)" -ForegroundColor Red
+            }
             exit 4
         } else {
             Write-Host "Erro local: $($_.Exception.Message)" -ForegroundColor Red
