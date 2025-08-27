@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as nodemailer from 'nodemailer'
 import { generateTokenPublico } from './proposta-token'
 import { PropostaPDFService, type PropostaWithRelations, type RBACContext } from './proposta-pdf'

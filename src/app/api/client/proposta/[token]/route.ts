@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { StatusProposta } from '@/types/propostas'
 import { validateTokenPublico } from '@/lib/services/proposta-token'
 import { applyRBACMasking, getUserPermissions, getPropostaContext } from '@/lib/services/proposta-rbac'
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { token: string } }
 ) {
   try {

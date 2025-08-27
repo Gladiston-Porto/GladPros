@@ -1,5 +1,6 @@
 // import { applyRBACMasking, type RBACContext } from './proposta-rbac'
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // Context para RBAC (definido aqui temporariamente)
 export interface RBACContext {
   userId?: number
