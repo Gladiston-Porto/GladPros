@@ -1,5 +1,5 @@
 // src/modules/propostas/services/propostasApi.ts
-import type { PropostaWithRelations, StatusProposta } from '@/types/propostas'
+import { StatusProposta } from '@/types/propostas'
 
 export interface PropostaDTO {
   id: string
@@ -68,25 +68,33 @@ export async function getPropostas(
   const items = body.items || []
   const pagination = body.pagination || {}
 
-  const data = items.map((p: any) => ({
-    id: p.id,
-    numeroProposta: p.numeroProposta,
-    titulo: p.titulo,
-    status: p.status,
-    precoPropostaCliente: p.precoPropostaCliente,
-    valorEstimado: p.valorEstimado || 0,
-    criadoEm: p.criadoEm,
-    validadeProposta: p.validadeProposta,
-    assinadoEm: p.assinadoEm,
-    cliente: {
-      id: p.cliente?.id || '',
-      nome: p.cliente?.nomeCompleto || p.cliente?.razaoSocial || '',
-      email: p.cliente?.email || ''
-    },
-    contatoNome: p.contatoNome,
-    contatoEmail: p.contatoEmail,
-    localExecucaoEndereco: p.localExecucaoEndereco
-  }))
+  const data = items.map((p: unknown) => {
+    const _p = p as Record<string, unknown>
+    const clienteObj = (_p.cliente as Record<string, unknown> | undefined)
+    const clienteId = clienteObj?.id ?? ''
+    const clienteNome = clienteObj?.nomeCompleto ?? clienteObj?.razaoSocial ?? ''
+    const clienteEmail = clienteObj?.email ?? ''
+
+    return {
+      id: String(_p.id ?? ''),
+      numeroProposta: String(_p.numeroProposta ?? ''),
+      titulo: String(_p.titulo ?? ''),
+      status: (_p.status as StatusProposta) || StatusProposta.RASCUNHO,
+      precoPropostaCliente: (_p.precoPropostaCliente as number | undefined) ?? undefined,
+      valorEstimado: Number(_p.valorEstimado ?? 0) || 0,
+      criadoEm: String(_p.criadoEm ?? ''),
+      validadeProposta: _p.validadeProposta as string | undefined,
+      assinadoEm: _p.assinadoEm as string | undefined,
+      cliente: {
+        id: String(clienteId),
+        nome: String(clienteNome),
+        email: String(clienteEmail),
+      },
+      contatoNome: _p.contatoNome as string | undefined,
+      contatoEmail: _p.contatoEmail as string | undefined,
+      localExecucaoEndereco: _p.localExecucaoEndereco as string | undefined,
+    }
+  })
 
   const total = typeof pagination.total === 'number' ? pagination.total : 0
   const page = filters.page || 1

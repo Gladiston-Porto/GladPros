@@ -1,5 +1,12 @@
 // src/lib/services/proposta-rbac.ts
-import type { PropostaResponse } from "@/lib/validations/proposta";
+import type { Proposta, PropostaEtapa, AnyArgs } from '@/types/prisma-temp';
+
+export type Role = 'ADMIN' | 'USER' | 'VIEWER';
+export type Permission =
+  | 'VIEW_INTERNAL_VALUES'
+  | 'EDIT_PROPOSTA'
+  | 'APPROVE_PROPOSTA'
+  | 'VIEW_ALL_PROPOSTAS';
 
 export interface UserPermissions {
   canViewInternalValues: boolean;
@@ -8,6 +15,7 @@ export interface UserPermissions {
   canViewAllPropostas: boolean;
   isAdmin: boolean;
   userId?: number;
+  role?: Role;
 }
 
 export interface PropostaContext {
@@ -16,39 +24,42 @@ export interface PropostaContext {
   userPermissions: UserPermissions;
 }
 
-const MASKED_VALUE = "****";
-const MASKED_NUMBER = "***.**";
+const MASKED_NUMBER = '***.**' as const;
 
 /**
  * Determina permissões do usuário baseado no contexto
  * TODO: Integrar com sistema de RBAC real
  */
-export function getUserPermissions(userId?: number, isAdmin: boolean = false): UserPermissions {
-  // Por enquanto, lógica simples - pode ser expandida
-  return {
-    canViewInternalValues: isAdmin || false, // Por padrão, apenas admins veem valores internos
-    canEdit: isAdmin || false,
-    canApprove: isAdmin || false,
-    canViewAllPropostas: isAdmin || false,
-    isAdmin,
-    userId
-  };
+export function getUserPermissions(userId?: number, isAdmin: boolean = false, role?: Role): UserPermissions {
+  // Lógica conservadora: admin tem todas as permissões
+  const perms = {
+    canViewInternalValues: Boolean(isAdmin),
+    canEdit: Boolean(isAdmin),
+    canApprove: Boolean(isAdmin),
+    canViewAllPropostas: Boolean(isAdmin),
+    isAdmin: Boolean(isAdmin),
+    userId,
+    role,
+  } as UserPermissions;
+
+  return perms;
 }
 
 /**
  * Determina contexto da visualização da proposta
  */
 export function getPropostaContext(
-  proposta: any,
+  proposta: Proposta | { status?: string } | undefined,
   isClientView: boolean,
   userPermissions: UserPermissions
 ): PropostaContext {
-  const isAfterSignature = proposta.status === 'ASSINADA' || proposta.status === 'APROVADA';
-  
+  const status = proposta?.status ?? '';
+  const isAfterSignature = status === 'ASSINADA' || status === 'APROVADA';
+
   return {
     isClientView,
     isAfterSignature,
-    userPermissions
+    userPermissions,
   };
 }
 
@@ -57,16 +68,12 @@ export function getPropostaContext(
  */
 function shouldMaskValue(context: PropostaContext): boolean {
   // Cliente sempre tem valores mascarados após assinatura
-  if (context.isClientView && context.isAfterSignature) {
-    return true;
-  }
-  
-  // Cliente nunca vê valores internos
-  if (context.isClientView) {
-    return false; // Durante assinatura, cliente vê valores
-  }
-  
-  // Usuários internos: apenas mascarar se não tiver permissão
+  if (context.isClientView && context.isAfterSignature) return true;
+
+  // Cliente não vê valores internos normalmente
+  if (context.isClientView) return false;
+
+  // Interno: mascarar se não tiver permissão
   return !context.userPermissions.canViewInternalValues;
 }
 
@@ -74,167 +81,118 @@ function shouldMaskValue(context: PropostaContext): boolean {
  * Determina se valores internos devem ser incluídos
  */
 function shouldIncludeInternalValues(context: PropostaContext): boolean {
-  if (context.isClientView) {
-    return false; // Cliente nunca vê valores internos
-  }
-  
+  if (context.isClientView) return false;
   return context.userPermissions.canViewInternalValues;
 }
 
 /**
  * Mascara um valor numérico
  */
-function maskNumericValue(value: number | null | undefined): string | number | null | undefined {
-  if (value === null || value === undefined) {
-    return value;
-  }
+function maskNumericValue(value: number | null | undefined): number | string | null | undefined {
+  if (value === null || value === undefined) return value;
   return MASKED_NUMBER;
 }
 
 /**
  * Mascara uma etapa conforme contexto
  */
-function maskEtapa(etapa: any, context: PropostaContext): any {
+function maskEtapa(etapa: Partial<PropostaEtapa> & Record<string, unknown>, context: PropostaContext): Partial<PropostaEtapa> {
   const shouldMask = shouldMaskValue(context);
-  
+
+  const custo = etapa.custoMaoObraEstimado as number | null | undefined;
+
   return {
-    ...etapa,
-    custoMaoObraEstimado: shouldMask 
-      ? maskNumericValue(etapa.custoMaoObraEstimado as any)
-      : etapa.custoMaoObraEstimado
+    ...(etapa as Partial<PropostaEtapa>),
+    custoMaoObraEstimado: (shouldMask ? maskNumericValue(custo) : custo) as unknown as number | null | undefined,
   };
 }
 
 /**
  * Mascara um material conforme contexto
  */
-function maskMaterial(material: any, context: PropostaContext): any {
+function maskMaterial(material: Record<string, unknown>, context: PropostaContext): Record<string, unknown> {
   const shouldMask = shouldMaskValue(context);
-  
+
+  const preco = material.precoUnitario as number | null | undefined;
+  const total = material.totalItem as number | null | undefined;
+
   return {
     ...material,
-    precoUnitario: shouldMask 
-      ? maskNumericValue(material.precoUnitario as any)
-      : material.precoUnitario,
-    totalItem: shouldMask 
-      ? maskNumericValue(material.totalItem as any)
-      : material.totalItem
+    precoUnitario: shouldMask ? maskNumericValue(preco) : preco,
+    totalItem: shouldMask ? maskNumericValue(total) : total,
   };
 }
 
 /**
  * Aplica mascaramento RBAC a uma proposta completa
  */
-export function applyRBACMasking(proposta: any, context: PropostaContext): any {
-  const shouldMask = shouldMaskValue(context);
+export function applyRBACMasking(proposta: Proposta | Record<string, unknown> | undefined, context: PropostaContext): Record<string, unknown> {
   const includeInternal = shouldIncludeInternalValues(context);
-  
-  const masked = {
-    ...proposta,
-    
-    // Valores principais
-    valorEstimado: shouldMask 
-      ? maskNumericValue(proposta.valorEstimado)
-      : proposta.valorEstimado,
-    precoPropostaCliente: shouldMask 
-      ? maskNumericValue(proposta.precoPropostaCliente)
-      : proposta.precoPropostaCliente,
-    
-    // Estimativas internas - remover completamente se não tiver permissão
-    internalEstimate: includeInternal ? proposta.internalEstimate : undefined,
-    
-    // Observações internas
-    observacoesInternas: includeInternal ? proposta.observacoesInternas : undefined,
-    
-    // Campos de auditoria interna
-    criadoPor: includeInternal ? proposta.criadoPor : undefined,
-    atualizadoPor: includeInternal ? proposta.atualizadoPor : undefined,
-    
-    // Etapas com mascaramento
-    etapas: proposta.etapas?.map((etapa: any) => maskEtapa(etapa, context)),
-    
-    // Materiais com mascaramento  
-    materiais: proposta.materiais?.map((material: any) => maskMaterial(material, context)),
-    
-    // Anexos - filtrar privados para cliente
-    anexos: context.isClientView 
-      ? proposta.anexos?.filter((anexo: any) => !anexo.privado)
-      : proposta.anexos,
-    
-    // Metadados de permissão para a UI
+
+  const valorEstimado = (proposta as AnyArgs)?.valorEstimado as number | null | undefined;
+  const precoCliente = (proposta as AnyArgs)?.precoPropostaCliente as number | null | undefined;
+
+  const masked: Record<string, unknown> = {
+    ...(proposta as Record<string, unknown>),
+    valorEstimado: shouldMaskValue(context) ? maskNumericValue(valorEstimado) : valorEstimado,
+    precoPropostaCliente: shouldMaskValue(context) ? maskNumericValue(precoCliente) : precoCliente,
+    internalEstimate: includeInternal ? (proposta as AnyArgs)?.internalEstimate : undefined,
+    observacoesInternas: includeInternal ? (proposta as AnyArgs)?.observacoesInternas : undefined,
+    criadoPor: includeInternal ? (proposta as AnyArgs)?.criadoPor : undefined,
+    atualizadoPor: includeInternal ? (proposta as AnyArgs)?.atualizadoPor : undefined,
+    etapas: Array.isArray((proposta as AnyArgs)?.etapas)
+      ? (((proposta as AnyArgs).etapas as unknown[]) || []).map((e) => maskEtapa(e as Record<string, unknown>, context))
+      : undefined,
+    materiais: Array.isArray((proposta as AnyArgs)?.materiais)
+      ? (((proposta as AnyArgs).materiais as unknown[]) || []).map((m) => maskMaterial(m as Record<string, unknown>, context))
+      : undefined,
+    anexos: context.isClientView
+      ? (((proposta as AnyArgs)?.anexos as unknown[]) || [])?.filter((a) => !((a as AnyArgs)?.privado))
+      : (proposta as AnyArgs)?.anexos,
     canViewInternalValues: context.userPermissions.canViewInternalValues,
     canEdit: context.userPermissions.canEdit,
     canApprove: context.userPermissions.canApprove,
   };
-  
+
   return masked;
 }
 
 /**
  * Filtra lista de propostas por permissões do usuário
  */
-export function filterPropostasByPermissions(
-  propostas: any[],
-  userPermissions: UserPermissions
-): any[] {
-  if (userPermissions.canViewAllPropostas) {
-    return propostas;
-  }
-  
-  // Filtrar apenas propostas do usuário (se implementado)
-  // Por enquanto, retorna todas - implementar filtro por criador/responsável depois
+export function filterPropostasByPermissions(propostas: Proposta[] | AnyArgs[], userPermissions: UserPermissions): Proposta[] | AnyArgs[] {
+  if (userPermissions.canViewAllPropostas) return propostas;
+
+  // Implementar filtro por criador/responsável quando necessário
   return propostas;
 }
 
 /**
  * Valida se usuário pode acessar uma proposta específica
  */
-export function canAccessProposta(
-  proposta: any,
-  userPermissions: UserPermissions
-): boolean {
-  if (userPermissions.canViewAllPropostas) {
-    return true;
-  }
-  
-  // Implementar lógica específica:
-  // - Criador pode ver
-  // - Responsável pode ver  
-  // - Proposta do cliente do usuário pode ver
-  
-  return true; // Por enquanto, permite acesso
+export function canAccessProposta(proposta: Proposta | AnyArgs, userPermissions: UserPermissions): boolean {
+  if (userPermissions.canViewAllPropostas) return true;
+
+  // TODO: adicionar checagens por criador/responsável/cliente
+  return true;
 }
 
 /**
  * Valida se usuário pode editar uma proposta
  */
-export function canEditProposta(
-  proposta: any,
-  userPermissions: UserPermissions
-): boolean {
-  if (!userPermissions.canEdit) {
-    return false;
-  }
-  
-  // Não pode editar se já foi assinada/aprovada
-  if (['ASSINADA', 'APROVADA'].includes(proposta.status)) {
-    return false;
-  }
-  
+export function canEditProposta(proposta: Proposta | { status?: string } | AnyArgs, userPermissions: UserPermissions): boolean {
+  if (!userPermissions.canEdit) return false;
+  const status = String((proposta as AnyArgs)?.status ?? '');
+  if (['ASSINADA', 'APROVADA'].includes(status)) return false;
+
   return true;
 }
 
 /**
  * Valida se usuário pode aprovar uma proposta
  */
-export function canApproveProposta(
-  proposta: any,
-  userPermissions: UserPermissions
-): boolean {
-  if (!userPermissions.canApprove) {
-    return false;
-  }
-  
-  // Só pode aprovar se estiver assinada
-  return proposta.status === 'ASSINADA';
+export function canApproveProposta(proposta: Proposta | { status?: string } | AnyArgs, userPermissions: UserPermissions): boolean {
+  if (!userPermissions.canApprove) return false;
+  const status = String((proposta as AnyArgs)?.status ?? '');
+  return status === 'ASSINADA';
 }

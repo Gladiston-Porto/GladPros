@@ -11,6 +11,7 @@ jest.mock('@/server/db', () => ({
     cliente: {
       findMany: jest.fn(),
       count: jest.fn(),
+  findFirst: jest.fn(),
       create: jest.fn(),
     },
     $executeRaw: jest.fn(),
@@ -29,7 +30,9 @@ jest.mock('@/lib/requireServerUser', () => ({
 
 // Mock RBAC
 jest.mock('@/lib/rbac', () => ({
-  can: jest.fn().mockReturnValue(true)
+  can: jest.fn().mockReturnValue(true),
+  // Provide the helper used by server routes during tests
+  requireClientePermission: jest.fn().mockResolvedValue({ id: '1', role: 'ADMIN', email: 'admin@test.com' })
 }))
 
 // Mock crypto

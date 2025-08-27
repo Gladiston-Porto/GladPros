@@ -110,7 +110,8 @@ export async function POST(req: NextRequest) {
         WHERE id = ${userId}
         LIMIT 1
       `;
-      fullUserRows = (alt as any).map((r: any) => ({ ...r, tokenVersion: 0 }));
+      // alt already has a typed row shape; map directly and add tokenVersion
+      fullUserRows = alt.map((r) => ({ ...r, tokenVersion: 0 }));
     }
 
     const user = fullUserRows[0];

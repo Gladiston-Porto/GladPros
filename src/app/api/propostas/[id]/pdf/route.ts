@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/server/db-temp'
 import { PropostaPDFService, type PDFGenerationOptions, type RBACContext } from '@/lib/services/proposta-pdf'
+import type { PropostaWithRelations } from '@/lib/services/proposta-pdf'
+
+// minimal local shape to avoid widespread `any` in this route
+// local alias intentionally removed; use PropostaWithRelations directly
 
 export async function GET(
   request: NextRequest,
@@ -30,8 +34,8 @@ export async function GET(
       )
     }
 
-    // Validar se a proposta pode gerar PDF
-    const validation = PropostaPDFService.validateForPDF(proposta as any)
+  // Validar se a proposta pode gerar PDF
+  const validation = PropostaPDFService.validateForPDF(proposta as unknown as PropostaWithRelations)
     if (!validation.valid) {
       return NextResponse.json(
         { 
@@ -65,11 +69,15 @@ export async function GET(
     }
 
     // Gerar PDF
+    // generatePDF expects a concrete PropostaWithRelations
     const { buffer, filename, contentType } = await PropostaPDFService.generatePDF(
-      proposta as any,
+      proposta as unknown as PropostaWithRelations,
       rbacContext,
       pdfOptions
     )
+
+    // Convert Node Buffer to ArrayBuffer for NextResponse
+    const arrayBuffer = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength)
 
     // Retornar PDF como download
     const headers = new Headers()
@@ -77,7 +85,7 @@ export async function GET(
     headers.set('Content-Disposition', `attachment; filename="${filename}"`)
     headers.set('Cache-Control', 'no-cache')
 
-    return new NextResponse(buffer as any, {
+  return new NextResponse(arrayBuffer as ArrayBuffer, {
       status: 200,
       headers
     })

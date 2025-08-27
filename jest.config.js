@@ -28,6 +28,8 @@ const config = {
     '<rootDir>/src/**/__tests__/**/*.{js,jsx,ts,tsx}',
     '<rootDir>/src/**/?(*.)+(spec|test).{js,jsx,ts,tsx}',
   ],
+  // Ignore TypeScript declaration files in test folders
+  testPathIgnorePatterns: ["\\.d\.ts$"],
   testEnvironmentOptions: {
     customExportConditions: [''],
   },

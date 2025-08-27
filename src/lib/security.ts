@@ -100,6 +100,7 @@ export class SecurityService {
       await this.cleanExpiredSessions();
     } catch (e) {
       // Evitar quebra do login se a tabela SessaoAtiva ainda não existir
+      void e
     }
 
     // Política de sessão única: revogar todas as sessões anteriores do usuário
@@ -107,6 +108,7 @@ export class SecurityService {
       await this.revokeAllUserSessions(usuarioId);
     } catch (e) {
       // continuar mesmo se falhar
+      void e
     }
 
     // Criar nova sessão usando modelo Prisma (ou fallback SQL se indisponível)

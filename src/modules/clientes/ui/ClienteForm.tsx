@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useState } from 'react'
 import type { ClienteCreateInput, ClienteUpdateInput, TipoCliente, TipoDocumentoPF } from '@/types/cliente'

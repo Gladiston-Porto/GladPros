@@ -70,7 +70,8 @@ export async function POST(
     const updatedProposta = await db.proposta.update({
       where: { id: propostaId },
       data: {
-        assinaturaTipo: validatedData.assinaturaTipo as any, // TipoAssinatura enum
+  // validatedData.assinaturaTipo is constrained by zod to the allowed strings
+  assinaturaTipo: String(validatedData.assinaturaTipo),
         assinaturaNome: validatedData.assinaturaNome,
         assinaturaImagem: validatedData.assinaturaImagem,
         assinaturaIp: clientIp,

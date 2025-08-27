@@ -2,7 +2,8 @@ import { z } from 'zod'
 
 // Validações base
 const telefoneRegex = /^(?:\+?\d[\d\s\-\(\)]{9,14})$/
-const zipCodeRegex = /^(\d{5}|\d{5}-\d{4}|\d{8}|\d{5,9})$/
+// Accept common ZIP/CEP formats including Brazilian 5-3 (01310-100), 8 digits, US 5 or 5-4, or 5-9
+const zipCodeRegex = /^(\d{5}|\d{5}-\d{4}|\d{5}-\d{3}|\d{8}|\d{5,9})$/
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 // Validações para mercado americano
@@ -157,7 +158,7 @@ export const clienteFiltersSchema = z.object({
   tipo: z.enum(['PF', 'PJ', 'all']).optional().default('all'),
   ativo: z.union([z.coerce.boolean(), z.literal('all')]).optional().default('all'),
   page: z.coerce.number().min(1).optional().default(1),
-  pageSize: z.coerce.number().min(1).max(2000).optional().default(12), // Aumentado para 2000
+  pageSize: z.coerce.number().min(1).max(2000).optional().default(10),
   // Ordenação server-side
   sortKey: z.enum(['nome', 'tipo', 'email', 'telefone', 'documento', 'cidadeEstado', 'status']).optional(),
   sortDir: z.enum(['asc', 'desc']).optional()

@@ -1,4 +1,5 @@
 // Email service for sending proposal notifications
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import nodemailer from 'nodemailer'
 
 interface EmailConfig {

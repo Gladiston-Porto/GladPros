@@ -13,10 +13,11 @@ const bulkSchema = z.object({
   filters: clienteFiltersSchema.partial().optional()
 })
 
-function buildWhereFromFilters(filters: any) {
-  const where: any = {}
-  if (filters?.q && String(filters.q).trim()) {
-    const q = String(filters.q).trim()
+function buildWhereFromFilters(filters: unknown) {
+  const where: Record<string, unknown> = {}
+  const f = filters as Record<string, unknown>
+  if (f?.q && String((f.q as unknown) || '').trim()) {
+    const q = String(f.q).trim()
     where.OR = [
       { nomeCompleto: { contains: q, mode: 'insensitive' } },
       { razaoSocial: { contains: q, mode: 'insensitive' } },
@@ -25,12 +26,8 @@ function buildWhereFromFilters(filters: any) {
       { docLast4: { contains: q } }
     ]
   }
-  if (filters?.tipo && filters.tipo !== 'all') {
-    where.tipo = filters.tipo
-  }
-  if (filters?.ativo !== undefined && filters.ativo !== 'all') {
-    where.status = filters.ativo ? 'ATIVO' : 'INATIVO'
-  }
+  if (f?.tipo && f.tipo !== 'all') (where as Record<string, unknown>)['tipo'] = f.tipo
+  if (f?.ativo !== undefined && f.ativo !== 'all') (where as Record<string, unknown>)['status'] = ((f.ativo as unknown) === true) ? 'ATIVO' : 'INATIVO'
   return where
 }
 
@@ -46,14 +43,14 @@ export async function POST(request: NextRequest) {
       await requireClientePermission(request, 'canUpdate')
     }
 
-    let where: any = {}
+  let where: Record<string, unknown> = {}
     if (scope === 'selected') {
       if (!ids || ids.length === 0) {
         return NextResponse.json({ error: 'Nenhum ID informado' }, { status: 400 })
       }
       where.id = { in: ids }
     } else {
-      where = buildWhereFromFilters(filters || {})
+      where = buildWhereFromFilters(filters || ({} as unknown))
     }
 
     let count = 0

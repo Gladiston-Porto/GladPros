@@ -9,10 +9,7 @@ export interface RBACContext {
 }
 
 // Função placeholder para mascaramento RBAC
-const applyRBACMasking = async (proposta: any, context: RBACContext) => {
-  // TODO: Implementar lógica real de mascaramento
-  return proposta
-}
+// Implemented after the types so it can use the PropostaWithRelations type.
 
 // Tipos de enum como strings para simplicidade
 type StatusProposta = 'RASCUNHO' | 'ENVIADA' | 'ASSINADA' | 'CANCELADA' | 'APROVADA'
@@ -53,23 +50,23 @@ export interface PropostaWithRelations {
   inspecoesNecessarias?: string | null
   
   // Condições comerciais
-  condicoesPagamento?: any
+  condicoesPagamento?: unknown
   garantia?: string | null
   exclusoes?: string | null
   condicoesGerais?: string | null
   descontosOfertados?: number | null
-  opcoesAlternativas?: any
+  opcoesAlternativas?: unknown
   
   // Estimativas internas
   valorEstimado?: number | null
-  internalEstimate?: any
+  internalEstimate?: unknown
   precoPropostaCliente?: number | null
   moeda: string
   
   // Condições de faturamento
   gatilhoFaturamento?: GatilhoFaturamento | null
   percentualSinal?: number | null
-  marcosPagamento?: any
+  marcosPagamento?: unknown
   formaPagamentoPreferida?: FormaPagamento | null
   instrucoesPagamento?: string | null
   multaAtraso?: string | null
@@ -108,7 +105,7 @@ export interface PropostaWithRelations {
   // Auditoria
   criadoPor?: number | null
   atualizadoPor?: number | null
-  historicoAlteracoes?: any
+  historicoAlteracoes?: unknown
   deletedAt?: Date | null
   deletedBy?: number | null
   criadoEm: Date
@@ -118,6 +115,27 @@ export interface PropostaWithRelations {
   etapas: PropostaEtapa[]
   materiais: PropostaMaterial[]
   anexos: AnexoProposta[]
+}
+
+// Placeholder masking function. It accepts a full PropostaWithRelations and RBAC context
+// and returns a shallow-cloned object — implement real masking logic later.
+const applyRBACMasking = async (
+  proposta: PropostaWithRelations,
+  context: RBACContext
+): Promise<PropostaWithRelations> => {
+  const copy: PropostaWithRelations = { ...proposta }
+
+  if (context.isClientAccess) {
+    // Hide internal-only fields for client access
+  const target = copy as unknown as Record<string, unknown | undefined>
+  target.internalEstimate = undefined
+  target.historicoAlteracoes = undefined
+  target.observacoesInternas = undefined
+  target.criadoPor = undefined
+  target.atualizadoPor = undefined
+  }
+
+  return copy
 }
 
 export interface PropostaEtapa {
@@ -151,7 +169,7 @@ export interface PropostaMaterial {
   fornecedor?: string | null
   fornecedorPreferencial?: string | null
   observacoes?: string | null
-  especificacoes?: any
+  especificacoes?: unknown
   status: string
   criadoEm: Date
   atualizadoEm: Date

@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/server/db'
 
+type PropostaRow = {
+  numeroProposta?: string
+  titulo?: string
+  cliente?: { nome?: string }
+  status?: string
+  precoPropostaCliente?: number | null
+  criadoEm?: Date
+  validadeProposta?: Date | null
+}
+
 /**
  * API para exportar propostas em PDF
  * POST /api/propostas/export/pdf
@@ -10,8 +20,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { filename = 'propostas', filters = {} } = body
 
-    // Build where clause based on filters
-    const where: any = {}
+  // Build where clause based on filters
+  const where: Record<string, unknown> = {}
     
     if (filters.q) {
       where.OR = [
@@ -29,8 +39,9 @@ export async function POST(request: NextRequest) {
       where.clienteId = filters.clienteId
     }
 
-    // Fetch data
-    const propostas = await (prisma as any).proposta.findMany({
+  // Fetch data
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+  const propostas = await (prisma as any).proposta.findMany({
       where,
       include: {
         cliente: {
@@ -127,17 +138,19 @@ export async function POST(request: NextRequest) {
               </tr>
             </thead>
             <tbody>
-              ${propostas.map((proposta: any) => `
+          ${
+            (propostas as unknown as PropostaRow[]).map((proposta) => `
                 <tr>
                   <td><strong>${proposta.numeroProposta}</strong></td>
                   <td class="truncate">${proposta.titulo}</td>
-                  <td>${proposta.cliente.nome}</td>
-                  <td><span class="status status-${proposta.status}">${proposta.status}</span></td>
+                  <td>${proposta.cliente?.nome ?? ''}</td>
+                  <td><span class="status status-${proposta.status ?? ''}">${proposta.status ?? ''}</span></td>
                   <td class="number">${proposta.precoPropostaCliente ? `USD ${proposta.precoPropostaCliente.toFixed(2)}` : 'N/A'}</td>
-                  <td>${proposta.criadoEm.toLocaleDateString('pt-BR')}</td>
+                  <td>${proposta.criadoEm ? proposta.criadoEm.toLocaleDateString('pt-BR') : ''}</td>
                   <td>${proposta.validadeProposta ? proposta.validadeProposta.toLocaleDateString('pt-BR') : 'N/A'}</td>
                 </tr>
-              `).join('')}
+              `).join('')
+            }
             </tbody>
           </table>
           

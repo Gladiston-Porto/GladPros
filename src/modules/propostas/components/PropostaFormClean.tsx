@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -313,14 +314,15 @@ export default function PropostaForm() {
         })
       })
 
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Erro ao processar assinatura')
-      }
+  if (!response.ok) {
+    const error = await response.json()
+    throw new Error(error.error || 'Erro ao processar assinatura')
+  }
 
-      const result = await response.json()
-      
-      toast({
+  // response body not required here; proceed after success
+  await response.json()
+
+  toast({
         title: 'Assinatura Confirmada',
         description: 'Proposta assinada digitalmente com sucesso!'
       })
@@ -918,7 +920,7 @@ export default function PropostaForm() {
           <CardContent className="space-y-4">
             {formData.etapas.length === 0 ? (
               <p className="text-center py-8 text-muted-foreground">
-                Nenhuma etapa adicionada. Clique em "Adicionar Etapa" para começar.
+                Nenhuma etapa adicionada. Clique em &quot;Adicionar Etapa&quot; para começar.
               </p>
             ) : (
               formData.etapas.map((etapa, index) => (
@@ -989,7 +991,7 @@ export default function PropostaForm() {
           <CardContent className="space-y-4">
             {formData.materiais.length === 0 ? (
               <p className="text-center py-8 text-muted-foreground">
-                Nenhum material adicionado. Clique em "Adicionar Material" para começar.
+                Nenhum material adicionado. Clique em &quot;Adicionar Material&quot; para começar.
               </p>
             ) : (
               formData.materiais.map((material, index) => (

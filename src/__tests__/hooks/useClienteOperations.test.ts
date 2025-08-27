@@ -68,13 +68,13 @@ describe('useClienteOperations', () => {
         useClienteOperations({ onSuccess, onError })
       )
 
-      let error: Error | null = null
       try {
         await act(async () => {
           await result.current.createCliente(mockCreateInput)
         })
-      } catch (e) {
-        error = e as Error
+      } catch (_e) {
+        // expected
+        void _e
       }
 
       expect(onError).toHaveBeenCalledWith('Erro ao criar cliente')
@@ -82,7 +82,7 @@ describe('useClienteOperations', () => {
     })
 
     it('sets loading state during create', async () => {
-      let resolveCreate: (value: any) => void
+      let resolveCreate: (value: unknown) => void
       const createPromise = new Promise(resolve => {
         resolveCreate = resolve
       })
@@ -106,7 +106,7 @@ describe('useClienteOperations', () => {
         resolveCreate!({
           ok: true,
           json: async () => ({ id: 1, ...mockCreateInput }),
-        })
+        } as unknown as Response)
       })
 
       // Should not be loading anymore
@@ -159,8 +159,9 @@ describe('useClienteOperations', () => {
         await act(async () => {
           await result.current.updateCliente(999, mockUpdateInput)
         })
-      } catch (e) {
+      } catch (_e) {
         // Expected error
+        void _e
       }
 
       expect(onError).toHaveBeenCalledWith('Cliente não encontrado')
@@ -210,8 +211,9 @@ describe('useClienteOperations', () => {
         await act(async () => {
           await result.current.deleteCliente(1)
         })
-      } catch (e) {
+      } catch (_e) {
         // Expected error
+        void _e
       }
 
       expect(onError).toHaveBeenCalledWith('Não autorizado')
@@ -234,8 +236,9 @@ describe('useClienteOperations', () => {
         await act(async () => {
           await result.current.createCliente(mockCreateInput)
         })
-      } catch (e) {
+      } catch (_e) {
         // Expected error
+        void _e
       }
 
       expect(onError).toHaveBeenCalledWith('Network error')

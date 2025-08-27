@@ -146,7 +146,7 @@ export default function UsersListPage() {
             onSelectedChange={setSelectedIds}
             sortKey={sortKey}
             sortDir={sortDir}
-            onSortChange={(k: any, d: any) => { setSortKey(k); setSortDir(d); }}
+            onSortChange={(k: 'nome' | 'email' | 'role' | 'ativo' | 'criadoEm', d: 'asc' | 'desc') => { setSortKey(k); setSortDir(d); }}
           />
         )}
       </Panel>

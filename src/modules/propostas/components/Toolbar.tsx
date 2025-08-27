@@ -1,8 +1,6 @@
 // src/modules/propostas/components/Toolbar.tsx
 "use client";
-import { Search, Download, ChevronDown } from "lucide-react";
-import { Plus } from "lucide-react";
-import { Loader2 } from "lucide-react";
+import { Search, Download, ChevronDown, Plus } from "lucide-react";
 import Link from "next/link";
 // ...existing code...
 import { useState, useRef, useEffect } from "react";
@@ -49,10 +47,9 @@ export default function Toolbar({
   const exportRef = useRef<HTMLDivElement>(null);
   const [statusMenuOpen, setStatusMenuOpen] = useState(false);
   const [clienteMenuOpen, setClienteMenuOpen] = useState(false);
-  const [scopeMenuOpen, setScopeMenuOpen] = useState(false);
+  // scope menu state not used in this component
   const statusRef = useRef<HTMLDivElement>(null);
   const clienteRef = useRef<HTMLDivElement>(null);
-  const scopeRef = useRef<HTMLDivElement>(null);
   const { showToast } = useToast();
 
   const handleExport = async (format: 'csv' | 'pdf') => {
@@ -145,9 +142,7 @@ export default function Toolbar({
       if (clienteRef.current && !clienteRef.current.contains(event.target as Node)) {
         setClienteMenuOpen(false);
       }
-      if (scopeRef.current && !scopeRef.current.contains(event.target as Node)) {
-        setScopeMenuOpen(false);
-      }
+  // scopeRef kept for future use; no action needed when clicking outside it
     }
 
     document.addEventListener('mousedown', handleClickOutside);

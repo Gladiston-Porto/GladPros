@@ -6,24 +6,25 @@ import { verifyAuthJWT } from "@/lib/jwt"
 import { hasTokenVersionColumn } from "@/lib/db-metadata"
 
 export async function POST(request: Request) {
-  const payload: Record<string, any> = { message: 'Logout realizado com sucesso' };
+  // simple, well-known payload shape — let inference handle the type
+  const payload = { message: 'Logout realizado com sucesso' };
 
   try {
-    // Extrair cookies (Next.js Web API Request)
-    const cookieHeader = (request.headers as any).get?.("cookie") as string | undefined;
-    const sessionToken = cookieHeader
+  // Extrair cookies (Next.js Web API Request)
+  const cookieHeader = request.headers.get("cookie") as string | undefined;
+  const sessionToken = cookieHeader
       ?.split(';')
       .map((p) => p.trim())
       .find((p) => p.startsWith('sessionToken='))
       ?.split('=')[1];
-    const cookieAuthToken = cookieHeader
+  const cookieAuthToken = cookieHeader
       ?.split(';')
       .map((p) => p.trim())
       .find((p) => p.startsWith('authToken='))
       ?.split('=')[1];
 
     // Accept Authorization: Bearer <token> as alternative
-    const authHeader = (request.headers as any).get?.('authorization') as string | undefined;
+  const authHeader = request.headers.get('authorization') as string | undefined;
     const headerToken = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : undefined;
     const authToken = cookieAuthToken ?? headerToken;
 
@@ -31,8 +32,8 @@ export async function POST(request: Request) {
       try {
         const { SecurityService } = await import('@/lib/security');
         await SecurityService.revokeSessionByToken(sessionToken);
-      } catch (e) {
-        console.warn('[Logout] Falha ao revogar sessão por token:', e);
+      } catch (_err) {
+        console.warn('[Logout] Falha ao revogar sessão por token:', _err);
       }
     }
 
@@ -49,12 +50,12 @@ export async function POST(request: Request) {
             // Falha transitória: ignore
           }
         }
-      } catch (e: any) {
+      } catch {
         // token inválido, ignore
       }
     }
-  } catch (e) {
-    console.warn('[Logout] Falha ao processar cookies:', e);
+  } catch (_e) {
+    console.warn('[Logout] Falha ao processar cookies:', _e);
   }
 
   // Limpar cookies de autenticação e sessão

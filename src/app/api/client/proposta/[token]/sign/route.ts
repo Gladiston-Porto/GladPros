@@ -23,6 +23,8 @@ export async function POST(
       ip, 
       userAgent 
     } = assinaturaClienteSchema.parse(body)
+    // aceitação de termos é validada pela schema; referenciamos para evitar warning
+    void aceiteTermos
 
     // Validate token and find proposal
     const proposta = await validateTokenPublico(token)
@@ -104,7 +106,7 @@ export async function POST(
       return NextResponse.json(
         { 
           error: 'Dados inválidos',
-          details: error.issues.map((e: any) => e.message)
+          details: error.issues.map((issue) => issue.message)
         },
         { status: 400 }
       )

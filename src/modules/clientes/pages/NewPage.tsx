@@ -29,27 +29,28 @@ export default function NewPage() {
         }
         const msg: string = error?.error || error?.message || '';
         const fieldErrors: Record<string, string> = {};
-        if (/e-mail.*cadastrado|E-mail.*cadastrado/i.test(msg)) {
-          fieldErrors.email = msg;
-        }
-        if (/Documento.*cadastrado/i.test(msg)) {
-          const d: any = data;
-          if (d?.tipo === 'PJ' && d?.ein) fieldErrors.ein = msg;
-          if (d?.tipo === 'PF') {
-            if (d?.tipoDocumentoPF === 'SSN' && d?.ssn) fieldErrors.ssn = msg;
-            if (d?.tipoDocumentoPF === 'ITIN' && d?.itin) fieldErrors.itin = msg;
+          if (/e-mail.*cadastrado|E-mail.*cadastrado/i.test(msg)) {
+            fieldErrors.email = msg;
           }
-        }
+          if (/Documento.*cadastrado/i.test(msg)) {
+        const d = data as unknown as Record<string, unknown>;
+            if (d?.tipo === 'PJ' && typeof d['ein'] === 'string' && d['ein']) fieldErrors.ein = msg;
+            if (d?.tipo === 'PF') {
+          if ((d?.tipoDocumentoPF as string) === 'SSN' && typeof d['ssn'] === 'string' && d['ssn']) fieldErrors.ssn = msg;
+          if ((d?.tipoDocumentoPF as string) === 'ITIN' && typeof d['itin'] === 'string' && d['itin']) fieldErrors.itin = msg;
+            }
+          }
         if (Object.keys(fieldErrors).length) throw { message: msg || 'Dados inválidos', fieldErrors };
         throw new Error(msg || 'Erro ao criar cliente');
       }
 
       showToast({ title: 'Sucesso', message: 'Cliente criado com sucesso', type: 'success' });
       router.push('/clientes');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro ao criar cliente:', error);
-      if (error?.details) throw error;
-      showToast({ title: 'Erro', message: error.message || 'Erro ao criar cliente', type: 'error' });
+      if ((error as { details?: unknown })?.details) throw error;
+      const msg = (error as { message?: string })?.message ?? String(error);
+      showToast({ title: 'Erro', message: msg || 'Erro ao criar cliente', type: 'error' });
     } finally {
       setLoading(false);
     }

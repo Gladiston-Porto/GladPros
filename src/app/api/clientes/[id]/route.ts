@@ -6,7 +6,6 @@ import {
   sanitizeClienteInput, 
   encryptClienteData, 
   checkDocumentoExists, 
-  checkEmailExists,
   logClienteAudit,
   calculateClienteDiff,
   formatTelefone,
@@ -24,8 +23,8 @@ export async function GET(
   ctx: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Verificar permissão de leitura
-    const user = await requireClientePermission(request, 'canRead')
+  // Verificar permissão de leitura
+  const user = await requireClientePermission(request, 'canRead')
     
     // Validar parâmetros
   const { id } = clienteParamsSchema.parse(await ctx.params)
@@ -63,8 +62,8 @@ export async function GET(
       )
     }
     
-    // Preparar resposta base
-    const response: any = {
+  // Preparar resposta base
+  const response: Record<string, unknown> = {
       id: cliente.id,
       tipo: cliente.tipo,
       nomeCompleto: cliente.nomeCompleto,
@@ -88,8 +87,8 @@ export async function GET(
     if (ClientePermissions.canViewDocuments(user.role) && cliente.documentoEnc) {
       try {
         response.documento = await decryptDoc(cliente.documentoEnc)
-      } catch (error) {
-        console.warn('Erro ao descriptografar documento:', error)
+      } catch (err) {
+        console.warn('Erro ao descriptografar documento:', err)
         // Não falha a operação, apenas não retorna o documento
       }
     }
@@ -145,11 +144,14 @@ export async function PUT(
     // Obter dados do body
     const body = await request.json()
     
-    // Validar dados
-    const validData = clienteUpdateSchema.parse(body)
+  // Validar dados
+  const validData = clienteUpdateSchema.parse(body)
     
-    // Sanitizar entrada
-    const sanitizedData = sanitizeClienteInput(validData)
+  // Sanitizar entrada (usar Record<string,unknown> para evitar explicit any)
+  // sanitizeClienteInput returns a plain object; allow flexible indexing for now
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const sanitizedData = sanitizeClienteInput(validData) as Record<string, any>
+
     
     // Buscar cliente atual
     const clienteAtual = await prisma.cliente.findUnique({
@@ -180,8 +182,8 @@ export async function PUT(
       )
     }
     
-    // Preparar dados para atualização
-    const updateData: any = {}
+  // Preparar dados para atualização
+  const updateData: Record<string, unknown> = {}
     
     // Campos simples
     const simpleFields = [
@@ -288,10 +290,10 @@ export async function PUT(
     })
     
     // Calcular diff para auditoria
-    const diff = calculateClienteDiff(
-      clienteAtual,
-      { ...sanitizedData, status: updateData.status }
-    )
+     const diff = calculateClienteDiff(
+       clienteAtual,
+       { ...(sanitizedData as Record<string, unknown>), status: updateData.status }
+     )
     
     // Registrar auditoria se houve mudanças
     if (Object.keys(diff).length > 0) {
@@ -326,9 +328,10 @@ export async function PUT(
   } catch (error) {
     console.error('[API] PUT /api/clientes/[id] error:', error)
 
-    // Tratar violações de unicidade (P2002) com mensagens amigáveis
-    const anyErr: any = error as any
-    if (anyErr && typeof anyErr.code === 'string' && anyErr.code === 'P2002') {
+  // Tratar violações de unicidade (P2002) com mensagens amigáveis
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const anyErr: any = error as any
+  if (anyErr && typeof anyErr.code === 'string' && anyErr.code === 'P2002') {
       const target = anyErr.meta?.target
       let message = 'Dados duplicados'
       if (Array.isArray(target)) {

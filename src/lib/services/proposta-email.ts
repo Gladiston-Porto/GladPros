@@ -27,21 +27,43 @@ interface PropostaEmailOptions {
   /**
    * Dados adicionais para o template
    */
-  templateData?: Record<string, any>
+  templateData?: Record<string, unknown>
 }
+
+type MailAttachment = { filename: string; content: Buffer; contentType?: string }
+
+type MailOptions = {
+  from: string
+  to: string | string[]
+  cc?: string[]
+  subject: string
+  html?: string
+  text?: string
+  attachments?: MailAttachment[]
+}
+
+type TransporterLike = {
+  sendMail(options: MailOptions): Promise<{ messageId?: string }>
+  verify?(): Promise<void>
+}
+
+type SignatureData = { clientName: string; signedAt: string | Date; ip?: string }
 
 /**
  * Serviço para envio de emails relacionados a propostas
  */
 export class PropostaEmailService {
-  private static transporter: any | null = null
+  // nodemailer types are not required at the moment; use unknown-safe typing here
+  private static transporter: unknown | null = null
 
   /**
    * Configura o transporter de email
    */
-  private static getTransporter(): any {
+  private static getTransporter(): unknown {
     if (!this.transporter) {
-      this.transporter = nodemailer.createTransporter({
+  // createTransport returns a transporter object; keep its type opaque here
+  // to avoid adding type dependencies in this refactor sweep.
+      this.transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST || 'localhost',
         port: parseInt(process.env.SMTP_PORT || '587'),
         secure: process.env.SMTP_SECURE === 'true',
@@ -91,7 +113,7 @@ export class PropostaEmailService {
         options
       )
 
-      const attachments: any[] = []
+  const attachments: Array<{ filename: string; content: Buffer; contentType?: string }> = []
 
       // Incluir PDF se solicitado
       if (options.includePDF) {
@@ -113,7 +135,7 @@ export class PropostaEmailService {
       }
 
       // Configurar email
-      const mailOptions: any = {
+  const mailOptions: MailOptions = {
         from: process.env.SMTP_FROM || 'GladPros <noreply@gladpros.com>',
         to: proposta.contatoEmail,
         subject: emailTemplate.subject,
@@ -123,8 +145,11 @@ export class PropostaEmailService {
       }
 
       // Enviar email
-      const transporter = this.getTransporter()
-      const info = await transporter.sendMail(mailOptions)
+  // transporter has opaque type; use runtime call and assert via any to avoid TS churn
+  // transporter is stored as unknown to avoid pulling nodemailer types in this sweep.
+  // Cast to TransporterLike at the narrow call site.
+  const transporter = this.getTransporter() as TransporterLike
+  const info = await transporter.sendMail(mailOptions)
 
       return {
         success: true,
@@ -164,7 +189,7 @@ export class PropostaEmailService {
         }
       )
 
-      const mailOptions: any = {
+      const mailOptions: MailOptions = {
         from: process.env.SMTP_FROM || 'GladPros <noreply@gladpros.com>',
         to: process.env.NOTIFICATION_EMAIL || 'admin@gladpros.com',
         cc: process.env.SALES_EMAIL ? [process.env.SALES_EMAIL] : undefined,
@@ -173,7 +198,7 @@ export class PropostaEmailService {
         text: emailTemplate.text
       }
 
-      const transporter = this.getTransporter()
+      const transporter = this.getTransporter() as TransporterLike
       await transporter.sendMail(mailOptions)
 
       return { success: true }
@@ -209,7 +234,7 @@ export class PropostaEmailService {
         }
       )
 
-      const mailOptions: any = {
+      const mailOptions: MailOptions = {
         from: process.env.SMTP_FROM || 'GladPros <noreply@gladpros.com>',
         to: proposta.contatoEmail,
         subject: emailTemplate.subject,
@@ -217,7 +242,7 @@ export class PropostaEmailService {
         text: emailTemplate.text
       }
 
-      const transporter = this.getTransporter()
+      const transporter = this.getTransporter() as TransporterLike
       await transporter.sendMail(mailOptions)
 
       return { success: true }
@@ -253,7 +278,8 @@ export class PropostaEmailService {
         }
 
       case 'reminder':
-        const daysOverdue = options.templateData?.daysOverdue || 0
+  const rawDays = options.templateData?.daysOverdue
+  const daysOverdue = typeof rawDays === 'number' ? rawDays : 0
         return {
           subject: `Lembrete: Proposta ${proposta.numeroProposta} aguarda sua análise`,
           html: this.generateReminderHTML(proposta, proposalUrl, daysOverdue),
@@ -261,7 +287,7 @@ export class PropostaEmailService {
         }
 
       case 'signed':
-        const signatureData = options.templateData || {}
+        const signatureData = this.parseSignatureData(options.templateData)
         return {
           subject: `✅ Proposta ${proposta.numeroProposta} foi assinada`,
           html: this.generateSignedHTML(proposta, signatureData),
@@ -277,6 +303,16 @@ export class PropostaEmailService {
 
       default:
         throw new Error(`Template não reconhecido: ${template}`)
+    }
+  }
+
+  // Normalize/parse signature data passed in templateData
+  private static parseSignatureData(input: unknown): SignatureData {
+    const s = (input as Record<string, unknown>) || {}
+    return {
+      clientName: typeof s.clientName === 'string' ? s.clientName : 'Cliente',
+      signedAt: s.signedAt ? (s.signedAt as string | Date) : new Date(),
+      ip: typeof s.ip === 'string' ? s.ip : undefined
     }
   }
 
@@ -470,7 +506,7 @@ Email: contato@gladpros.com
    */
   private static generateSignedHTML(
     proposta: PropostaWithRelations,
-    signatureData: any
+    signatureData: SignatureData
   ): string {
     return `
     <!DOCTYPE html>
@@ -522,7 +558,7 @@ Email: contato@gladpros.com
    */
   private static generateSignedText(
     proposta: PropostaWithRelations,
-    signatureData: any
+    signatureData: SignatureData
   ): string {
     return `
 Proposta Assinada!
@@ -612,9 +648,9 @@ Esta é uma notificação automática do sistema GladPros.
    */
   static async testEmailConfiguration(): Promise<{ success: boolean; error?: string }> {
     try {
-      const transporter = this.getTransporter()
-      await transporter.verify()
-      
+      const transporter = this.getTransporter() as TransporterLike
+      if (transporter.verify) await transporter.verify()
+
       return { success: true }
     } catch (error) {
       return {

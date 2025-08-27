@@ -3,9 +3,7 @@
 import React, { useState } from 'react'
 import { StatusProposta, StatusPermite } from '@/types/prisma-temp'
 import { 
-  PropostaFormData, 
   TotaisCalculados,
-  ClienteInfo,
   PrazosInfo,
   ComercialInfo,
   PermiteInfo,

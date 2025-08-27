@@ -1,6 +1,5 @@
 // src/modules/propostas/components/PropostasTable.tsx
 "use client";
-import { useState } from "react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,14 +10,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
+// using native <table> markup here; UI Table primitives not used
 import { 
   Eye, 
   Edit, 

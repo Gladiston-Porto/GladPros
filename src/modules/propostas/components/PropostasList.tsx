@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { 
   Card, 
   CardContent, 
@@ -92,37 +92,36 @@ export default function PropostasList({ userRole }: PropostasListProps) {
   
   const { toast } = useToast()
 
-  // Load propostas
-  const loadPropostas = async (reset = false) => {
+  // Load propostas (stable with useCallback)
+  const loadPropostas = useCallback(async (reset = false) => {
     try {
       setLoading(true)
       const params = new URLSearchParams()
-      
+
       if (!reset && cursor) params.append('cursor', cursor)
       if (filters.busca) params.append('busca', filters.busca)
-      if (filters.status) params.append('status', filters.status)
-      if (filters.clienteId) params.append('clienteId', filters.clienteId)
+      if (filters.status) params.append('status', filters.status as string)
+      if (filters.clienteId) params.append('clienteId', String(filters.clienteId))
       if (filters.dataInicio) params.append('dataInicio', filters.dataInicio)
       if (filters.dataFim) params.append('dataFim', filters.dataFim)
 
       const response = await fetch(`/api/propostas?${params}`)
-      
+
       if (!response.ok) {
         throw new Error('Erro ao carregar propostas')
       }
 
       const data = await response.json()
-      
+
       if (reset) {
         setPropostas(data.propostas)
       } else {
         setPropostas(prev => [...prev, ...data.propostas])
       }
-      
+
       setCursor(data.nextCursor)
       setHasMore(data.hasMore)
-      
-    } catch (error) {
+    } catch {
       toast({
         title: 'Erro',
         description: 'Não foi possível carregar as propostas',
@@ -131,20 +130,20 @@ export default function PropostasList({ userRole }: PropostasListProps) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [cursor, filters, toast])
 
-  // Load clients for filter
-  const loadClientes = async () => {
+  // Load clients for filter (stable)
+  const loadClientes = useCallback(async () => {
     try {
       const response = await fetch('/api/clientes?limit=1000')
       if (response.ok) {
         const data = await response.json()
         setClientes(data.clientes || [])
       }
-    } catch (error) {
+    } catch {
       // Silent fail for filter options
     }
-  }
+  }, [])
 
   // Delete proposta
   const handleDelete = async (id: string) => {
@@ -162,7 +161,7 @@ export default function PropostasList({ userRole }: PropostasListProps) {
         title: 'Sucesso',
         description: 'Proposta excluída com sucesso'
       })
-    } catch (error) {
+  } catch {
       toast({
         title: 'Erro',
         description: 'Não foi possível excluir a proposta',
@@ -200,7 +199,7 @@ export default function PropostasList({ userRole }: PropostasListProps) {
   useEffect(() => {
     loadPropostas(true)
     loadClientes()
-  }, [])
+  }, [loadPropostas, loadClientes])
 
   return (
     <div className="space-y-6">

@@ -1,0 +1,62 @@
+﻿[
+    {
+        "file":  "C:\\Users\\gladi\\Documents\\gladpros-nextjs\\src\\types\\prisma-temp.ts",
+        "messages":  39,
+        "errors":  0,
+        "warnings":  39
+    },
+    {
+        "file":  "C:\\Users\\gladi\\Documents\\gladpros-nextjs\\src\\lib\\services\\proposta-rbac.ts",
+        "messages":  20,
+        "errors":  2,
+        "warnings":  18
+    },
+    {
+        "file":  "C:\\Users\\gladi\\Documents\\gladpros-nextjs\\src\\modules\\propostas\\ui\\ClientPropostaView.tsx",
+        "messages":  12,
+        "errors":  6,
+        "warnings":  6
+    },
+    {
+        "file":  "C:\\Users\\gladi\\Documents\\gladpros-nextjs\\src\\modules\\propostas\\pages\\ListPage.tsx",
+        "messages":  10,
+        "errors":  4,
+        "warnings":  6
+    },
+    {
+        "file":  "C:\\Users\\gladi\\Documents\\gladpros-nextjs\\src\\lib\\helpers\\cliente.ts",
+        "messages":  9,
+        "errors":  3,
+        "warnings":  6
+    },
+    {
+        "file":  "C:\\Users\\gladi\\Documents\\gladpros-nextjs\\src\\lib\\services\\proposta-email.ts",
+        "messages":  9,
+        "errors":  0,
+        "warnings":  9
+    },
+    {
+        "file":  "C:\\Users\\gladi\\Documents\\gladpros-nextjs\\src\\lib\\services\\proposta-pdf.ts",
+        "messages":  8,
+        "errors":  1,
+        "warnings":  7
+    },
+    {
+        "file":  "C:\\Users\\gladi\\Documents\\gladpros-nextjs\\src\\modules\\propostas\\components\\PropostaFormClean.tsx",
+        "messages":  8,
+        "errors":  5,
+        "warnings":  3
+    },
+    {
+        "file":  "C:\\Users\\gladi\\Documents\\gladpros-nextjs\\src\\modules\\clientes\\pages\\DetailPage.tsx",
+        "messages":  8,
+        "errors":  0,
+        "warnings":  8
+    },
+    {
+        "file":  "C:\\Users\\gladi\\Documents\\gladpros-nextjs\\src\\modules\\propostas\\components\\PropostaForm.tsx",
+        "messages":  8,
+        "errors":  4,
+        "warnings":  4
+    }
+]

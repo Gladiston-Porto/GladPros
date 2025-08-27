@@ -11,10 +11,12 @@ interface EditClientePageProps {
 }
 
 export default function DetailPage({ params }: EditClientePageProps) {
-  const { id } = (params && typeof params === 'object' && 'id' in (params as any)) ? (params as any).id : React.use(params as any);
+  // extrai id de forma segura
+  const resolvedParams = (params as { id: string }) || { id: '' };
+  const id = typeof resolvedParams === 'object' && 'id' in resolvedParams ? resolvedParams.id : '';
   const router = useRouter();
   const { showToast } = useToast();
-  const [cliente, setCliente] = useState<any>(null);
+  const [cliente, setCliente] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(true);
   const [operationLoading, setOperationLoading] = useState(false);
 
@@ -26,12 +28,13 @@ export default function DetailPage({ params }: EditClientePageProps) {
         if (!response.ok) {
           throw new Error('Cliente não encontrado');
         }
-        const data = await response.json();
-        if (!cancelled) setCliente(data);
-      } catch (error: any) {
+    const data = await response.json();
+  if (!cancelled) setCliente(data as Record<string, unknown>);
+      } catch (error: unknown) {
         if (cancelled) return;
         console.error('Erro ao carregar cliente:', error);
-        showToast({ title: 'Erro', message: error.message || 'Erro ao carregar cliente', type: 'error' });
+        const msg = (error as { message?: string })?.message ?? String(error);
+        showToast({ title: 'Erro', message: msg || 'Erro ao carregar cliente', type: 'error' });
         router.push('/clientes');
       } finally {
         if (!cancelled) setLoading(false);
@@ -40,7 +43,9 @@ export default function DetailPage({ params }: EditClientePageProps) {
 
     fetchCliente();
     return () => { cancelled = true };
-  }, [id]);
+  // include showToast and router in deps because they are stable or intentionally referenced
+  // router comes from next/navigation and is safe to include; showToast from context is stable
+  }, [id, router, showToast]);
 
   const handleSubmit = async (data: ClienteCreateInput | ClienteUpdateInput) => {
     setOperationLoading(true);
@@ -60,11 +65,11 @@ export default function DetailPage({ params }: EditClientePageProps) {
         const fieldErrors: Record<string, string> = {};
         if (/e-mail.*cadastrado|E-mail.*cadastrado/i.test(msg)) fieldErrors.email = msg;
         if (/Documento.*cadastrado/i.test(msg)) {
-          const d: any = data;
-          if (d?.tipo === 'PJ' && d?.ein) fieldErrors.ein = msg;
+          const d = data as unknown as Record<string, unknown>;
+          if (d?.tipo === 'PJ' && typeof d['ein'] === 'string' && d['ein']) fieldErrors.ein = msg;
           if (d?.tipo === 'PF') {
-            if (d?.tipoDocumentoPF === 'SSN' && d?.ssn) fieldErrors.ssn = msg;
-            if (d?.tipoDocumentoPF === 'ITIN' && d?.itin) fieldErrors.itin = msg;
+            if ((d?.tipoDocumentoPF as string) === 'SSN' && typeof d['ssn'] === 'string' && d['ssn']) fieldErrors.ssn = msg;
+            if ((d?.tipoDocumentoPF as string) === 'ITIN' && typeof d['itin'] === 'string' && d['itin']) fieldErrors.itin = msg;
           }
         }
         if (Object.keys(fieldErrors).length) throw { message: msg || 'Dados inválidos', fieldErrors };
@@ -73,9 +78,10 @@ export default function DetailPage({ params }: EditClientePageProps) {
 
       showToast({ title: 'Sucesso', message: 'Cliente atualizado com sucesso', type: 'success' });
       router.push('/clientes');
-    } catch (error: any) {
-      if (error?.details) throw error;
-      showToast({ title: 'Erro', message: error.message || 'Erro ao atualizar cliente', type: 'error' });
+    } catch (error: unknown) {
+      if ((error as { details?: unknown })?.details) throw error;
+      const msg = (error as { message?: string })?.message ?? String(error);
+      showToast({ title: 'Erro', message: msg || 'Erro ao atualizar cliente', type: 'error' });
     } finally {
       setOperationLoading(false);
     }

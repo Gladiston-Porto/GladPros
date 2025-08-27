@@ -9,11 +9,12 @@ export class AuditService {
     entidade: string,
     entidadeId: number | string,
     acao: string,
-    diff?: Record<string, any>
+  diff?: Record<string, unknown>
   ) {
     try {
-      const auditModel = (prisma as any)?.auditLog
-      if (!auditModel || typeof auditModel.create !== 'function') {
+  // prisma may be a client without the auditLog delegate in certain envs (tests/legacy)
+  const auditModel = (prisma as unknown as { auditLog?: { create?: (args?: unknown) => Promise<unknown> } })?.auditLog
+  if (!auditModel || typeof auditModel.create !== 'function') {
         // Tabela/modelo de auditoria não disponível: não falhar
         return null
       }
@@ -41,8 +42,8 @@ export class AuditService {
     limit: number = 50
   ) {
     try {
-      const auditModel = (prisma as any)?.auditLog
-      if (!auditModel || typeof auditModel.findMany !== 'function') {
+  const auditModel = (prisma as unknown as { auditLog?: { findMany?: (args?: unknown) => Promise<unknown[]> } })?.auditLog
+  if (!auditModel || typeof auditModel.findMany !== 'function') {
         return []
       }
       const history = await auditModel.findMany({

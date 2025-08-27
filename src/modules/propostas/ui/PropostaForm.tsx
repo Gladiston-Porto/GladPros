@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useMemo, useState, useEffect, useCallback } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { useRouter } from 'next/navigation'
 import { StatusProposta, StatusPermite } from '@/types/prisma-temp'
 import { useToast } from '@/components/ui/Toaster'
@@ -30,14 +30,7 @@ import { useAutoSave } from './useAutoSave'
 import { propostaFormSchema } from './validation'
 
 // Interface para clientes da API
-interface ClienteAPI {
-  id: string
-  nomeCompleto?: string
-  razaoSocial?: string
-  nomeFantasia?: string
-  email: string
-  telefone?: string
-}
+// ClienteAPI interface removed (not used)
 
 export default function PropostaFormNova() {
   const [loading, setLoading] = useState(false)
@@ -165,12 +158,16 @@ export default function PropostaFormNova() {
   const { debouncedSave } = useAutoSave(formData, !loading)
 
   // Trigger auto-save quando dados mudam (com debounce interno)
+  // debouncedSave is intentionally omitted from the deps array because it is
+  // stable from the custom hook and re-including it causes unwanted re-runs.
+  // Keeping formData in deps triggers save when the payload changes.
   useEffect(() => {
     // Só salvar se tiver dados mínimos
     if (cliente.id && escopo.length > 5) {
       debouncedSave(formData)
     }
-  }, [formData]) // Removendo debouncedSave das dependências para evitar re-execuções desnecessárias
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- debouncedSave is stable by design
+  }, [formData, cliente.id, escopo.length])
 
   // Handlers utilitários
   const addMaterial = () =>
@@ -248,7 +245,7 @@ export default function PropostaFormNova() {
 
   // Root styles vars for brand colors
   const rootStyle: React.CSSProperties = {
-    // @ts-ignore CSS custom props
+  // @ts-expect-error CSS custom props
     "--gp-blue": gp.blue,
     "--gp-orange": gp.orange,
   }
@@ -516,7 +513,7 @@ export default function PropostaFormNova() {
                   <div className="col-span-12 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Label>Status</Label>
-                      <Select value={e.status} onChange={(ev) => setEtapas((arr) => arr.map((x) => (x.id === e.id ? { ...x, status: ev.target.value as any } : x)))} className="w-auto">
+                      <Select value={e.status} onChange={(ev) => setEtapas((arr) => arr.map((x) => (x.id === e.id ? { ...x, status: ev.target.value as Etapa['status'] } : x)))} className="w-auto">
                         <option value="planejada">Planejada</option>
                         <option value="opcional">Opcional</option>
                         <option value="removida">Removida</option>
@@ -559,7 +556,7 @@ export default function PropostaFormNova() {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
               <div>
                 <Label required>Gatilho</Label>
-                <Select value={faturamento.gatilho} onChange={(e) => setFaturamento({ ...faturamento, gatilho: e.target.value as any })}>
+                <Select value={faturamento.gatilho} onChange={(e) => setFaturamento({ ...faturamento, gatilho: e.target.value as FaturamentoInfo['gatilho'] })}>
                   <option value="na_aprovacao">Na aprovação</option>
                   <option value="por_marcos">Por marcos</option>
                   <option value="na_entrega">Na entrega</option>

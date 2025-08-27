@@ -2,11 +2,29 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/server/db'
 import { clienteFiltersSchema } from '@/lib/validations/cliente'
 
-function buildWhere(filters: any) {
-  const where: any = {}
-  if (filters?.q && String(filters.q).trim()) {
-    const q = String(filters.q).trim()
-    where.OR = [
+type ClienteRow = {
+  id: number | string
+  tipo?: string
+  nomeCompleto?: string | null
+  nomeFantasia?: string | null
+  razaoSocial?: string | null
+  email?: string | null
+  telefone?: string | null
+  cidade?: string | null
+  estado?: string | null
+  status?: string | null
+  criadoEm?: Date | string
+  nomeCompletoOuRazao?: string
+  ativo?: boolean
+}
+
+function buildWhere(filters: unknown) {
+  // keep a flexible shape for the dynamic where object
+  const where: Record<string, unknown> = {}
+  const f = filters as Record<string, unknown>
+  if (f?.q && String((f.q as unknown) || '').trim()) {
+    const q = String(f.q).trim()
+    ;(where as Record<string, unknown>).OR = [
       { nomeCompleto: { contains: q, mode: 'insensitive' } },
       { razaoSocial: { contains: q, mode: 'insensitive' } },
       { nomeFantasia: { contains: q, mode: 'insensitive' } },
@@ -14,19 +32,20 @@ function buildWhere(filters: any) {
       { docLast4: { contains: q } },
     ]
   }
-  if (filters?.tipo && filters.tipo !== 'all') where.tipo = filters.tipo
-  if (filters?.ativo !== undefined && filters.ativo !== 'all') where.status = filters.ativo ? 'ATIVO' : 'INATIVO'
+  if (f?.tipo && f.tipo !== 'all') (where as Record<string, unknown>)['tipo'] = f.tipo
+  if (f?.ativo !== undefined && f.ativo !== 'all') (where as Record<string, unknown>)['status'] = ((f.ativo as unknown) === true) ? 'ATIVO' : 'INATIVO'
   return where
 }
 
 export async function POST(request: NextRequest) {
   try {
     const raw = await request.json().catch(() => ({}))
-    const filename = typeof raw?.filename === 'string' && raw.filename.trim() ? raw.filename : 'clientes'
-    let rows: any[] = Array.isArray(raw?.clientes) ? raw.clientes : []
+    const rawBody = raw as Record<string, unknown>
+    const filename = typeof rawBody?.filename === 'string' && String(rawBody.filename).trim() ? String(rawBody.filename) : 'clientes'
+  let rows: unknown[] = Array.isArray(rawBody?.clientes as unknown) ? (rawBody.clientes as unknown[]) : []
 
-    if (!rows.length && raw?.filters) {
-      const parsed = clienteFiltersSchema.partial().parse(raw.filters)
+    if (!rows.length && rawBody?.filters) {
+      const parsed = clienteFiltersSchema.partial().parse(rawBody.filters)
       const where = buildWhere(parsed)
       rows = await prisma.cliente.findMany({
         where,
@@ -45,7 +64,8 @@ export async function POST(request: NextRequest) {
         },
         orderBy: [{ status: 'desc' }, { atualizadoEm: 'desc' }],
       })
-      rows = rows.map((c) => ({
+
+    rows = (rows as ClienteRow[]).map((c: ClienteRow) => ({
         id: c.id,
         nomeCompletoOuRazao: c.tipo === 'PF' ? (c.nomeCompleto || '') : (c.nomeFantasia || c.razaoSocial || ''),
         tipo: c.tipo,
@@ -54,7 +74,7 @@ export async function POST(request: NextRequest) {
         cidade: c.cidade,
         estado: c.estado,
         ativo: c.status === 'ATIVO',
-        criadoEm: c.criadoEm.toISOString(),
+      criadoEm: c.criadoEm ? new Date(c.criadoEm).toISOString() : undefined,
       }))
     }
 
@@ -65,7 +85,7 @@ export async function POST(request: NextRequest) {
     const headers = ['ID', 'Nome/Empresa', 'Tipo', 'E-mail', 'Telefone', 'Cidade', 'Estado', 'Status', 'Criado Em']
     const lines = [
       headers.join(','),
-      ...rows.map((c) => [
+    ... (rows as ClienteRow[]).map((c: ClienteRow) => [
         c.id,
         c.nomeCompletoOuRazao || '',
         c.tipo || '',
@@ -74,8 +94,8 @@ export async function POST(request: NextRequest) {
         c.cidade || '',
         c.estado || '',
         c.ativo ? 'Ativo' : 'Inativo',
-        c.criadoEm ? new Date(c.criadoEm).toLocaleDateString('pt-BR') : '',
-      ].map((f: any) => `"${String(f).replace(/"/g, '""')}"`).join(','))
+      c.criadoEm ? new Date(c.criadoEm).toLocaleDateString('pt-BR') : '',
+  ].map((f: unknown) => `"${String(f).replace(/"/g, '""')}"`).join(','))
     ]
     const csv = lines.join('\n')
 
@@ -85,8 +105,8 @@ export async function POST(request: NextRequest) {
         'Content-Disposition': `attachment; filename="${filename}.csv"`,
       },
     })
-  } catch (e) {
-    console.error('Erro ao gerar CSV de clientes:', e)
+  } catch (_e) {
+    console.error('Erro ao gerar CSV de clientes:', _e)
     return NextResponse.json({ message: 'Erro interno do servidor' }, { status: 500 })
   }
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { 
   Card, 
@@ -41,7 +41,7 @@ import {
   Edit,
   Send,
   FileText,
-  CheckCircle,
+  // CheckCircle removed (unused)
   XCircle,
   Clock,
   User,
@@ -71,11 +71,11 @@ export default function PropostaDetails({ propostaId }: PropostaDetailsProps) {
   const { toast } = useToast()
 
   // Load proposta details
-  const loadProposta = async () => {
+  const loadProposta = useCallback(async () => {
     try {
       setLoading(true)
       const response = await fetch(`/api/propostas/${propostaId}`)
-      
+
       if (!response.ok) {
         if (response.status === 404) {
           toast({
@@ -91,8 +91,8 @@ export default function PropostaDetails({ propostaId }: PropostaDetailsProps) {
 
       const data = await response.json()
       setProposta(data)
-      
-    } catch (error) {
+
+    } catch {
       toast({
         title: 'Erro',
         description: 'Não foi possível carregar a proposta',
@@ -101,7 +101,7 @@ export default function PropostaDetails({ propostaId }: PropostaDetailsProps) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [propostaId, router, toast])
 
   // Send proposta
   const handleSend = async () => {
@@ -124,7 +124,7 @@ export default function PropostaDetails({ propostaId }: PropostaDetailsProps) {
       
       await loadProposta()
       
-    } catch (error) {
+    } catch {
       toast({
         title: 'Erro',
         description: 'Não foi possível enviar a proposta',
@@ -156,7 +156,7 @@ export default function PropostaDetails({ propostaId }: PropostaDetailsProps) {
       
       await loadProposta()
       
-    } catch (error) {
+    } catch {
       toast({
         title: 'Erro',
         description: 'Não foi possível cancelar a proposta',
@@ -169,7 +169,7 @@ export default function PropostaDetails({ propostaId }: PropostaDetailsProps) {
 
   useEffect(() => {
     loadProposta()
-  }, [propostaId])
+  }, [loadProposta])
 
   if (loading) {
     return (

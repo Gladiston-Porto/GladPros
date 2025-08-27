@@ -1,24 +1,24 @@
 // src/modules/propostas/pages/ListPage.tsx
 "use client";
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
+import type { StatusProposta } from '@/types/propostas'
 import Toolbar from "../components/Toolbar";
 import { Pagination } from "@/modules/clientes/ui/Pagination";
 import PropostasTable from "../components/PropostasTable";
 import { getPropostas, deleteProposta, duplicateProposta, sendProposta } from "../services/propostasApi";
-import { runBulkAction, needsExportWarning } from "../services/bulkService";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
 import type { PropostaDTO } from "../services/propostasApi";
 import { Panel } from "@/components/GladPros";
 import { useToast } from "@/components/ui/Toaster";
 
 export default function PropostasListPage() {
-  const { confirm, Dialog } = useConfirm();
+  const { Dialog } = useConfirm();
   const { showToast } = useToast();
   
   // Filters and pagination
   const [q, setQ] = useState("");
-  const [status, setStatus] = useState(""); // Show all by default
+  const [status, setStatus] = useState<StatusProposta | 'all' | ''>(""); // Show all by default
   const [clienteId, setClienteId] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -43,9 +43,9 @@ export default function PropostasListPage() {
   const load = useCallback(async (signal?: AbortSignal) => {
     setLoading(true);
     try {
-      const res = await getPropostas({ 
+    const res = await getPropostas({ 
         q, 
-        status: status as any, 
+  status: status === '' ? undefined : (status as StatusProposta | 'all'),
         clienteId: clienteId || undefined,
         page, 
         pageSize,
@@ -55,7 +55,8 @@ export default function PropostasListPage() {
       
       setData(res.data);
       setTotal(res.total);
-    } catch (error: any) {
+    } catch (err: unknown) {
+      const error = err as Error & { name?: string }
       if (error.name !== 'AbortError') {
         console.error('Erro ao carregar propostas:', error);
         // Remover showToast das dependências para evitar loop infinito
@@ -70,9 +71,10 @@ export default function PropostasListPage() {
       const response = await fetch('/api/clientes?pageSize=1000');
       if (response.ok) {
         const { data } = await response.json();
-        setClientes(data.map((c: any) => ({ id: c.id, nome: c.nome })));
+  setClientes(data.map((c: { id: string; nome: string }) => ({ id: c.id, nome: c.nome })));
       }
-    } catch (error) {
+    } catch (err: unknown) {
+      const error = err as Error
       console.error('Erro ao carregar clientes:', error);
     }
   }, []);
@@ -108,7 +110,8 @@ export default function PropostasListPage() {
       // Usar controlador para evitar requests desnecessários
       const controller = new AbortController();
       load(controller.signal);
-    } catch (error: any) {
+    } catch (err: unknown) {
+      const error = err as Error
       showToast({ 
         title: 'Erro', 
         message: error.message || 'Erro ao deletar proposta', 
@@ -128,7 +131,8 @@ export default function PropostasListPage() {
       // Usar controlador para evitar requests desnecessários
       const controller = new AbortController();
       load(controller.signal);
-    } catch (error: any) {
+    } catch (err: unknown) {
+      const error = err as Error
       showToast({ 
         title: 'Erro', 
         message: error.message || 'Erro ao duplicar proposta', 
@@ -148,7 +152,8 @@ export default function PropostasListPage() {
       // Usar controlador para evitar requests desnecessários
       const controller = new AbortController();
       load(controller.signal);
-    } catch (error: any) {
+    } catch (err: unknown) {
+      const error = err as Error
       showToast({ 
         title: 'Erro', 
         message: error.message || 'Erro ao enviar proposta', 
@@ -175,7 +180,7 @@ export default function PropostasListPage() {
         q={searchTerm}
         onQ={setSearchTerm}
         status={status}
-        onStatus={setStatus}
+    onStatus={(v: string) => setStatus((v as StatusProposta) || '')}
         clienteId={clienteId}
         onClienteId={setClienteId}
         total={total}

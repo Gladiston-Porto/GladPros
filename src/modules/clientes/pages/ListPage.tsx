@@ -6,7 +6,7 @@ import { Pagination } from "@/modules/clientes/ui/Pagination";
 import Toolbar from "../components/Toolbar";
 import ClientesTable from "../components/ClientesTable";
 import { getClientes, deleteCliente, toggleClienteStatus } from "../services/clientesApi";
-import { runBulkAction, needsExportWarning } from "../services/bulkService";
+import { runBulkAction } from "../services/bulkService";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
 import type { ClienteDTO } from "@/types/cliente";
 import { Panel } from "@/components/GladPros";
@@ -38,9 +38,10 @@ export default function ClientesListPage() {
   const load = useCallback(async (signal?: AbortSignal) => {
     setLoading(true);
     try {
+      const tipoArg = tipo === 'PF' || tipo === 'PJ' ? tipo : 'all';
       const res = await getClientes({ 
         q, 
-        tipo: tipo as any, 
+        tipo: tipoArg as 'PF' | 'PJ' | 'all',
         ativo: status === 'ATIVO' ? true : status === 'INATIVO' ? false : 'all',
         page, 
         pageSize,
@@ -49,9 +50,10 @@ export default function ClientesListPage() {
       }, signal);
       setData(res.data);
       setTotal(res.total);
-    } catch (e: any) {
-      if (e?.name !== 'AbortError') {
-        console.error(e);
+    } catch (ex: unknown) {
+      const err = ex as { name?: string } | null;
+      if (err?.name !== 'AbortError') {
+        console.error(err ?? ex);
       }
     } finally {
       setLoading(false);
@@ -76,8 +78,8 @@ export default function ClientesListPage() {
       await deleteCliente(String(id));
       showToast({ title: 'Excluído', message: 'Cliente excluído com sucesso', type: 'success' });
       load();
-    } catch (error) {
-      console.error(error);
+    } catch (_error) {
+      console.error(_error);
       showToast({ title: 'Erro', message: 'Falha ao excluir cliente', type: 'error' });
     }
   }
@@ -96,8 +98,8 @@ export default function ClientesListPage() {
       await toggleClienteStatus(String(id), !currentStatus);
       showToast({ title: 'Sucesso', message: 'Status atualizado', type: 'success' });
       load(); // Recarregar lista
-    } catch (error) {
-      console.error(error);
+    } catch (_error) {
+      console.error(_error);
       showToast({ title: 'Erro', message: 'Erro ao alterar status do cliente', type: 'error' });
     }
   }
@@ -131,9 +133,9 @@ export default function ClientesListPage() {
         {loading ? (
           <div className="p-6 text-sm opacity-60">Carregando…</div>
         ) : (
-          <ClientesTable 
+            <ClientesTable 
             data={data} 
-            onEdit={(id: number) => (location.href = `/clientes/${id}`)} 
+            onEdit={(id: number) => { window.location.href = `/clientes/${id}` }} 
             onDelete={onDelete} 
             onToggleStatus={onToggleStatus}
             sortKey={sortKey}
@@ -164,6 +166,7 @@ export default function ClientesListPage() {
                     setSelectedIds([]);
                     load();
                   } catch (e) {
+                    void e
                     showToast({ title: 'Erro', message: 'Falha ao ativar selecionados', type: 'error' });
                   }
                 }}
@@ -179,6 +182,7 @@ export default function ClientesListPage() {
                     setSelectedIds([]);
                     load();
                   } catch (e) {
+                    void e
                     showToast({ title: 'Erro', message: 'Falha ao desativar selecionados', type: 'error' });
                   }
                 }}
@@ -188,13 +192,14 @@ export default function ClientesListPage() {
                 onClick={async () => {
                   const ok = await confirm({ title: 'Excluir selecionados', message: `Excluir ${selectedIds.length} cliente(s)? Essa ação não pode ser desfeita.`, confirmText: 'Excluir', tone: 'danger' });
                   if (!ok) return;
-                  try {
+                    try {
                     await runBulkAction({ action: 'delete', scope: 'selected', ids: selectedIds });
                     showToast({ title: 'Sucesso', message: 'Clientes excluídos', type: 'success' });
                     setSelectedIds([]);
                     load();
                   } catch (e) {
                     showToast({ title: 'Erro', message: 'Falha ao excluir selecionados', type: 'error' });
+                    console.error(e);
                   }
                 }}
                 className="rounded-lg border px-3 py-1 text-red-600"

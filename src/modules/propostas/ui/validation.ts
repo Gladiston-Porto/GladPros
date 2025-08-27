@@ -1,5 +1,4 @@
 import { z } from 'zod'
-import { StatusProposta, StatusPermite } from '@/types/prisma-temp'
 
 export const materialSchema = z.object({
   id: z.string(),

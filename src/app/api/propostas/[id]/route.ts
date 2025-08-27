@@ -122,7 +122,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     // TODO: Get user from session
     const userId = 'temp-user-id'
 
-    const updatedProposta = await db.$transaction(async (tx: any) => {
+  const updatedProposta = await db.$transaction(async (tx) => {
       // Update proposta
       const proposta = await tx.proposta.update({
         where: { id },
@@ -143,12 +143,13 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       })
 
       // Create audit log
+      const proposalNumber = String((proposta as unknown as Record<string, unknown>)['numero'] ?? (proposta as unknown as Record<string, unknown>)['numeroProposta'] ?? '')
       await tx.propostaLog.create({
         data: {
           propostaId: id,
           usuarioId: userId,
           acao: AcaoPropostaLog.UPDATED,
-          detalhes: `Proposta ${proposta.numero} atualizada`,
+          detalhes: `Proposta ${proposalNumber} atualizada`,
           ip: request.headers.get('x-forwarded-for') || 'unknown',
           userAgent: request.headers.get('user-agent') || 'unknown'
         }
@@ -160,11 +161,13 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     // Transform response
     const response = {
       ...updatedProposta,
-      cliente: {
-        id: updatedProposta.cliente.id,
-        nome: updatedProposta.cliente.nomeCompleto || updatedProposta.cliente.razaoSocial || 'Cliente',
-        email: updatedProposta.cliente.email
-      }
+      cliente: updatedProposta.cliente
+        ? {
+            id: updatedProposta.cliente.id,
+            nome: updatedProposta.cliente.nomeCompleto || updatedProposta.cliente.razaoSocial || 'Cliente',
+            email: updatedProposta.cliente.email
+          }
+        : null
     }
 
     return NextResponse.json(response)
@@ -208,7 +211,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     // TODO: Get user from session
     const userId = 'temp-user-id'
 
-    await db.$transaction(async (tx: any) => {
+  await db.$transaction(async (tx) => {
       // Soft delete proposta
       await tx.proposta.update({
         where: { id },

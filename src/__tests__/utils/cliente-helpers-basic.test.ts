@@ -5,7 +5,6 @@ import {
   getDocLast4,
   hashDocumento
 } from '@/lib/helpers/cliente'
-import { TipoCliente } from '@prisma/client'
 
 describe('Cliente Helpers - Basic Functions', () => {
   describe('maskDocumento', () => {

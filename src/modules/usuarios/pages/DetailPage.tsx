@@ -27,8 +27,8 @@ export default function UserDetailPage({ id }: { id: string }) {
     setLoading(true);
     setError(null);
     getUser(id)
-      .then((u: any) => { if (alive) setUser(u); })
-      .catch((e: any) => { if (alive) setError(e?.message || "Falha ao carregar usuário"); })
+      .then((u) => { if (alive) setUser(u as Usuario); })
+      .catch((e) => { if (alive) setError((e as { message?: string })?.message || "Falha ao carregar usuário"); })
       .finally(() => { if (alive) setLoading(false); });
     return () => { alive = false; };
   }, [id]);

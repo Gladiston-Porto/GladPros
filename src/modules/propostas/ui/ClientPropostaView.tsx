@@ -5,22 +5,18 @@ import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
+// Separator removed (unused)
 import SignaturePad from '@/components/ui/SignaturePad'
 import PDFExportButton from '@/components/ui/PDFExportButton'
 import { formatCurrency, formatDate } from '@/lib/utils'
-import { StatusProposta, PropostaWithRelations as PropostaWithDetails, Cliente } from '@/types/propostas'
+import { StatusProposta, PropostaWithRelations as PropostaWithDetails } from '@/types/propostas'
 import { 
   FileText,
-  Calendar,
   DollarSign,
   Building2,
   Mail,
-  Phone,
-  MapPin,
   CheckCircle,
   AlertCircle
 } from 'lucide-react'
@@ -125,7 +121,7 @@ export default function ClientPropostaView({ proposta, token }: ClientPropostaVi
                   Proposta Comercial
                 </h1>
                 <p className="text-gray-600">
-                  {(proposta as any).numeroProposta} • {formatDate(proposta.createdAt)}
+                  {proposta.numero} • {formatDate(proposta.createdAt)}
                 </p>
               </div>
             </div>
@@ -138,7 +134,7 @@ export default function ClientPropostaView({ proposta, token }: ClientPropostaVi
           <div className="flex gap-2">
             <PDFExportButton
               elementId="proposta-content"
-              filename={`proposta-${(proposta as any).numeroProposta}.pdf`}
+              filename={`proposta-${proposta.numero}.pdf`}
               className="hidden print:hidden"
             >
               <FileText className="h-4 w-4 mr-2" />
@@ -327,13 +323,10 @@ export default function ClientPropostaView({ proposta, token }: ClientPropostaVi
                   checked={termsAccepted}
                   onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
                 />
-                <label
-                  htmlFor="terms"
-                  className="text-sm leading-relaxed cursor-pointer"
-                >
-                  Declaro que li, entendi e aceito todos os termos e condições 
-                  desta proposta comercial. Confirmo que tenho autoridade para 
-                  assinar em nome da empresa/pessoa mencionada.
+                <label htmlFor="terms" className="text-sm leading-relaxed cursor-pointer">
+                  Declaro que li, entendi e aceito todos os termos e condições desta
+                  proposta comercial. Confirmo que tenho autoridade para assinar em
+                  nome da empresa/pessoa mencionada.
                 </label>
               </div>
 
@@ -352,7 +345,7 @@ export default function ClientPropostaView({ proposta, token }: ClientPropostaVi
         )}
 
         {/* Already Signed */}
-        {proposta.status === StatusProposta.ASSINADA && (proposta as any).assinadaEm && (
+  {proposta.status === StatusProposta.ASSINADA && proposta.assinaturaData && (
           <Card className="mb-6">
             <CardContent className="pt-6">
               <div className="text-center">
@@ -361,12 +354,12 @@ export default function ClientPropostaView({ proposta, token }: ClientPropostaVi
                   Proposta Assinada
                 </h3>
                 <p className="text-gray-600">
-                  Esta proposta foi assinada em {formatDate((proposta as any).assinadaEm)}
+                  Esta proposta foi assinada em {formatDate(proposta.assinaturaData)}
                 </p>
-                {(proposta as any).assinaturaResponsavel && (
-                  <p className="text-sm text-gray-500 mt-2">
-                    Assinado por: {(proposta as any).assinaturaResponsavel}
-                  </p>
+                {proposta.responsavelNome && (
+                    <p className="text-sm text-gray-500 mt-2">
+                      Assinado por: {proposta.responsavelNome}
+                    </p>
                 )}
               </div>
             </CardContent>

@@ -88,7 +88,7 @@ export function EtapasSection({ etapas, onEtapasChange }: EtapasSectionProps) {
               <Label>Status</Label>
               <Select 
                 value={etapa.status} 
-                onChange={(e) => updateEtapa(etapa.id, { status: e.target.value as any })} 
+                onChange={(e) => updateEtapa(etapa.id, { status: e.target.value as 'planejada' | 'opcional' | 'removida' })} 
                 className="w-auto"
               >
                 <option value="planejada">Planejada</option>

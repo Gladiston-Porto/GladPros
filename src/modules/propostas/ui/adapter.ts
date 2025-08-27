@@ -171,15 +171,19 @@ export function adaptPropostaFormToAPI(formData: PropostaFormData): PropostaAPIP
     })),
     
     // Etapas adaptadas
-    etapas: formData.etapas.map((e: any, index: number) => ({
-      servico: String(e.servico ?? ''),
-      descricao: String(e.descricao ?? ''),
-      ordem: index + 1,
-      quantidade: e.quantidade,
-      unidade: e.unidade ? String(e.unidade) : undefined,
-      duracaoEstimadaHoras: e.duracaoHoras,
-      custoMaoObraEstimado: e.custoMO,
-      status: e.status ? String(e.status).toUpperCase() : 'PLANEJADA'
-    }))
+    etapas: formData.etapas.map((e: unknown, index: number) => {
+      type EtapaForm = { servico?: string; descricao?: string; quantidade?: number; unidade?: string; duracaoHoras?: number; custoMO?: number; status?: string }
+      const et = e as EtapaForm
+      return ({
+        servico: String(et.servico ?? ''),
+        descricao: String(et.descricao ?? ''),
+        ordem: index + 1,
+        quantidade: et.quantidade,
+        unidade: et.unidade ? String(et.unidade) : undefined,
+        duracaoEstimadaHoras: et.duracaoHoras,
+        custoMaoObraEstimado: et.custoMO,
+        status: et.status ? String(et.status).toUpperCase() : 'PLANEJADA'
+      })
+    })
   }
 }

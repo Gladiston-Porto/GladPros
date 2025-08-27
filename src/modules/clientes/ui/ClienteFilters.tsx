@@ -13,7 +13,8 @@ export function ClienteFilters({ filters, onFiltersChange, onClear }: ClienteFil
   }
 
   const handleTipoChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    onFiltersChange({ tipo: e.target.value as any })
+    const v = e.target.value as 'PF' | 'PJ' | 'all'
+    onFiltersChange({ tipo: v })
   }
 
   const handleAtivoChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -106,7 +107,7 @@ export function ClienteFilters({ filters, onFiltersChange, onClear }: ClienteFil
             
             {filters.q && (
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                Busca: "{filters.q}"
+                  Busca: &quot;{filters.q}&quot;
                 <button
                   type="button"
                   className="ml-1 inline-flex items-center justify-center h-4 w-4 rounded-full text-blue-400 hover:bg-blue-200 hover:text-blue-500"

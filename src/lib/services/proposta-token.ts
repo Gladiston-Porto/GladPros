@@ -1,7 +1,7 @@
 // src/lib/services/proposta-token.ts
 import { randomBytes } from 'crypto';
 import { db } from "@/server/db-temp";
-import type { Proposta } from "@/types/prisma-temp";
+// Tipo `Proposta` não é usado diretamente aqui; mantemos apenas a função do serviço
 
 export interface TokenPublico {
   token: string;
@@ -133,7 +133,10 @@ export async function cleanExpiredTokens(): Promise<number> {
     }
   });
 
-  return result.count;
+  // db.proposta.updateMany pode retornar um resultado tipado pelo Prisma;
+  // como aqui usamos um stub/adapter, garantimos o acesso a `count` com um cast seguro.
+  const typedResult = result as unknown as { count: number }
+  return typedResult.count;
 }
 
 /**

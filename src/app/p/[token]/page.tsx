@@ -48,7 +48,7 @@ async function getPropostaByToken(token: string): Promise<PropostaWithRelations 
       }
     })
 
-    return proposta as any
+  return proposta as unknown as PropostaWithRelations | null
   } catch (error) {
     console.error('Error fetching proposal:', error)
     return null
@@ -78,7 +78,7 @@ export async function generateMetadata({ params }: Props) {
   }
 
   return {
-    title: `Proposta ${(proposta as any).numeroProposta} - GladPros`,
-    description: `Visualização da proposta comercial ${(proposta as any).numeroProposta}`,
+    title: `Proposta ${(proposta as PropostaWithRelations).numero ?? ''} - GladPros`,
+    description: `Visualização da proposta comercial ${(proposta as PropostaWithRelations).numero ?? ''}`,
   }
 }

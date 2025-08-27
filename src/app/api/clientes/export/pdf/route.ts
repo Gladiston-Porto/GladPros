@@ -15,10 +15,11 @@ type ClientePayload = {
   criadoEm?: string;
 };
 
-function buildWhere(filters: any) {
-  const where: any = {};
-  if (filters?.q && String(filters.q).trim()) {
-    const searchTerm = String(filters.q).trim();
+function buildWhere(filters: unknown) {
+  const where: Record<string, unknown> = {};
+  const f = filters as Record<string, unknown>
+  if (f?.q && String((f.q as unknown) || '').trim()) {
+    const searchTerm = String(f.q).trim();
     where.OR = [
       { nomeCompleto: { contains: searchTerm, mode: 'insensitive' } },
       { razaoSocial: { contains: searchTerm, mode: 'insensitive' } },
@@ -27,8 +28,8 @@ function buildWhere(filters: any) {
       { docLast4: { contains: searchTerm } }
     ];
   }
-  if (filters?.tipo && filters.tipo !== 'all') where.tipo = filters.tipo;
-  if (filters?.ativo !== undefined && filters.ativo !== 'all') where.status = filters.ativo ? 'ATIVO' : 'INATIVO';
+  if (f?.tipo && f.tipo !== 'all') (where as Record<string, unknown>)['tipo'] = f.tipo;
+  if (f?.ativo !== undefined && f.ativo !== 'all') (where as Record<string, unknown>)['status'] = ((f.ativo as unknown) === true) ? 'ATIVO' : 'INATIVO';
   return where;
 }
 
@@ -40,8 +41,8 @@ export async function POST(request: NextRequest) {
 
     // If filters provided, fetch server-side
     if (!clientes.length && raw?.filters) {
-      const parsed = clienteFiltersSchema.partial().parse(raw.filters);
-      const where = buildWhere(parsed);
+    const parsed = clienteFiltersSchema.partial().parse(raw.filters);
+    const where = buildWhere(parsed as unknown);
       const rows = await prisma.cliente.findMany({
         where,
         select: {

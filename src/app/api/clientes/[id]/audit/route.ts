@@ -12,8 +12,9 @@ export async function GET(
   ctx: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Verificar permissão de leitura (ADMIN e GERENTE para auditoria)
-    const user = await requireClientePermission(request, 'canUpdate')
+  // Verificar permissão de leitura (ADMIN e GERENTE para auditoria)
+  const _user = await requireClientePermission(request, 'canUpdate')
+  void _user
     
     // Validar parâmetros
   const { id } = clienteParamsSchema.parse(await ctx.params)
@@ -26,10 +27,18 @@ export async function GET(
     const history = await AuditService.getEntityHistory('Cliente', id, limit)
     
     // Formatar resposta
-    const data = history.map((entry: any) => ({
+    type AuditEntry = {
+      id: number
+      acao: string
+      diff?: string | null
+      timestamp: Date
+      usuario: { id: number; nomeCompleto: string; email: string }
+    }
+
+    const data = (history as AuditEntry[]).map((entry) => ({
       id: entry.id,
       acao: entry.acao,
-      diff: entry.diff ? JSON.parse(entry.diff) : null,
+      diff: entry.diff ? JSON.parse(String(entry.diff)) : null,
       timestamp: entry.timestamp.toISOString(),
       usuario: {
         id: entry.usuario.id,

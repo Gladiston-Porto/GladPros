@@ -106,6 +106,6 @@ export interface AuditLogEntry {
   entidade: string
   entidadeId: string
   acao: string
-  diff: any
+  diff: unknown
   createdAt: string
 }

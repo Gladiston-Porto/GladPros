@@ -1,6 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/server/db'
 
+type PropostaRow = {
+  numeroProposta?: string
+  titulo?: string
+  cliente?: { nome?: string }
+  status?: string
+  precoPropostaCliente?: number | null
+  valorEstimado?: number
+  criadoEm?: Date
+  validadeProposta?: Date | null
+  assinadoEm?: Date | null
+  contatoNome?: string | null
+  contatoEmail?: string | null
+  localExecucaoEndereco?: string | null
+}
+
 /**
  * API para exportar propostas em CSV
  * POST /api/propostas/export/csv
@@ -10,8 +25,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { filename = 'propostas', filters = {} } = body
 
-    // Build where clause based on filters
-    const where: any = {}
+  // Build where clause based on filters
+  const where: Record<string, unknown> = {}
     
     if (filters.q) {
       where.OR = [
@@ -29,8 +44,9 @@ export async function POST(request: NextRequest) {
       where.clienteId = filters.clienteId
     }
 
-    // Fetch data
-    const propostas = await (prisma as any).proposta.findMany({
+  // Fetch data
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+  const propostas = await (prisma as any).proposta.findMany({
       where,
       include: {
         cliente: {
@@ -61,14 +77,14 @@ export async function POST(request: NextRequest) {
       'Endereço Execução'
     ]
 
-    const rows = propostas.map((proposta: any) => [
+  const rows = (propostas as unknown as PropostaRow[]).map((proposta) => [
       proposta.numeroProposta,
       proposta.titulo,
-      proposta.cliente.nome,
+      proposta.cliente?.nome || '',
       proposta.status,
-      proposta.precoPropostaCliente?.toFixed(2) || '',
-      proposta.valorEstimado.toFixed(2),
-      proposta.criadoEm.toLocaleDateString('pt-BR'),
+      proposta.precoPropostaCliente ? proposta.precoPropostaCliente.toFixed(2) : '',
+      proposta.valorEstimado?.toFixed ? proposta.valorEstimado.toFixed(2) : '',
+      proposta.criadoEm ? proposta.criadoEm.toLocaleDateString('pt-BR') : '',
       proposta.validadeProposta ? proposta.validadeProposta.toLocaleDateString('pt-BR') : '',
       proposta.assinadoEm ? proposta.assinadoEm.toLocaleDateString('pt-BR') : '',
       proposta.contatoNome || '',
@@ -77,7 +93,7 @@ export async function POST(request: NextRequest) {
     ])
 
     const csvContent = [headers, ...rows]
-      .map((row: any) => row.map((field: any) => `"${field}"`).join(','))
+      .map((row: unknown[]) => row.map((field: unknown) => `"${String(field)}"`).join(','))
       .join('\n')
 
     return new NextResponse(csvContent, {

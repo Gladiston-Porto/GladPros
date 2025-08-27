@@ -80,6 +80,7 @@ export default function PropostaForm() {
   const router = useRouter()
   const { showToast } = useToast()
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const toast = (options: any) => {
     showToast({
       title: options.title || '',
@@ -94,7 +95,8 @@ export default function PropostaForm() {
       const response = await fetch('/api/clientes?limit=1000')
       if (response.ok) {
         const data = await response.json()
-        const clientesList = (data.clientes || []).map((cliente: any) => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const clientesList = (data.clientes || []).map((cliente: any) => ({
           id: cliente.id,
           nome: cliente.nomeCompleto || cliente.razaoSocial || cliente.nomeFantasia || 'Cliente',
           email: cliente.email
@@ -194,6 +196,7 @@ export default function PropostaForm() {
   }
 
   // Update etapa
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateEtapa = (index: number, field: keyof EtapaForm, value: any) => {
     setFormData(prev => ({
       ...prev,
@@ -228,6 +231,7 @@ export default function PropostaForm() {
   }
 
   // Update material
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateMaterial = (index: number, field: keyof MaterialForm, value: any) => {
     setFormData(prev => ({
       ...prev,
@@ -370,7 +374,7 @@ export default function PropostaForm() {
           <CardContent className="space-y-4">
             {formData.etapas.length === 0 ? (
               <p className="text-center py-8 text-muted-foreground">
-                Nenhuma etapa adicionada. Clique em "Adicionar Etapa" para começar.
+                Nenhuma etapa adicionada. Clique em &quot;Adicionar Etapa&quot; para começar.
               </p>
             ) : (
               formData.etapas.map((etapa, index) => (
@@ -441,7 +445,7 @@ export default function PropostaForm() {
           <CardContent className="space-y-4">
             {formData.materiais.length === 0 ? (
               <p className="text-center py-8 text-muted-foreground">
-                Nenhum material adicionado. Clique em "Adicionar Material" para começar.
+                Nenhum material adicionado. Clique em &quot;Adicionar Material&quot; para começar.
               </p>
             ) : (
               formData.materiais.map((material, index) => (

@@ -36,7 +36,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     // TODO: Get user from session
     const userId = 'temp-user-id'
 
-    const updatedProposta = await db.$transaction(async (tx: any) => {
+  const updatedProposta = await db.$transaction(async (tx) => {
       // Update status to CANCELADA
       const proposta = await tx.proposta.update({
         where: { id },
@@ -49,12 +49,13 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       })
 
       // Create audit log
+      const proposalNumber = String((proposta as unknown as Record<string, unknown>)['numero'] ?? (proposta as unknown as Record<string, unknown>)['numeroProposta'] ?? '')
       await tx.propostaLog.create({
         data: {
           propostaId: id,
           usuarioId: userId,
           acao: AcaoPropostaLog.CANCELLED,
-          detalhes: `Proposta ${proposta.numero} cancelada. Motivo: ${motivo || 'Não informado'}`,
+          detalhes: `Proposta ${proposalNumber} cancelada. Motivo: ${motivo || 'Não informado'}`,
           ip: request.headers.get('x-forwarded-for') || 'unknown',
           userAgent: request.headers.get('user-agent') || 'unknown'
         }

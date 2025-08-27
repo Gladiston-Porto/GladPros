@@ -86,7 +86,9 @@ export function ClienteForm({ cliente, onSubmit, onCancel, loading = false }: Cl
       return
     }
 
-    const payload: any = { ...formData }
+  // Use the validated input shapes from the shared types. Cast via unknown to avoid
+  // widening the local payload shape while preserving nullability from Zod schemas.
+  const payload = { ...formData } as unknown as ClienteCreateInput | ClienteUpdateInput
     // Normalize document masks to match server regex patterns
     if (payload.tipo === 'PF') {
       if (payload.tipoDocumentoPF === 'SSN' && payload.ssn) {
@@ -112,20 +114,20 @@ export function ClienteForm({ cliente, onSubmit, onCancel, loading = false }: Cl
 
     try {
       await onSubmit(payload)
-    } catch (err: any) {
+    } catch (err) {
       // Mapear erros de validação do servidor (Zod) para campos do formulário
       const fieldErrors: Record<string, string> = {}
-      // Suporte a erro.fieldErrors direto
-      if (err && typeof err === 'object' && err.fieldErrors && typeof err.fieldErrors === 'object') {
-        Object.assign(fieldErrors, err.fieldErrors)
+      const errorObj = err as { fieldErrors?: Record<string, string>; details?: unknown; issues?: unknown }
+      if (errorObj.fieldErrors && typeof errorObj.fieldErrors === 'object') {
+        Object.assign(fieldErrors, errorObj.fieldErrors)
       }
-      // Suporte a err.details como issues do Zod
-      const issues = err?.details || err?.issues
+      const issues = errorObj.details || errorObj.issues
       if (Array.isArray(issues)) {
-        issues.forEach((issue: any) => {
-          const path = Array.isArray(issue.path) ? issue.path.join('.') : issue.path
+        (issues as unknown[]).forEach((issue) => {
+          const ish = issue as { path?: string[] | string; message?: string }
+          const path = Array.isArray(ish.path) ? ish.path.join('.') : ish.path
           if (typeof path === 'string' && path) {
-            fieldErrors[path] = issue.message || 'Valor inválido'
+            fieldErrors[path] = ish.message || 'Valor inválido'
           }
         })
       }
