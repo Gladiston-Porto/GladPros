@@ -36,6 +36,33 @@ prisma/ – schema e migrações
 
 docs/ – documentação completa do sistema
 
+scripts/ – utilitários e ferramentas de desenvolvimento
+
+🔧 Scripts Disponíveis
+
+npm run dev – executar em modo de desenvolvimento
+
+npm run build – build para produção
+
+npm run test – executar testes
+
+npm run lint – verificar código com ESLint
+
+npm run github:status – verificar status dos branches e CI/CD
+
+npm run github:status-node – versão Node.js do verificador de status
+
+🔍 Verificação de Status GitHub
+
+O projeto inclui ferramentas para verificar o status dos branches e GitHub Actions:
+
+• Scripts multiplataforma (Bash, PowerShell, Node.js)
+• Verificação automática via GitHub Actions (agendada semanalmente)
+• Relatórios coloridos com status detalhado
+• Documentação completa em scripts/README-github-status.md
+
+Para usar, defina GITHUB_TOKEN e execute npm run github:status
+
 📖 Documentação
 
 Visão geral: docs/01-arquitetura.md
