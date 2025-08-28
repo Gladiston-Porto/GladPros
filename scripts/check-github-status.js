@@ -5,7 +5,6 @@
  * This script checks the status of GitHub branches and CI/CD workflows,
  * providing detailed information about workflow runs, branch health, and actionable insights.
  */
-
 // Configuration
 const REPO_OWNER = 'Gladiston-Porto';
 const REPO_NAME = 'GladPros';
