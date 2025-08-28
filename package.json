@@ -9,14 +9,12 @@
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
-    "test:watch": "jest --watch",
     "github:status": "node scripts/check-github-status.js",
     "github:status:summary": "node scripts/check-github-status.js --summary",
     "github:check": "bash scripts/check-github-status.sh",
     "status:check": "./scripts/check-github-status.sh",
     "status:check-js": "node scripts/check-ci-status.js",
     "status:check-full": "node scripts/check-github-status.js",
-    "prisma:migrate": "prisma migrate dev",
     "postinstall": "prisma generate"
   },
   "dependencies": {
