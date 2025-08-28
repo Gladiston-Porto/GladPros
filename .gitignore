@@ -27,3 +27,8 @@ tsconfig.tsbuildinfo
 
 # Next.js build output
 .next/
+
+# Temporary build files
+mock-prisma-client.js
+node_modules/@prisma/client/index.js
+node_modules/.prisma/client/index.js

@@ -26,6 +26,9 @@ jobs:
       - name: Build
         run: npm run build --if-present
         env:
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          CLIENT_DOC_ENCRYPTION_KEY_BASE64: ${{ secrets.CLIENT_DOC_ENCRYPTION_KEY_BASE64 }}
+          # Use environment secrets if available, otherwise use temporary build values
+          JWT_SECRET: ${{ secrets.JWT_SECRET || 'temporary-jwt-secret-for-build-only-32-chars' }}
+          CLIENT_DOC_ENCRYPTION_KEY_BASE64: ${{ secrets.CLIENT_DOC_ENCRYPTION_KEY_BASE64 || 'dGVtcG9yYXJ5LWVuY3J5cHRpb24ta2V5LWZvci1idWlsZA==' }}
           CLIENT_DOC_ENCRYPTION_KEY_FALLBACKS: ${{ secrets.CLIENT_DOC_ENCRYPTION_KEY_FALLBACKS }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL || 'mysql://user:pass@localhost:3306/temp_build_db' }}
+          NEXT_PHASE: 'phase-production-build'

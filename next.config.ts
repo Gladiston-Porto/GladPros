@@ -34,8 +34,6 @@ const nextConfig: NextConfig = {
   experimental: {
     largePageDataBytes: 128 * 1000, // 128KB
   },
-  // Disable static page generation for problematic routes
-  generateStaticParams: false,
   // Configurações para evitar execução de API durante build
   staticPageGenerationTimeout: 60, // Increase timeout to 60 seconds
   // Desabilitar static optimization para rotas que usam dados dinâmicos
@@ -43,7 +41,7 @@ const nextConfig: NextConfig = {
     return 'build-' + Date.now()
   },
   // Configurações específicas para evitar problemas durante build
-  output: 'standalone',
+  output: undefined, // Change from 'standalone' to allow better build optimization
   trailingSlash: false,
   skipTrailingSlashRedirect: true,
   skipMiddlewareUrlNormalize: true,
