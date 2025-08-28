@@ -3,6 +3,7 @@ import * as dotenv from 'dotenv';
 
 // Carregar .env explicitamente
 dotenv.config({ path: '.env' });
+dotenv.config({ path: '.env.local' });
 
 const nextConfig: NextConfig = {
   eslint: {
