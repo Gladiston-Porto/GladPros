@@ -9,6 +9,22 @@ import { adaptPropostaFormToAPI } from "@modules/propostas/ui/adapter";
 import { PropostaFormData } from "@modules/propostas/ui/types";
 import { requireServerUser } from "@/lib/requireServerUser";
 
+// Proteção contra execução durante build time
+function isBuildTime(): boolean {
+  return (
+    typeof window === 'undefined' &&
+    (
+      process.env.NEXT_PHASE === 'phase-production-build' ||
+      process.env.NEXT_PHASE === 'phase-production-server' ||
+      process.env.NEXT_PHASE === 'phase-static' ||
+      process.env.NEXT_PHASE === 'phase-export' ||
+      !process.env.JWT_SECRET ||
+      typeof process.env.NODE_ENV === 'undefined' ||
+      process.env.NODE_ENV === 'development'
+    )
+  );
+}
+
 // Retry helper para transações DB
 async function withRetry<T>(fn: () => Promise<T>, retries = 2, delayMs = 300): Promise<T> {
   let lastErr: unknown;
@@ -52,6 +68,13 @@ function mapPrismaError(error: unknown): { status: number; message: string; fiel
 
 // GET /api/propostas - Lista com filtros e paginação por cursor
 export async function GET() {
+  // Proteção contra execução durante build time
+  if (isBuildTime()) {
+    return NextResponse.json(
+      { error: "Service temporarily unavailable" },
+      { status: 503 }
+    );
+  }
   try {
     // TEMPORARY STUB - retorna dados mock para testar
     return NextResponse.json({
@@ -75,6 +98,14 @@ export async function GET() {
 
 // POST /api/propostas - Criar nova proposta
 export async function POST(request: NextRequest) {
+  // Proteção contra execução durante build time
+  if (isBuildTime()) {
+    return NextResponse.json(
+      { error: "Service temporarily unavailable" },
+      { status: 503 }
+    );
+  }
+
   try {
     // POST handler started
 

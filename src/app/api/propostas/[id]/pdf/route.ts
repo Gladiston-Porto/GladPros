@@ -78,7 +78,8 @@ export async function GET(
     headers.set('Content-Disposition', `attachment; filename="${filename}"`)
     headers.set('Cache-Control', 'no-cache')
 
-  return new NextResponse(buffer as unknown as ArrayBuffer, {
+  return new NextResponse(
+      buffer as unknown as ArrayBuffer, {
       status: 200,
       headers
     })

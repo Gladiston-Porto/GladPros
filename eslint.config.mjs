@@ -10,7 +10,7 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
-  { ignores: ["coverage/", ".next/"] },
+  { ignores: ["coverage/", ".next/", ".scripts/"] },
   ...compat.extends("next/core-web-vitals", "next/typescript"),
   {
     rules: {
@@ -21,7 +21,7 @@ const eslintConfig = [
   },
   // Relax rules for scripts JS files (allow require-style imports)
   {
-    files: ["scripts/**/*.js"],
+    files: ["scripts/**/*.js", ".scripts/**/*.js"],
     rules: {
       "@typescript-eslint/no-require-imports": "off",
       "import/no-anonymous-default-export": "off",
@@ -30,7 +30,7 @@ const eslintConfig = [
   },
   // Keep a looser set for mixed test folders and scripts
   {
-    files: ["src/tests/**/*.{js,ts,tsx}", "scripts/**/*.{js,ts}"],
+    files: ["src/tests/**/*.{js,ts,tsx}", "scripts/**/*.{js,ts}", ".scripts/**/*.{js,ts}"],
     rules: {
       "@typescript-eslint/no-require-imports": "off",
       "import/no-anonymous-default-export": "off",

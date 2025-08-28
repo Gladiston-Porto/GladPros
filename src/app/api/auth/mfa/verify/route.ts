@@ -17,7 +17,34 @@ function getClientIP(req: NextRequest): string {
   );
 }
 
+// Proteção contra execução durante build time
+function isBuildTime(): boolean {
+  return (
+    typeof window === 'undefined' &&
+    (
+      process.env.NEXT_PHASE === 'phase-production-build' ||
+      process.env.NEXT_PHASE === 'phase-production-server' ||
+      process.env.NEXT_PHASE === 'phase-static' ||
+      process.env.NEXT_PHASE === 'phase-export' ||
+      !process.env.JWT_SECRET ||
+      typeof process.env.NODE_ENV === 'undefined' ||
+      process.env.NODE_ENV === 'development'
+    )
+  );
+}
+
 export async function POST(req: NextRequest) {
+  // Se estiver em build time, retorna resposta de serviço indisponível
+  if (isBuildTime()) {
+    return new Response(JSON.stringify({
+      error: 'Service unavailable during build',
+      message: 'This endpoint is not available during the build process'
+    }), {
+      status: 503,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
   try {
     const raw = await req.json().catch(() => ({}));
     const parsed = mfaVerificationSchema.safeParse(raw);

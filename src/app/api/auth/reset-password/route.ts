@@ -5,7 +5,30 @@ import { prisma } from "@/server/db";
 import { sha256Hex } from "@/lib/tokens";
 import { resetPasswordApiSchema } from "@/lib/validation";
 
+// Proteção contra execução durante build time
+function isBuildTime(): boolean {
+  return (
+    typeof window === 'undefined' &&
+    (
+      process.env.NEXT_PHASE === 'phase-production-build' ||
+      process.env.NEXT_PHASE === 'phase-production-server' ||
+      process.env.NEXT_PHASE === 'phase-static' ||
+      process.env.NEXT_PHASE === 'phase-export' ||
+      !process.env.JWT_SECRET ||
+      typeof process.env.NODE_ENV === 'undefined' ||
+      process.env.NODE_ENV === 'development'
+    )
+  );
+}
+
 export async function POST(req: Request) {
+  // Proteção contra execução durante build time
+  if (isBuildTime()) {
+    return NextResponse.json(
+      { error: "Service temporarily unavailable" },
+      { status: 503 }
+    );
+  }
   const body = await req.json().catch(() => ({}));
   const parsed = resetPasswordApiSchema.safeParse(body);
   if (!parsed.success) {

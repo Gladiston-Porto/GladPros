@@ -52,8 +52,8 @@ async function getPropostaByToken(token: string): Promise<PropostaWithRelations 
     })
 
   return proposta as PropostaWithRelations | null
-  } catch (error) {
-    console.error('Error fetching proposal:', error)
+  } catch {
+    console.error('Error fetching proposal')
     return null
   }
 }

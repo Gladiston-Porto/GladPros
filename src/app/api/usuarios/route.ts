@@ -9,6 +9,22 @@ import { generateTempPassword } from "../../../lib/passwords";
 import { renderWelcomeEmail } from "@/lib/emails/welcome";
 import { sendMail } from "@/lib/mailer";
 
+// Proteção contra execução durante build time
+function isBuildTime(): boolean {
+  return (
+    typeof window === 'undefined' &&
+    (
+      process.env.NEXT_PHASE === 'phase-production-build' ||
+      process.env.NEXT_PHASE === 'phase-production-server' ||
+      process.env.NEXT_PHASE === 'phase-static' ||
+      process.env.NEXT_PHASE === 'phase-export' ||
+      !process.env.JWT_SECRET ||
+      typeof process.env.NODE_ENV === 'undefined' ||
+      process.env.NODE_ENV === 'development'
+    )
+  );
+}
+
 // Minimal shapes for raw SQL rows
 type UserRow = {
   id: number;
@@ -64,6 +80,14 @@ const Status = z.enum(["ATIVO", "INATIVO"]);
  * Lista com paginação e filtros: q, role, status, page, pageSize
  * =======================================================*/
 export async function GET(req: Request) {
+  // Proteção contra execução durante build time
+  if (isBuildTime()) {
+    return NextResponse.json(
+      { error: "Service temporarily unavailable" },
+      { status: 503 }
+    );
+  }
+
   try {
     const { searchParams } = new URL(req.url);
 
@@ -270,6 +294,14 @@ const UserCreateSchema = z.object({
 });
 
 export async function POST(req: Request) {
+  // Proteção contra execução durante build time
+  if (isBuildTime()) {
+    return NextResponse.json(
+      { error: "Service temporarily unavailable" },
+      { status: 503 }
+    );
+  }
+
   let body: unknown;
   try {
     body = await req.json();

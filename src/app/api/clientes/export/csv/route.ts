@@ -2,6 +2,19 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/server/db'
 import { clienteFiltersSchema } from '@/lib/validations/cliente'
 
+// Proteção contra execução durante build time
+function isBuildTime(): boolean {
+  return (
+    typeof window === 'undefined' &&
+    (
+      process.env.NEXT_PHASE === 'phase-production-build' ||
+      process.env.NEXT_PHASE === 'phase-production-server' ||
+      !process.env.JWT_SECRET ||
+      typeof process.env.NODE_ENV === 'undefined'
+    )
+  );
+}
+
 function buildWhere(filters: Record<string, unknown>) {
   const where: Record<string, unknown> = {}
   if (filters?.q && String(filters.q).trim()) {
@@ -20,6 +33,14 @@ function buildWhere(filters: Record<string, unknown>) {
 }
 
 export async function POST(request: NextRequest) {
+  // Proteção contra execução durante build time
+  if (isBuildTime()) {
+    return NextResponse.json(
+      { error: "Service temporarily unavailable" },
+      { status: 503 }
+    );
+  }
+
   try {
     const raw = await request.json().catch(() => ({}))
     const filename = typeof raw?.filename === 'string' && raw.filename.trim() ? raw.filename : 'clientes'
