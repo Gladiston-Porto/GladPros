@@ -15,6 +15,7 @@
     "github:check": "bash scripts/check-github-status.sh",
     "github:local": "node scripts/check-local-git-status.js",
     "secret:scan": "node scripts/secret-scan.js",
+    "github:status": "node scripts/check-github-status.js",
     "doc-key:fp": "node scripts/print-doc-key-fp.js",
     "doc-key:rekey": "node scripts/rekey-documents.js",
     "db:fix-sessions": "node scripts/fix-missing-tables.js",
