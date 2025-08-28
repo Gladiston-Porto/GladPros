@@ -1,0 +1,327 @@
+{
+  "version": 3,
+  "pages404": true,
+  "caseSensitive": false,
+  "basePath": "",
+  "redirects": [],
+  "headers": [],
+  "dynamicRoutes": [
+    {
+      "page": "/api/client/proposta/[token]",
+      "regex": "^/api/client/proposta/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPtoken": "nxtPtoken"
+      },
+      "namedRegex": "^/api/client/proposta/(?<nxtPtoken>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/client/proposta/[token]/sign",
+      "regex": "^/api/client/proposta/([^/]+?)/sign(?:/)?$",
+      "routeKeys": {
+        "nxtPtoken": "nxtPtoken"
+      },
+      "namedRegex": "^/api/client/proposta/(?<nxtPtoken>[^/]+?)/sign(?:/)?$"
+    },
+    {
+      "page": "/api/clientes/[id]",
+      "regex": "^/api/clientes/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/clientes/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/clientes/[id]/audit",
+      "regex": "^/api/clientes/([^/]+?)/audit(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/clientes/(?<nxtPid>[^/]+?)/audit(?:/)?$"
+    },
+    {
+      "page": "/api/notifications/[id]",
+      "regex": "^/api/notifications/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/notifications/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/propostas/[id]",
+      "regex": "^/api/propostas/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/propostas/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/propostas/[id]/assinatura",
+      "regex": "^/api/propostas/([^/]+?)/assinatura(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/propostas/(?<nxtPid>[^/]+?)/assinatura(?:/)?$"
+    },
+    {
+      "page": "/api/propostas/[id]/cancel",
+      "regex": "^/api/propostas/([^/]+?)/cancel(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/propostas/(?<nxtPid>[^/]+?)/cancel(?:/)?$"
+    },
+    {
+      "page": "/api/propostas/[id]/pdf",
+      "regex": "^/api/propostas/([^/]+?)/pdf(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/propostas/(?<nxtPid>[^/]+?)/pdf(?:/)?$"
+    },
+    {
+      "page": "/api/propostas/[id]/send",
+      "regex": "^/api/propostas/([^/]+?)/send(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/propostas/(?<nxtPid>[^/]+?)/send(?:/)?$"
+    },
+    {
+      "page": "/api/propostas/[id]/send-email",
+      "regex": "^/api/propostas/([^/]+?)/send\\-email(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/propostas/(?<nxtPid>[^/]+?)/send\\-email(?:/)?$"
+    },
+    {
+      "page": "/api/usuarios/sessions/[sessionId]",
+      "regex": "^/api/usuarios/sessions/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPsessionId": "nxtPsessionId"
+      },
+      "namedRegex": "^/api/usuarios/sessions/(?<nxtPsessionId>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/usuarios/[id]",
+      "regex": "^/api/usuarios/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/usuarios/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/usuarios/[id]/auditoria",
+      "regex": "^/api/usuarios/([^/]+?)/auditoria(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/usuarios/(?<nxtPid>[^/]+?)/auditoria(?:/)?$"
+    },
+    {
+      "page": "/api/usuarios/[id]/security",
+      "regex": "^/api/usuarios/([^/]+?)/security(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/usuarios/(?<nxtPid>[^/]+?)/security(?:/)?$"
+    },
+    {
+      "page": "/api/usuarios/[id]/sessions",
+      "regex": "^/api/usuarios/([^/]+?)/sessions(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/usuarios/(?<nxtPid>[^/]+?)/sessions(?:/)?$"
+    },
+    {
+      "page": "/api/usuarios/[id]/status",
+      "regex": "^/api/usuarios/([^/]+?)/status(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/usuarios/(?<nxtPid>[^/]+?)/status(?:/)?$"
+    },
+    {
+      "page": "/clientes/[id]",
+      "regex": "^/clientes/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/clientes/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/p/[token]",
+      "regex": "^/p/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPtoken": "nxtPtoken"
+      },
+      "namedRegex": "^/p/(?<nxtPtoken>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/propostas/[id]",
+      "regex": "^/propostas/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/propostas/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/reset-senha/[token]",
+      "regex": "^/reset\\-senha/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPtoken": "nxtPtoken"
+      },
+      "namedRegex": "^/reset\\-senha/(?<nxtPtoken>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/usuarios/[id]",
+      "regex": "^/usuarios/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/usuarios/(?<nxtPid>[^/]+?)(?:/)?$"
+    }
+  ],
+  "staticRoutes": [
+    {
+      "page": "/",
+      "regex": "^/(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/(?:/)?$"
+    },
+    {
+      "page": "/401",
+      "regex": "^/401(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/401(?:/)?$"
+    },
+    {
+      "page": "/403",
+      "regex": "^/403(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/403(?:/)?$"
+    },
+    {
+      "page": "/500/preview",
+      "regex": "^/500/preview(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/500/preview(?:/)?$"
+    },
+    {
+      "page": "/_not-found",
+      "regex": "^/_not\\-found(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/_not\\-found(?:/)?$"
+    },
+    {
+      "page": "/clientes",
+      "regex": "^/clientes(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/clientes(?:/)?$"
+    },
+    {
+      "page": "/clientes/novo",
+      "regex": "^/clientes/novo(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/clientes/novo(?:/)?$"
+    },
+    {
+      "page": "/dashboard",
+      "regex": "^/dashboard(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard(?:/)?$"
+    },
+    {
+      "page": "/desbloqueio",
+      "regex": "^/desbloqueio(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/desbloqueio(?:/)?$"
+    },
+    {
+      "page": "/esqueci-senha",
+      "regex": "^/esqueci\\-senha(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/esqueci\\-senha(?:/)?$"
+    },
+    {
+      "page": "/icon.ico",
+      "regex": "^/icon\\.ico(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/icon\\.ico(?:/)?$"
+    },
+    {
+      "page": "/login",
+      "regex": "^/login(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/login(?:/)?$"
+    },
+    {
+      "page": "/mfa",
+      "regex": "^/mfa(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/mfa(?:/)?$"
+    },
+    {
+      "page": "/primeiro-acesso",
+      "regex": "^/primeiro\\-acesso(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/primeiro\\-acesso(?:/)?$"
+    },
+    {
+      "page": "/primeiro-acesso/resetar-senha",
+      "regex": "^/primeiro\\-acesso/resetar\\-senha(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/primeiro\\-acesso/resetar\\-senha(?:/)?$"
+    },
+    {
+      "page": "/proposta-modular",
+      "regex": "^/proposta\\-modular(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/proposta\\-modular(?:/)?$"
+    },
+    {
+      "page": "/propostas",
+      "regex": "^/propostas(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/propostas(?:/)?$"
+    },
+    {
+      "page": "/propostas/nova",
+      "regex": "^/propostas/nova(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/propostas/nova(?:/)?$"
+    },
+    {
+      "page": "/usuarios",
+      "regex": "^/usuarios(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/usuarios(?:/)?$"
+    },
+    {
+      "page": "/usuarios/novo",
+      "regex": "^/usuarios/novo(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/usuarios/novo(?:/)?$"
+    }
+  ],
+  "dataRoutes": [],
+  "rsc": {
+    "header": "RSC",
+    "varyHeader": "RSC, Next-Router-State-Tree, Next-Router-Prefetch, Next-Router-Segment-Prefetch",
+    "prefetchHeader": "Next-Router-Prefetch",
+    "didPostponeHeader": "x-nextjs-postponed",
+    "contentTypeHeader": "text/x-component",
+    "suffix": ".rsc",
+    "prefetchSuffix": ".prefetch.rsc",
+    "prefetchSegmentHeader": "Next-Router-Segment-Prefetch",
+    "prefetchSegmentSuffix": ".segment.rsc",
+    "prefetchSegmentDirSuffix": ".segments"
+  },
+  "rewriteHeaders": {
+    "pathHeader": "x-nextjs-rewritten-path",
+    "queryHeader": "x-nextjs-rewritten-query"
+  },
+  "skipMiddlewareUrlNormalize": true,
+  "rewrites": []
+}

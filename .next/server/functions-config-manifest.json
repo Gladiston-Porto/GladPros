@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "functions": {
+    "/api/auth/forgot-password": {},
+    "/api/auth/logout": {},
+    "/api/auth/me": {},
+    "/api/debug/make-token": {},
+    "/api/clientes/bulk": {},
+    "/api/propostas/rascunho": {},
+    "/api/propostas": {},
+    "/api/clientes": {},
+    "/api/usuarios": {},
+    "/desbloqueio": {}
+  }
+}
