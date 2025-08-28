@@ -6,6 +6,19 @@ import { generateToken, sha256Hex } from "@/lib/tokens"
 import { EmailService } from "@/lib/email"
 import { forgotPasswordSchema } from "@/lib/validation"
 
+// Proteção contra execução durante build time
+function isBuildTime(): boolean {
+  return (
+    typeof window === 'undefined' &&
+    (
+      process.env.NEXT_PHASE === 'phase-production-build' ||
+      process.env.NEXT_PHASE === 'phase-production-server' ||
+      !process.env.JWT_SECRET ||
+      typeof process.env.NODE_ENV === 'undefined'
+    )
+  );
+}
+
 function baseUrlFrom(req: Request) {
   const h = (name: string) => req.headers.get(name) || ""
   const host = h("x-forwarded-host") || h("host") || "localhost:3000"
@@ -14,6 +27,13 @@ function baseUrlFrom(req: Request) {
 }
 
 export async function POST(req: Request) {
+  // Proteção contra execução durante build time
+  if (isBuildTime()) {
+    return NextResponse.json(
+      { error: "Service temporarily unavailable" },
+      { status: 503 }
+    );
+  }
   const body = await req.json().catch(() => ({}))
   const parsed = forgotPasswordSchema.safeParse(body)
   if (!parsed.success) return NextResponse.json({ error: "E-mail inválido" }, { status: 422 })

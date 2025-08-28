@@ -4,6 +4,19 @@ import { exportUsersPdfSchema } from "@/lib/validation";
 import { z } from "zod";
 import { prisma } from "@/server/db";
 
+// Proteção contra execução durante build time
+function isBuildTime(): boolean {
+  return (
+    typeof window === 'undefined' &&
+    (
+      process.env.NEXT_PHASE === 'phase-production-build' ||
+      process.env.NEXT_PHASE === 'phase-production-server' ||
+      !process.env.JWT_SECRET ||
+      typeof process.env.NODE_ENV === 'undefined'
+    )
+  );
+}
+
 type UserRow = {
   id: number; email: string; nomeCompleto?: string | null; nome?: string | null;
   role?: string | null; nivel?: string | null; status?: string | null; criadoEm?: Date | null;
@@ -28,6 +41,14 @@ const FiltersSchema = z.object({
 }).optional();
 
 export async function POST(request: NextRequest) {
+  // Proteção contra execução durante build time
+  if (isBuildTime()) {
+    return NextResponse.json(
+      { error: "Service temporarily unavailable" },
+      { status: 503 }
+    );
+  }
+
   try {
   const raw = await request.json().catch(() => ({}));
   // Support either explicit users array or filters for all-filtered scope

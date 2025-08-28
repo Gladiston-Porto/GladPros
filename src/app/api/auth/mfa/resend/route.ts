@@ -11,7 +11,27 @@ function getClientIP(req: NextRequest): string {
          "unknown";
 }
 
+// Proteção contra execução durante build time
+function isBuildTime(): boolean {
+  return (
+    typeof window === 'undefined' &&
+    (
+      process.env.NEXT_PHASE === 'phase-production-build' ||
+      process.env.NEXT_PHASE === 'phase-production-server' ||
+      !process.env.JWT_SECRET ||
+      typeof process.env.NODE_ENV === 'undefined'
+    )
+  );
+}
+
 export async function POST(req: NextRequest) {
+  // Proteção contra execução durante build time
+  if (isBuildTime()) {
+    return NextResponse.json(
+      { error: "Service temporarily unavailable" },
+      { status: 503 }
+    );
+  }
   const ip = getClientIP(req);
   const userAgent = req.headers.get("user-agent") || undefined;
   

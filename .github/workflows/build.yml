@@ -1,0 +1,54 @@
+# .github/workflows/build.yml
+name: Build and Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Generate Prisma client
+      run: npx prisma generate
+
+    - name: Check environment variables
+      run: node scripts/check-build-env.js
+      env:
+        JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        CLIENT_DOC_ENCRYPTION_KEY_BASE64: ${{ secrets.CLIENT_DOC_ENCRYPTION_KEY_BASE64 }}
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+    - name: Run linting
+      run: npm run lint
+
+    - name: Run tests
+      run: npm test
+
+    - name: Build application
+      run: npm run build
+      env:
+        JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        CLIENT_DOC_ENCRYPTION_KEY_BASE64: ${{ secrets.CLIENT_DOC_ENCRYPTION_KEY_BASE64 }}
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        NEXT_PUBLIC_APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: nextjs-build
+        path: .next/

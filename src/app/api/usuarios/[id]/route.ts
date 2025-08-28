@@ -5,6 +5,19 @@ import bcrypt from "bcryptjs";
 import { AuditoriaService } from "@/lib/auditoria";
 import { userUpdateApiSchema } from "@/lib/validation";
 
+// Proteção contra execução durante build time
+function isBuildTime(): boolean {
+  return (
+    typeof window === 'undefined' &&
+    (
+      process.env.NEXT_PHASE === 'phase-production-build' ||
+      process.env.NEXT_PHASE === 'phase-production-server' ||
+      !process.env.JWT_SECRET ||
+      typeof process.env.NODE_ENV === 'undefined'
+    )
+  );
+}
+
 type UserRow = {
   id: number;
   email: string;
@@ -64,6 +77,14 @@ async function withRetry<T>(fn: () => Promise<T>, retries = 2, delayMs = 500): P
 
 /* GET /api/usuarios/:id */
 export async function GET(_req: Request, context: unknown) {
+  // Proteção contra execução durante build time
+  if (isBuildTime()) {
+    return NextResponse.json(
+      { error: "Service temporarily unavailable" },
+      { status: 503 }
+    );
+  }
+
   try {
     const params = await resolveParams(context);
     const idVal = (params as Record<string, unknown>)?.id;

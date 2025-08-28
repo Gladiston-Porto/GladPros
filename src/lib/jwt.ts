@@ -10,16 +10,28 @@ function getSecret(): Uint8Array {
   if (!secret) {
     const secretRaw = process.env.JWT_SECRET
     if (!secretRaw) {
-      // During build time, provide a temporary secret to allow compilation
-      // This will be replaced with the real secret at runtime
-      const isBuildTime = !process.browser && (process.env.NEXT_PHASE === 'phase-production-build' || process.env.NEXT_PHASE === 'phase-production-server' || !process.env.NODE_ENV)
+      // Proteção mais robusta contra build time
+      const isBuildTime =
+        typeof window === 'undefined' &&
+        (
+          process.env.NEXT_PHASE === 'phase-production-build' ||
+          process.env.NEXT_PHASE === 'phase-production-server' ||
+          process.env.NEXT_PHASE === 'phase-static' ||
+          process.env.NEXT_PHASE === 'phase-export' ||
+          process.env.NEXT_PHASE === 'phase-development-build' ||
+          !process.env.NODE_ENV ||
+          process.env.NODE_ENV === 'development' ||
+          !process.env.JWT_SECRET
+        );
+
       if (isBuildTime) {
-        secret = new TextEncoder().encode('temporary-build-secret-will-be-replaced-at-runtime')
+        console.warn('[JWT] Usando secret temporário durante build. Certifique-se de definir JWT_SECRET em produção.');
+        secret = new TextEncoder().encode('temporary-build-secret-will-be-replaced-at-runtime-32-chars-minimum')
       } else {
-        throw new Error("Missing JWT_SECRET environment variable")
+        throw new Error("Missing JWT_SECRET environment variable. Certifique-se de definir esta variável em .env.local")
       }
     } else {
-      if (secretRaw.length < 32) throw new Error("JWT_SECRET must be at least 32 characters")
+      if (secretRaw.length < 32) throw new Error("JWT_SECRET deve ter pelo menos 32 caracteres")
       secret = new TextEncoder().encode(secretRaw)
     }
   }

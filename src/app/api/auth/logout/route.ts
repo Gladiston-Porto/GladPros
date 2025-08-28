@@ -5,7 +5,27 @@ import { prisma } from "@/server/db"
 import { verifyAuthJWT } from "@/lib/jwt"
 import { hasTokenVersionColumn } from "@/lib/db-metadata"
 
+// Proteção contra execução durante build time
+function isBuildTime(): boolean {
+  return (
+    typeof window === 'undefined' &&
+    (
+      process.env.NEXT_PHASE === 'phase-production-build' ||
+      process.env.NEXT_PHASE === 'phase-production-server' ||
+      !process.env.JWT_SECRET ||
+      typeof process.env.NODE_ENV === 'undefined'
+    )
+  );
+}
+
 export async function POST(request: Request) {
+  // Proteção contra execução durante build time
+  if (isBuildTime()) {
+    return NextResponse.json(
+      { error: "Service temporarily unavailable" },
+      { status: 503 }
+    );
+  }
   const payload: { message: string } = { message: 'Logout realizado com sucesso' };
 
   try {
