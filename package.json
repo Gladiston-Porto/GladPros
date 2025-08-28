@@ -14,8 +14,6 @@
     "github:status": "node scripts/check-github-status.js",
     "github:status:summary": "node scripts/check-github-status.js --summary",
     "github:check": "bash scripts/check-github-status.sh",
-    "doc-key:rekey": "node scripts/rekey-documents.js",
-    "db:fix-sessions": "node scripts/fix-missing-tables.js",
     "status:check": "./scripts/check-github-status.sh",
     "status:check-js": "node scripts/check-ci-status.js",
     "status:check-full": "node scripts/check-github-status.js",
