@@ -189,7 +189,7 @@ export async function POST(req: NextRequest) {
     if (!emailResult.success) {
       console.error("[API] Erro ao enviar email MFA:", emailResult.error);
       // Em desenvolvimento, mostrar código no console mesmo se email falhar
-      if (process.env.NODE_ENV === 'development' && process.env.NODE_ENV !== 'test') {
+      if (process.env.NODE_ENV === 'development') {
         console.log(`[DEV] Código MFA para ${user.email}: ${mfaCode}`);
       }
     }
