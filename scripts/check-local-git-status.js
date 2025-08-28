@@ -3,7 +3,6 @@
 // Fallback script to check local git status when GitHub API is not accessible
 
 const { execSync } = require('child_process');
-const path = require('path');
 const fs = require('fs');
 
 // Colors for console output
@@ -29,7 +28,7 @@ function execGitCommand(command) {
       cwd: process.cwd(),
       stdio: ['pipe', 'pipe', 'pipe']
     }).trim();
-  } catch (error) {
+  } catch {
     return null;
   }
 }

@@ -3,11 +3,11 @@
 // Este script simula a saída sem fazer chamadas reais à API
 
 const colors = {
-  red: '\033[0;31m',
-  green: '\033[0;32m',
-  yellow: '\033[1;33m',
-  blue: '\033[0;34m',
-  nc: '\033[0m'
+  red: '\x1b[0;31m',
+  green: '\x1b[0;32m',
+  yellow: '\x1b[1;33m',
+  blue: '\x1b[0;34m',
+  nc: '\x1b[0m'
 };
 
 function colorText(text, color) {

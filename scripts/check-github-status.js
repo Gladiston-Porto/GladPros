@@ -6,9 +6,6 @@
  * providing detailed information about workflow runs, branch health, and actionable insights.
  */
 
-const fs = require('fs');
-const path = require('path');
-
 // Configuration
 const REPO_OWNER = 'Gladiston-Porto';
 const REPO_NAME = 'GladPros';
@@ -37,7 +34,7 @@ async function githubApiRequest(endpoint, token = null) {
     }
     
     return await response.json();
-  } catch (error) {
+  } catch {
     // Fallback for environments without node-fetch - use basic Node.js modules
     return await fallbackHttpRequest(url, headers);
   }
@@ -64,7 +61,7 @@ async function fallbackHttpRequest(url, headers) {
       res.on('end', () => {
         try {
           resolve(JSON.parse(data));
-        } catch (error) {
+        } catch {
           reject(new Error('Invalid JSON response'));
         }
       });

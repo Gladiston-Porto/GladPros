@@ -2,10 +2,10 @@
  * Test for GitHub Status Checker
  */
 
-const {
+import {
   analyzeWorkflowHealth,
   generateStatusReport
-} = require('../../../scripts/check-github-status');
+} from '../../../scripts/check-github-status.js';
 
 // Mock console.log to capture output
 let logOutput = [];

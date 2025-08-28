@@ -6,7 +6,6 @@
  */
 
 const https = require('https');
-const path = require('path');
 
 // Configuration
 const REPO_OWNER = 'Gladiston-Porto';
@@ -44,7 +43,7 @@ function makeRequest(hostname, path, token = null) {
         if (res.statusCode >= 200 && res.statusCode < 300) {
           try {
             resolve(JSON.parse(data));
-          } catch (error) {
+          } catch {
             reject(new Error('Invalid JSON response'));
           }
         } else {
@@ -270,7 +269,7 @@ async function main() {
   
   try {
     // Check all aspects
-    const [workflows, branches] = await Promise.all([
+    const [workflows] = await Promise.all([
       checkWorkflows(token),
       checkBranches(token)
     ]);
