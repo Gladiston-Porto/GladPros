@@ -22,6 +22,21 @@ npx prisma migrate dev
 
 npm run dev
 
+🔧 Scripts Úteis
+
+# Desenvolvimento
+npm run dev                 # Inicia servidor de desenvolvimento
+npm run build              # Build para produção
+npm test                   # Executa testes
+
+# GitHub e CI/CD
+npm run github:status       # Verifica status dos branches e workflows
+npm run github:status:summary # Versão resumida para CI/CD
+
+# Utilitários
+npm run secret:scan         # Scanner de segurança local
+npm run lint               # Linting com ESLint
+
 📁 Estrutura
 
 src/modules/ – módulos como clientes, propostas, projetos etc.
@@ -36,6 +51,33 @@ prisma/ – schema e migrações
 
 docs/ – documentação completa do sistema
 
+scripts/ – utilitários e ferramentas de desenvolvimento
+
+🔧 Scripts Disponíveis
+
+npm run dev – executar em modo de desenvolvimento
+
+npm run build – build para produção
+
+npm run test – executar testes
+
+npm run lint – verificar código com ESLint
+
+npm run github:status – verificar status dos branches e CI/CD
+
+npm run github:status-node – versão Node.js do verificador de status
+
+🔍 Verificação de Status GitHub
+
+O projeto inclui ferramentas para verificar o status dos branches e GitHub Actions:
+
+• Scripts multiplataforma (Bash, PowerShell, Node.js)
+• Verificação automática via GitHub Actions (agendada semanalmente)
+• Relatórios coloridos com status detalhado
+• Documentação completa em scripts/README-github-status.md
+
+Para usar, defina GITHUB_TOKEN e execute npm run github:status
+
 📖 Documentação
 
 Visão geral: docs/01-arquitetura.md
@@ -47,6 +89,34 @@ Autenticação: docs/03-fluxo-autenticacao.md
 Estrutura do banco: docs/04-estrutura-db.md
 
 Roadmap: docs/05-roadmap.md
+
+GitHub Status Checker: docs/08-github-status-checker.md
+
+🔧 Ferramentas de Desenvolvimento
+
+**Verificação de Status do GitHub:**
+```bash
+# Verificar branches e CI/CD
+npm run github:status
+
+# Versão local (sem necessidade de token)
+npm run github:local
+
+# Wrapper com shell script
+npm run github:check
+```
+
+**Outros Scripts Úteis:**
+```bash
+# Verificar variáveis de ambiente
+npm run build:check
+
+# Executar testes com cobertura
+npm run test:coverage
+
+# Verificar possíveis vazamentos de dados
+npm run secret:scan
+```
 
 ✉️ Contato
 

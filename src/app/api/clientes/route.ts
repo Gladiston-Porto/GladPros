@@ -19,6 +19,11 @@ export const runtime = "nodejs"
 
 // Proteção contra execução durante build time
 function isBuildTime(): boolean {
+  // Nunca considerar build time durante testes
+  if (process.env.NODE_ENV === 'test') {
+    return false;
+  }
+  
   return (
     typeof window === 'undefined' &&
     (
@@ -26,9 +31,7 @@ function isBuildTime(): boolean {
       process.env.NEXT_PHASE === 'phase-production-server' ||
       process.env.NEXT_PHASE === 'phase-static' ||
       process.env.NEXT_PHASE === 'phase-export' ||
-      !process.env.JWT_SECRET ||
-      typeof process.env.NODE_ENV === 'undefined' ||
-      process.env.NODE_ENV === 'development'
+      (!process.env.JWT_SECRET && process.env.NODE_ENV === 'production')
     )
   );
 }
