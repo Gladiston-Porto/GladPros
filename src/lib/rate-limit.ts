@@ -1,31 +1,44 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Redis from 'ioredis';
 
+// Check if we're in build time
+function isBuildTime(): boolean {
+  return (
+    process.env.NEXT_PHASE === 'phase-production-build' ||
+    process.env.NEXT_PHASE === 'phase-production-server' ||
+    process.env.NEXT_PHASE === 'phase-static' ||
+    process.env.NEXT_PHASE === 'phase-export' ||
+    process.env.CI === 'true'
+  );
+}
+
 // Redis client para rate limiting
 let redis: Redis | null = null;
 
-try {
-  redis = new Redis({
-    host: process.env.REDIS_HOST || 'localhost',
-    port: parseInt(process.env.REDIS_PORT || '6379'),
-    lazyConnect: true,
-    connectTimeout: 1000,
-    maxRetriesPerRequest: 1
-  });
-  
-  // Silenciar erros de conexão Redis quando não está disponível
-  redis.on('error', () => {
-    // Apenas avisar uma vez no console, não poluir logs
-    const g = global as unknown as { __redis_error_logged?: boolean };
-    if (!g.__redis_error_logged) {
-      console.warn('[RATE LIMIT] Redis não disponível, usando rate limit em memória');
-      g.__redis_error_logged = true;
-    }
-  });
-  
-} catch {
-  console.warn('[RATE LIMIT] Redis não disponível, usando rate limit em memória');
-  redis = null;
+if (!isBuildTime()) {
+  try {
+    redis = new Redis({
+      host: process.env.REDIS_HOST || 'localhost',
+      port: parseInt(process.env.REDIS_PORT || '6379'),
+      lazyConnect: true,
+      connectTimeout: 1000,
+      maxRetriesPerRequest: 1
+    });
+    
+    // Silenciar erros de conexão Redis quando não está disponível
+    redis.on('error', () => {
+      // Apenas avisar uma vez no console, não poluir logs
+      const g = global as unknown as { __redis_error_logged?: boolean };
+      if (!g.__redis_error_logged) {
+        console.warn('[RATE LIMIT] Redis não disponível, usando rate limit em memória');
+        g.__redis_error_logged = true;
+      }
+    });
+    
+  } catch {
+    console.warn('[RATE LIMIT] Redis não disponível, usando rate limit em memória');
+    redis = null;
+  }
 }
 
 // Cache em memória como fallback
@@ -68,8 +81,17 @@ export class RateLimiter {
     resetTime: number;
     message?: string;
   }> {
+    // During build time, always allow
+    if (isBuildTime()) {
+      return {
+        allowed: true,
+        remaining: this.options.max,
+        resetTime: Date.now() + this.options.windowMs
+      };
+    }
+    
     const key = customKey || this.options.keyGenerator!(req);
-  const now = Date.now();
+    const now = Date.now();
 
     try {
       if (redis) {

@@ -1,19 +1,35 @@
 import Redis from 'ioredis';
 
+// Check if we're in build time
+function isBuildTime(): boolean {
+  return (
+    process.env.NEXT_PHASE === 'phase-production-build' ||
+    process.env.NEXT_PHASE === 'phase-production-server' ||
+    process.env.NEXT_PHASE === 'phase-static' ||
+    process.env.NEXT_PHASE === 'phase-export' ||
+    process.env.CI === 'true'
+  );
+}
+
 class CacheService {
   private redis: Redis | null = null;
   private memoryCache: Map<string, { value: unknown; expires: number }> = new Map();
+  private initialized: boolean = false;
 
   constructor() {
-    this.initializeRedis();
-    
-    // Limpeza automática do cache em memória a cada 5 minutos
-    setInterval(() => {
-      this.cleanupMemoryCache();
-    }, 5 * 60 * 1000);
+    if (!isBuildTime()) {
+      this.initializeRedis();
+      
+      // Limpeza automática do cache em memória a cada 5 minutos
+      setInterval(() => {
+        this.cleanupMemoryCache();
+      }, 5 * 60 * 1000);
+    }
   }
 
   private async initializeRedis() {
+    if (isBuildTime() || this.initialized) return;
+    
     try {
       this.redis = new Redis({
         host: process.env.REDIS_HOST || 'localhost',
@@ -27,9 +43,11 @@ class CacheService {
       // Testar conexão
       await this.redis.ping();
       console.log('[CACHE] Redis conectado com sucesso');
+      this.initialized = true;
     } catch (error) {
       console.warn('[CACHE] Redis não disponível, usando cache em memória:', error);
       this.redis = null;
+      this.initialized = true;
     }
   }
 
@@ -43,6 +61,10 @@ class CacheService {
   }
 
   async get<T = unknown>(key: string): Promise<T | null> {
+    if (isBuildTime()) return null;
+    
+    if (!this.initialized) await this.initializeRedis();
+    
     try {
       if (this.redis) {
         const value = await this.redis.get(key);
@@ -63,6 +85,10 @@ class CacheService {
   }
 
   async set(key: string, value: unknown, ttlSeconds: number = 3600): Promise<boolean> {
+    if (isBuildTime()) return true;
+    
+    if (!this.initialized) await this.initializeRedis();
+    
     try {
       if (this.redis) {
         await this.redis.setex(key, ttlSeconds, JSON.stringify(value));

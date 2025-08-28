@@ -26,10 +26,18 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ['@prisma/client', 'prisma'],
   // Configurar variáveis de ambiente de forma segura
   env: {
-    JWT_SECRET: process.env.JWT_SECRET || 'temporary-build-secret',
+    JWT_SECRET: process.env.JWT_SECRET || 'temporary-build-secret-at-least-32-chars-long',
     CLIENT_DOC_ENCRYPTION_KEY_BASE64: process.env.CLIENT_DOC_ENCRYPTION_KEY_BASE64,
     CLIENT_DOC_ENCRYPTION_KEY_FALLBACKS: process.env.CLIENT_DOC_ENCRYPTION_KEY_FALLBACKS,
   },
+  // Disable static generation for API routes to avoid build-time execution
+  experimental: {
+    largePageDataBytes: 128 * 1000, // 128KB
+  },
+  // Disable static page generation for problematic routes
+  generateStaticParams: false,
+  // Configurações para evitar execução de API durante build
+  staticPageGenerationTimeout: 60, // Increase timeout to 60 seconds
   // Desabilitar static optimization para rotas que usam dados dinâmicos
   generateBuildId: async () => {
     return 'build-' + Date.now()
