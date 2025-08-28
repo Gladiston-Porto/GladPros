@@ -48,6 +48,28 @@ Estrutura do banco: docs/04-estrutura-db.md
 
 Roadmap: docs/05-roadmap.md
 
+🔧 Scripts Úteis
+
+**Verificar status do GitHub:**
+```bash
+# Usando Bash (Linux/macOS)
+GITHUB_TOKEN=ghp_xxx npm run github:status
+
+# Usando Node.js (todas as plataformas)
+GITHUB_TOKEN=ghp_xxx npm run github:status:node
+
+# Usando PowerShell (Windows)
+$env:GITHUB_TOKEN='ghp_xxx'
+powershell scripts/check-github-status.ps1
+```
+
+**Outros scripts:**
+```bash
+npm run build:check    # Verificar variáveis antes do build
+npm run secret:scan    # Escanear por secrets expostos
+npm test              # Executar testes
+```
+
 ✉️ Contato
 
 Gladiston Porto – GladPros.com
