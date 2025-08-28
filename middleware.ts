@@ -2,6 +2,7 @@
 // Versões antigas/experimentais estão em /archived-middleware.
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import type { AuthClaims } from "@/lib/jwt";
 
 // Rotas que não precisam de autenticação
 const publicRoutes = [
@@ -68,7 +69,7 @@ function isBuildTime(): boolean {
 }
 
 // Verificar e decodificar JWT (apenas se não for build time)
-async function verifyToken(token: string): Promise<any | null> {
+async function verifyToken(token: string): Promise<AuthClaims | null> {
   // Durante build time, sempre retornar null para permitir compilação
   if (isBuildTime()) {
     console.warn('[MIDDLEWARE] Build time detectado, pulando verificação de token');
