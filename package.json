@@ -18,6 +18,9 @@
     "doc-key:fp": "node scripts/print-doc-key-fp.js",
     "doc-key:rekey": "node scripts/rekey-documents.js",
     "db:fix-sessions": "node scripts/fix-missing-tables.js",
+    "status:check": "./scripts/check-github-status.sh",
+    "status:check-js": "node scripts/check-ci-status.js",
+    "status:check-full": "node scripts/check-github-status.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "postinstall": "prisma generate"
