@@ -9,9 +9,15 @@ Este script verifica o status dos branches e workflows do GitHub Actions para o 
 npm run github:status
 ```
 
+### Modo resumo (rápido)
+```bash
+npm run github:status:summary
+```
+
 ### Executação direta
 ```bash
 node scripts/check-github-status.js
+node scripts/check-github-status.js --summary
 ```
 
 ### Com token do GitHub (para informações completas)
@@ -169,8 +175,49 @@ Este script pode ser usado em pipelines de CI/CD para:
 
 ### Exemplo de uso em GitHub Actions
 ```yaml
-- name: Check repository status
-  run: npm run github:status
-  env:
-    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+name: Repository Health Check
+on:
+  schedule:
+    - cron: '0 9 * * *'  # Daily at 9 AM
+  workflow_dispatch:
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci
+      - name: Check repository status
+        run: npm run github:status:summary
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+### Modo Resumo para CI/CD
+O modo resumo (`--summary`) é ideal para pipelines de CI/CD:
+```bash
+npm run github:status:summary
+```
+
+Output do modo resumo:
+```
+🚀 GITHUB STATUS CHECKER
+📋 SUMMARY MODE
+──────────────────────────────────────────────────
+📁 Gladiston-Porto/GladPros
+🌿 Branch: main
+📝 Changes: working directory clean
+⚙️ Workflows: 4 configured
+
+🏥 HEALTH CHECK:
+✅ Local git repository: OK
+✅ Package.json: gladpros-nextjs
+✅ CI/CD: Configured
+──────────────────────────────────────────────────
+✨ Status check completed!
 ```

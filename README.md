@@ -22,6 +22,21 @@ npx prisma migrate dev
 
 npm run dev
 
+🔧 Scripts Úteis
+
+# Desenvolvimento
+npm run dev                 # Inicia servidor de desenvolvimento
+npm run build              # Build para produção
+npm test                   # Executa testes
+
+# GitHub e CI/CD
+npm run github:status       # Verifica status dos branches e workflows
+npm run github:status:summary # Versão resumida para CI/CD
+
+# Utilitários
+npm run secret:scan         # Scanner de segurança local
+npm run lint               # Linting com ESLint
+
 📁 Estrutura
 
 src/modules/ – módulos como clientes, propostas, projetos etc.

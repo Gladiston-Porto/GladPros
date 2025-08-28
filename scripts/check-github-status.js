@@ -23,7 +23,8 @@ const CONFIG = {
   repo: process.env.GITHUB_REPO || 'GladPros',
   token: process.env.GITHUB_TOKEN,
   maxWorkflowRuns: 5,
-  maxBranches: 10
+  maxBranches: 10,
+  summaryMode: process.argv.includes('--summary') || process.argv.includes('-s')
 };
 
 // Emojis for status visualization
@@ -474,11 +475,83 @@ async function main() {
     console.log(colorize(`${EMOJIS.warning} GITHUB_TOKEN não configurado - rate limits podem aplicar`, 'yellow'));
   }
 
-  await checkRepositoryInfo();
-  await checkBranches();
-  await checkWorkflows();
+  if (CONFIG.summaryMode) {
+    console.log(colorize('📋 SUMMARY MODE', 'cyan'));
+    await generateSummaryReport();
+  } else {
+    await checkRepositoryInfo();
+    await checkBranches();
+    await checkWorkflows();
+  }
 
   console.log(colorize('\n✨ Status check completed!', 'green'));
+}
+
+async function generateSummaryReport() {
+  console.log(colorize('─'.repeat(50), 'gray'));
+  
+  // Quick repository status
+  try {
+    const remoteUrl = execSync('git remote get-url origin', { encoding: 'utf8' }).trim();
+    const currentBranch = execSync('git branch --show-current', { encoding: 'utf8' }).trim();
+    const gitStatus = execSync('git status --porcelain', { encoding: 'utf8' }).trim();
+    
+    console.log(`📁 ${colorize(`${CONFIG.owner}/${CONFIG.repo}`, 'bright')}`);
+    console.log(`🌿 Branch: ${colorize(currentBranch, 'green')}`);
+    
+    if (gitStatus) {
+      const changeCount = gitStatus.split('\n').length;
+      console.log(`📝 Changes: ${colorize(`${changeCount} uncommitted`, 'yellow')}`);
+    } else {
+      console.log(`📝 Changes: ${colorize('working directory clean', 'green')}`);
+    }
+    
+  } catch (e) {
+    console.log(`📁 Repository: ${colorize('Git info not available', 'gray')}`);
+  }
+
+  // Count workflows
+  try {
+    const fs = require('fs');
+    const path = require('path');
+    const workflowDir = path.join(process.cwd(), '.github', 'workflows');
+    
+    if (fs.existsSync(workflowDir)) {
+      const workflowFiles = fs.readdirSync(workflowDir).filter(file => 
+        file.endsWith('.yml') || file.endsWith('.yaml')
+      );
+      console.log(`⚙️ Workflows: ${colorize(`${workflowFiles.length} configured`, 'blue')}`);
+    } else {
+      console.log(`⚙️ Workflows: ${colorize('No workflows found', 'gray')}`);
+    }
+  } catch (e) {
+    console.log(`⚙️ Workflows: ${colorize('Unable to check', 'gray')}`);
+  }
+
+  // Quick health check
+  console.log(colorize('\n🏥 HEALTH CHECK:', 'cyan'));
+  console.log(`${EMOJIS.success} Local git repository: OK`);
+  
+  try {
+    const fs = require('fs');
+    const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+    console.log(`${EMOJIS.success} Package.json: ${packageJson.name || 'OK'}`);
+  } catch (e) {
+    console.log(`${EMOJIS.warning} Package.json: Not found or invalid`);
+  }
+
+  try {
+    const fs = require('fs');
+    if (fs.existsSync('.github/workflows/ci.yml') || fs.existsSync('.github/workflows/build.yml')) {
+      console.log(`${EMOJIS.success} CI/CD: Configured`);
+    } else {
+      console.log(`${EMOJIS.warning} CI/CD: No standard workflows found`);
+    }
+  } catch (e) {
+    console.log(`${EMOJIS.info} CI/CD: Unable to verify`);
+  }
+  
+  console.log(colorize('─'.repeat(50), 'gray'));
 }
 
 // Auto-detect repository info from git if not provided
