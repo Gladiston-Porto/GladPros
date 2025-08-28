@@ -48,6 +48,34 @@ Estrutura do banco: docs/04-estrutura-db.md
 
 Roadmap: docs/05-roadmap.md
 
+GitHub Status Checker: docs/08-github-status-checker.md
+
+🔧 Ferramentas de Desenvolvimento
+
+**Verificação de Status do GitHub:**
+```bash
+# Verificar branches e CI/CD
+npm run github:status
+
+# Versão local (sem necessidade de token)
+npm run github:local
+
+# Wrapper com shell script
+npm run github:check
+```
+
+**Outros Scripts Úteis:**
+```bash
+# Verificar variáveis de ambiente
+npm run build:check
+
+# Executar testes com cobertura
+npm run test:coverage
+
+# Verificar possíveis vazamentos de dados
+npm run secret:scan
+```
+
 ✉️ Contato
 
 Gladiston Porto – GladPros.com
