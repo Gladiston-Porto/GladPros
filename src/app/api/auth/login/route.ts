@@ -16,20 +16,7 @@ function getClientIP(req: NextRequest): string {
 }
 
 // Proteção contra execução durante build time
-function isBuildTime(): boolean {
-  return (
-    typeof window === 'undefined' &&
-    (
-      process.env.NEXT_PHASE === 'phase-production-build' ||
-      process.env.NEXT_PHASE === 'phase-production-server' ||
-      process.env.NEXT_PHASE === 'phase-static' ||
-      process.env.NEXT_PHASE === 'phase-export' ||
-      !process.env.JWT_SECRET ||
-      typeof process.env.NODE_ENV === 'undefined' ||
-      process.env.NODE_ENV === 'development'
-    )
-  );
-}
+function isBuildTime(): boolean { return ( typeof window === 'undefined' && ( process.env.NEXT_PHASE === 'phase-production-build' || process.env.NEXT_PHASE === 'phase-production-server' || process.env.NEXT_PHASE === 'phase-static' || process.env.NEXT_PHASE === 'phase-export' || !process.env.JWT_SECRET || typeof process.env.NODE_ENV === 'undefined' ) && process.env.NODE_ENV !== 'test' ); }
 
 export async function POST(req: NextRequest) {
   // Proteção contra execução durante build time
@@ -202,7 +189,7 @@ export async function POST(req: NextRequest) {
     if (!emailResult.success) {
       console.error("[API] Erro ao enviar email MFA:", emailResult.error);
       // Em desenvolvimento, mostrar código no console mesmo se email falhar
-      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === 'development' && process.env.NODE_ENV !== 'test') {
         console.log(`[DEV] Código MFA para ${user.email}: ${mfaCode}`);
       }
     }
@@ -242,3 +229,4 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+

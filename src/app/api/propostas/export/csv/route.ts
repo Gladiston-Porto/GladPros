@@ -10,7 +10,8 @@ function isBuildTime(): boolean {
       process.env.NEXT_PHASE === 'phase-production-server' ||
       !process.env.JWT_SECRET ||
       typeof process.env.NODE_ENV === 'undefined'
-    )
+    ) &&
+    process.env.NODE_ENV !== 'test'
   );
 }
 
@@ -133,3 +134,4 @@ export async function POST(request: NextRequest) {
     )
   }
 }
+

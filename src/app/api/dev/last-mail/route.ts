@@ -6,3 +6,4 @@ export async function GET() {
   const mail = getLastDevMail();
   return NextResponse.json({ ok: true, mail }, { status: 200 });
 }
+

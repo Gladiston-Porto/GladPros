@@ -194,7 +194,7 @@ export async function POST(req: NextRequest) {
       }).catch(() => null);
       
       // Em desenvolvimento, apenas log
-      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === 'development' && process.env.NODE_ENV !== 'test') {
         console.log(`[DEV] Email de confirmação enviado para ${user.email}`);
       }
       
@@ -222,3 +222,4 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+

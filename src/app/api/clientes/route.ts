@@ -27,9 +27,9 @@ function isBuildTime(): boolean {
       process.env.NEXT_PHASE === 'phase-static' ||
       process.env.NEXT_PHASE === 'phase-export' ||
       !process.env.JWT_SECRET ||
-      typeof process.env.NODE_ENV === 'undefined' ||
-      process.env.NODE_ENV === 'development'
-    )
+      typeof process.env.NODE_ENV === 'undefined'
+    ) &&
+    process.env.NODE_ENV !== 'test'
   );
 }
 

@@ -5,20 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireServerUser } from "@/lib/requireServerUser";
 
 // Proteção contra execução durante build time
-function isBuildTime(): boolean {
-  return (
-    typeof window === 'undefined' &&
-    (
-      process.env.NEXT_PHASE === 'phase-production-build' ||
-      process.env.NEXT_PHASE === 'phase-production-server' ||
-      process.env.NEXT_PHASE === 'phase-static' ||
-      process.env.NEXT_PHASE === 'phase-export' ||
-      !process.env.JWT_SECRET ||
-      typeof process.env.NODE_ENV === 'undefined' ||
-      process.env.NODE_ENV === 'development'
-    )
-  );
-}
+function isBuildTime(): boolean { return ( typeof window === 'undefined' && ( process.env.NEXT_PHASE === 'phase-production-build' || process.env.NEXT_PHASE === 'phase-production-server' || process.env.NEXT_PHASE === 'phase-static' || process.env.NEXT_PHASE === 'phase-export' || !process.env.JWT_SECRET || typeof process.env.NODE_ENV === 'undefined' ) && process.env.NODE_ENV !== 'test' ); }
 
 // POST /api/propostas/rascunho - Salvar rascunho
 export async function POST(request: NextRequest) {
@@ -63,3 +50,4 @@ export async function POST(request: NextRequest) {
     }, { status: 500 });
   }
 }
+
