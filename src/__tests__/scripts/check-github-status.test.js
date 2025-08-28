@@ -2,10 +2,9 @@
  * Test for GitHub Status Checker
  */
 
-const { 
-  checkLocalBranches, 
-  checkLocalWorkflows, 
-  checkLocalRepositoryInfo 
+const {
+  analyzeWorkflowHealth,
+  generateStatusReport
 } = require('../../../scripts/check-github-status');
 
 // Mock console.log to capture output
@@ -24,49 +23,91 @@ describe('GitHub Status Checker', () => {
     console.log = originalLog;
   });
 
-  test('should check local repository info', async () => {
-    await checkLocalRepositoryInfo();
-    
-    // Should have some repository information
-    expect(logOutput.length).toBeGreaterThan(0);
-    
-    // Should mention the repository
-    const repoMention = logOutput.find(line => 
-      line.includes('Repository:') && line.includes('GladPros')
-    );
-    expect(repoMention).toBeDefined();
-  });
+  test('should analyze workflow health', () => {
+    const mockRuns = [
+      { conclusion: 'success', status: 'completed' },
+      { conclusion: 'failure', status: 'completed' },
+      { conclusion: 'success', status: 'completed' },
+      { status: 'in_progress' }
+    ];
 
-  test('should analyze local workflows', async () => {
-    await checkLocalWorkflows();
-    
-    // Should have found workflows
-    expect(logOutput.length).toBeGreaterThan(0);
-    
-    // Should mention CI workflow
-    const ciWorkflow = logOutput.find(line => 
-      line.includes('CI') && line.includes('📄')
-    );
-    expect(ciWorkflow).toBeDefined();
-  });
+    const result = analyzeWorkflowHealth(mockRuns);
 
-  test('should check local branches', async () => {
-    await checkLocalBranches();
-    
     // Should have some output
     expect(logOutput.length).toBeGreaterThan(0);
-    
-    // Should show some branch or info message
-    const hasOutput = logOutput.some(line => 
-      line.includes('-') || line.includes('Local git') || line.includes('No remote')
-    );
-    expect(hasOutput).toBe(true);
+
+    // Should return analysis object
+    expect(result).toHaveProperty('total', 4);
+    expect(result).toHaveProperty('success', 2);
+    expect(result).toHaveProperty('failure', 1);
+    expect(result).toHaveProperty('inProgress', 1);
   });
 
-  test('should handle missing directories gracefully', async () => {
-    // This should not throw
-    await expect(checkLocalWorkflows()).resolves.not.toThrow();
-    await expect(checkLocalBranches()).resolves.not.toThrow();
-    await expect(checkLocalRepositoryInfo()).resolves.not.toThrow();
+  test('should generate status report', () => {
+    const mockBranchInfo = {
+      total: 5,
+      default: 'main',
+      branches: [
+        { name: 'main', protected: true },
+        { name: 'develop', protected: false }
+      ]
+    };
+
+    const mockWorkflows = [
+      { id: 1, name: 'CI', state: 'active' },
+      { id: 2, name: 'Deploy', state: 'active' }
+    ];
+
+    const mockRuns = [
+      { conclusion: 'success' },
+      { conclusion: 'failure' }
+    ];
+
+    const mockAnalysis = {
+      total: 2,
+      success: 1,
+      failure: 1
+    };
+
+    generateStatusReport(mockBranchInfo, mockWorkflows, mockRuns, mockAnalysis);
+
+    // Should have some output
+    expect(logOutput.length).toBeGreaterThan(0);
+
+    // Should mention branch status
+    const branchStatus = logOutput.find(line =>
+      line.includes('Branch Status') || line.includes('Branch information')
+    );
+    expect(branchStatus).toBeDefined();
+
+    // Should mention workflow status
+    const workflowStatus = logOutput.find(line =>
+      line.includes('Workflow Status') || line.includes('workflows')
+    );
+    expect(workflowStatus).toBeDefined();
+  });
+
+  test('should handle empty workflow health analysis', () => {
+    const emptyRuns = [];
+
+    const result = analyzeWorkflowHealth(emptyRuns);
+
+    // Should handle empty array gracefully
+    expect(result).toHaveProperty('total', 0);
+    expect(result).toHaveProperty('success', 0);
+    expect(result).toHaveProperty('failure', 0);
+    expect(result).toHaveProperty('inProgress', 0);
+  });
+
+  test('should handle null branch info in status report', () => {
+    const nullBranchInfo = null;
+    const mockWorkflows = [];
+    const mockRuns = [];
+    const mockAnalysis = { total: 0, success: 0, failure: 0 };
+
+    // Should not throw error with null branch info
+    expect(() => {
+      generateStatusReport(nullBranchInfo, mockWorkflows, mockRuns, mockAnalysis);
+    }).not.toThrow();
   });
 });
